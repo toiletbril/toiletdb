@@ -6,7 +6,7 @@
 #include "student.cpp"
 
 template <typename T, typename A>
-void debug_putv(std::vector<T, A> v, const char *name)
+void debug_putv(const std::vector<T, A> &v, const char *name)
 {
     std::cout << "*** " << name << ": [\n";
     for (T s : v) {
@@ -15,7 +15,7 @@ void debug_putv(std::vector<T, A> v, const char *name)
     std::cout << "]\n";
 };
 
-template <typename T> void debug_puts(T s, const char *name)
+template <typename T> void debug_puts(const T &s, const char *name)
 {
     std::cout << "*** " << name << ": " << s << "\n";
 };

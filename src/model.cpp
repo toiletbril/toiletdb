@@ -15,12 +15,12 @@ class Model
 {
 private:
     std::vector<Student> students;
-    Filer *parser;
+    FileParser *parser;
 
 public:
     Model(const char *const &filename)
     {
-        this->parser = new Filer(filename);
+        this->parser = new FileParser(filename);
         this->parser->exists_or_create();
         this->students = this->parser->read_file();
     }

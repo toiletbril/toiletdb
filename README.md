@@ -1,6 +1,6 @@
 # toiletdb
 
-In-memory database with an ability to serialize into a file and CLI for it.
+In-memory database with an ability to serialize into a file and a CLI for it.
 
 Implemented as a database of students. For now, file format looks like this:
 ```

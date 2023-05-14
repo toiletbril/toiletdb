@@ -11,7 +11,7 @@
 
 #include "student.cpp"
 
-class Filer
+class FileParser
 {
 private:
     const char *const &filename;
@@ -23,7 +23,7 @@ private:
         file.open(this->filename, mode);
 
 #ifdef DEBUG
-        debug_puts(filename, "open");
+        debug_puts(filename, "FileParser.open");
 #endif
 
         if (!file.is_open()) {
@@ -56,7 +56,7 @@ private:
                 c = file.get();
             }
 
-            Student tempst;
+            Student temp_st;
             int field = 0;
 
             while (c != '\n' && c != '\r') {
@@ -66,16 +66,16 @@ private:
 
                     switch (field) {
                         case 0:
-                            tempst.name = temps.c_str();
+                            temp_st.name = temps.c_str();
                             break;
                         case 1:
-                            tempst.surname = temps.c_str();
+                            temp_st.surname = temps.c_str();
                             break;
                         case 2:
-                            tempst.group = temps.c_str();
+                            temp_st.group = temps.c_str();
                             break;
                         case 3:
-                            tempst.record_book = temps.c_str();
+                            temp_st.record_book = temps.c_str();
                             break;
 
                         default: {
@@ -110,10 +110,10 @@ private:
             }
 
 #ifdef DEBUG
-            debug_puts(tempst, "deserealize");
+            debug_puts(temp_st, "FileParser.deserealize");
 #endif
 
-            students.push_back(tempst);
+            students.push_back(temp_st);
 
             c = file.get();
             ++line;
@@ -127,7 +127,7 @@ private:
     {
         for (Student student : students) {
 #ifdef DEBUG
-            debug_puts(student, "serealize");
+            debug_puts(student, "FileParser.serealize");
 #endif
 
             file << '|' << student.name << '|' << student.surname << '|'
@@ -138,9 +138,9 @@ private:
     }
 
 public:
-    Filer(const char *const &filename) : filename(filename) {}
+    FileParser(const char *const &filename) : filename(filename) {}
 
-    ~Filer() { delete this->filename; }
+    ~FileParser() { delete this->filename; }
 
     // Return true if file exists, false if it doesn't.
     bool exists()
@@ -150,7 +150,7 @@ public:
         file.open(this->filename);
 
 #ifdef DEBUG
-        debug_puts(file.good(), "exists");
+        debug_puts(file.good(), "FileParser.exists");
 #endif
 
         return file.good();

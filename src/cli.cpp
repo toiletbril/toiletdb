@@ -51,7 +51,7 @@ static bool cli_y_or_n()
     return false;
 }
 
-// Splits strings by spaces, treats "quotes sentences" as a single argument.
+// Splits strings by spaces, treats "quoted sentences" as a single argument.
 static std::vector<std::string> cli_splitargs(const std::string *s)
 {
     size_t len = s->length();
@@ -88,8 +88,8 @@ static std::vector<std::string> cli_splitargs(const std::string *s)
     return result;
 }
 
-// As an example, model uses "|" as a separator.
 // Returns first invalid character it finds.
+// For example, model uses "|" as a separator.
 static char cli_forbiddenchar(std::vector<std::string> &args)
 {
     std::string forbidden_chars = "|[]";
@@ -103,7 +103,7 @@ static char cli_forbiddenchar(std::vector<std::string> &args)
     return 0;
 }
 
-// Prints entire vector of students.
+// Prints entire vector of students as a table.
 static void cli_putquery(std::vector<Student> &students)
 {
     std::cout << std::left << std::setw(12) << "N" << std::setw(24) << "Name"
@@ -306,6 +306,7 @@ void cli_loop(const char *filename)
         std::cout << "Opening '" << filename << "'...\n";
         model = new Model(filename);
     } catch (std::ios::failure &e) {
+        // iostream error's .what() method returns weird string at the end
         std::cout << filename << ": Could not open file: " << strerror(errno)
                   << "\n";
         std::exit(1);
@@ -333,8 +334,6 @@ void cli_loop(const char *filename)
         } catch (std::logic_error &e) {
             std::cout << "Logic error: " << e.what() << "\n";
         } catch (std::ios::failure &e) {
-            // iostream .what() method returns weird string at the end, but I
-            // want errors to look clear.
             std::cout << "IO error: " << strerror(errno) << "\n";
             std::exit(1);
         } catch (std::runtime_error &e) {
