@@ -15,7 +15,7 @@ Of course, the actual task was too easy, so I decided to implement a whole datab
 ## Usage
 
 ```console
-toiletdb <database file>
+$ toiletdb <database file>
 ```
 
 ## Bulding
