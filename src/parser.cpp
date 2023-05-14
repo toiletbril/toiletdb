@@ -41,7 +41,9 @@ private:
 
         size_t line = 1;
         size_t pos = 1;
-
+#ifdef DEBUG
+        bool debug_crlf = false;
+#endif
         int c = file.get();
 
         while (c != EOF) {
@@ -56,37 +58,33 @@ private:
                 c = file.get();
             }
 
-            Student temp_st;
+            std::vector<std::string> fields;
+            fields.reserve(5);
             int field = 0;
 
-            while (c != '\n' && c != '\r') {
+            while (c != '\n') {
+                if (c == '\r') {
+#ifdef DEBUG
+                    if (!debug_crlf) {
+                        debug_puts("CRLF detected", "FileParser.deserialize");
+                        debug_crlf = true;
+                    }
+#endif
+                    c = file.get();
+                    continue;
+                }
 
                 if (c == '|') {
-                    std::string &temps = temp;
+                    fields.push_back(temp);
 
-                    switch (field) {
-                        case 0:
-                            temp_st.name = temps.c_str();
-                            break;
-                        case 1:
-                            temp_st.surname = temps.c_str();
-                            break;
-                        case 2:
-                            temp_st.group = temps.c_str();
-                            break;
-                        case 3:
-                            temp_st.record_book = temps.c_str();
-                            break;
+                    if (field > 4) {
+                        std::string failstring =
+                            "Database file format is not "
+                            "correct: extra field at line " +
+                            std::to_string(line) + ":" +
+                            std::to_string(pos + 1);
 
-                        default: {
-                            std::string failstring =
-                                "Database file format is not "
-                                "correct: extra field at line " +
-                                std::to_string(line) + ":" +
-                                std::to_string(pos + 1);
-
-                            throw std::range_error(failstring);
-                        }
+                        throw std::range_error(failstring);
                     }
 
                     temp.clear();
@@ -99,21 +97,29 @@ private:
                 ++pos;
             }
 
-            if (field != 4) {
+            if (field != 5) {
                 std::string failstring = "Database file format is not "
-                                         "correct: invalid fields (" +
+                                         "correct: Invalid number of fields (" +
                                          std::to_string(field) +
-                                         "/4) at line " + std::to_string(line) +
+                                         "/5) at line " + std::to_string(line) +
                                          ":" + std::to_string(pos);
 
                 throw std::range_error(failstring);
             }
 
+            Student st = {
+                static_cast<size_t>(std::stoi(fields[0])),
+                fields[1].c_str(),
+                fields[2].c_str(),
+                fields[3].c_str(),
+                fields[4].c_str(),
+            };
+
 #ifdef DEBUG
-            debug_puts(temp_st, "FileParser.deserealize");
+            debug_puts(st, "FileParser.deserealize");
 #endif
 
-            students.push_back(temp_st);
+            students.push_back(st);
 
             c = file.get();
             ++line;
@@ -130,8 +136,9 @@ private:
             debug_puts(student, "FileParser.serealize");
 #endif
 
-            file << '|' << student.name << '|' << student.surname << '|'
-                 << student.group << '|' << student.record_book << '|' << "\n";
+            file << '|' << student.get_id() << '|' << student.name << '|'
+                 << student.surname << '|' << student.group << '|'
+                 << student.record_book << '|' << "\n";
         }
 
         file.flush();

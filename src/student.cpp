@@ -3,15 +3,20 @@
 #include <iostream>
 #include <string>
 
-struct Student
+#define TEMP_ID -1
+
+class Student
 {
+private:
+    size_t id;
+public:
     std::string name;
     std::string surname;
     std::string group;
     std::string record_book;
 
-    Student(const char *name, const char *surname, const char *group,
-            const char *record_book)
+    Student(const size_t id, const char *name, const char *surname,
+            const char *group, const char *record_book): id(id)
     {
         this->name = name;
         this->surname = surname;
@@ -19,12 +24,16 @@ struct Student
         this->record_book = record_book;
     }
 
-    Student() {}
+    Student(): id(TEMP_ID) {}
+
+    size_t get_id() const {
+        return this->id;
+    }
 
     // Allows to use << operator to print out this class.
     friend std::ostream &operator<<(std::ostream &os, const Student &s)
     {
-        os << "Student { " << s.name << ", " << s.surname << ", " << s.group
+        os << "Student { " << std::to_string(s.get_id()) << ", " << s.name << ", " << s.surname << ", " << s.group
            << ", " << s.record_book << " }";
         return os;
     }

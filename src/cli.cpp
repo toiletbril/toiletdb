@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+#include <cctype>
 #include <cstring>
 #include <fstream>
 #include <iomanip>
@@ -27,6 +29,14 @@ enum CLI_COMMAND_KIND
     COMMIT,
     REVERT,
 };
+
+// Is this legal ???
+void cli_tolower(std::string *str)
+{
+    for (char &c : *str) {
+        c = std::tolower(c);
+    }
+}
 
 // Prints a prompt which asks to input Y or N.
 static bool cli_y_or_n()
@@ -73,13 +83,15 @@ static std::vector<std::string> cli_splitargs(const std::string *s)
         } else if (c == '"') {
             in_quotes = true;
         } else if (c == ' ') {
-            result.push_back(temp);
+            if (!temp.empty())
+                result.push_back(temp);
             temp.clear();
         } else {
             temp += c;
         }
     }
-    result.push_back(temp);
+    if (!temp.empty())
+        result.push_back(temp);
 
 #ifdef DEBUG
     debug_putv(result, "cli_splitstring");
@@ -106,18 +118,16 @@ static char cli_forbiddenchar(std::vector<std::string> &args)
 // Prints entire vector of students as a table.
 static void cli_putquery(std::vector<Student> &students)
 {
-    std::cout << std::left << std::setw(12) << "N" << std::setw(24) << "Name"
+    std::cout << std::left << std::setw(12) << "ID" << std::setw(24) << "Name"
               << std::setw(30) << "Surname" << std::setw(12) << "Group"
               << std::setw(12) << "Record"
               << "\n";
 
-    int n = 0;
-
-    for (Student student : students) {
-        std::cout << std::left << std::setw(12) << ++n << std::setw(24)
-                  << student.name << std::setw(30) << student.surname
-                  << std::setw(12) << student.group << std::setw(12)
-                  << student.record_book << "\n";
+    for (Student &student : students) {
+        std::cout << std::left << std::setw(12) << student.get_id()
+                  << std::setw(24) << student.name << std::setw(30)
+                  << student.surname << std::setw(12) << student.group
+                  << std::setw(12) << student.record_book << "\n";
     }
 }
 
@@ -202,7 +212,7 @@ static void cli_exec(Model *model, std::vector<std::string> args)
                 }
             }
 
-            std::vector<Student> students = model->get_all_students();
+            std::vector<Student> &students = model->get_all_students();
 
             if (students.empty()) {
                 std::cout << "There is no students in database."
@@ -236,8 +246,8 @@ static void cli_exec(Model *model, std::vector<std::string> args)
                 return;
             }
 
-            Student student(args[1].c_str(), args[2].c_str(), args[3].c_str(),
-                            args[4].c_str());
+            Student student(model->get_next_id(), args[1].c_str(),
+                            args[2].c_str(), args[3].c_str(), args[4].c_str());
 
             model->add(student);
 
@@ -293,7 +303,47 @@ static void cli_exec(Model *model, std::vector<std::string> args)
         } break;
 
         case QUERY: {
-            throw std::logic_error("Not implemented");
+            // Search by name prefix
+            if (args.size() < 2) {
+                std::cout << "ERROR: Invalid number of arguments.\n"
+                             "Usage: query <student name>\n";
+
+                return;
+            }
+
+            std::cout << "Searching...\n";
+
+            std::string query = args[1];
+            size_t len = args.size();
+
+            // Concat args to a single string and use it as a query.
+            for (size_t i = 2; i < len; ++i) {
+                query += ' ' + args[i];
+            }
+
+            cli_tolower(&query);
+
+#ifdef DEBUG
+            debug_puts(query, "query");
+#endif
+            std::vector<Student> &students = model->get_all_students();
+            std::vector<Student> result;
+
+            for (Student &s : students) {
+                std::string full_name = s.name + " " + s.surname;
+                cli_tolower(&full_name);
+
+                if (full_name.rfind(query, 0) == 0) {
+                    result.push_back(s);
+                }
+            }
+
+            if (result.size() == 0) {
+                std::cout << "No students matched your query.\n";
+                return;
+            }
+
+            cli_putquery(result);
         } break;
     }
 }
@@ -310,6 +360,9 @@ void cli_loop(const char *filename)
         std::cout << filename << ": Could not open file: " << strerror(errno)
                   << "\n";
         std::exit(1);
+    } catch (std::range_error &e) {
+        std::cout << filename << ": Parsing error: " << e.what() << "\n";
+        exit(1);
     }
 
     std::cout << "Welcome to toiletdb.\n"

@@ -33,6 +33,8 @@ public:
 
     void save_all() { this->parser->write_file(this->students); }
 
+    size_t get_next_id() { return this->size() + 1; }
+
     inline void add(Student &s)
     {
 #ifdef DEBUG

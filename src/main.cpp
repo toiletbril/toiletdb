@@ -16,7 +16,8 @@
 /*
     TODO:
         - Grades
-        - Queries
+        - Fuzzy search for names
+        - Check ID uniqueness
 */
 
 int main(int argc, char **argv)
