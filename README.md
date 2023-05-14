@@ -2,9 +2,9 @@
 
 CLI for in-memory database with an ability of serialization to a file.
 
-Implemented as a students database. Files look like this:
+Implemented as a students database. File format looks like this:
 ```
-<name>|<surname>|<group name>|<record book number>
+|<name>|<surname>|<group name>|<record book number>|
 ```
 
 ## Bulding
