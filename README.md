@@ -7,7 +7,16 @@ Implemented as a database of students. For now, file format looks like this:
 |<ID>|<name>|<surname>|<group name>|<record book number>|
 ```
 
-As this was my first project in C++, I finally understand why people don't like it :3c
+## Why
+
+I got this idea from my friends' course project.
+Of course, the actual task was too easy, so I decided to implement a whole database instead :3c.
+
+## Usage
+
+```console
+toiletdb <database file>
+```
 
 ## Bulding
 

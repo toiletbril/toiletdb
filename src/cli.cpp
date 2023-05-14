@@ -280,7 +280,7 @@ static void cli_exec(Model *model, std::vector<std::string> args)
         } break;
 
         case GRADE: {
-            throw std::logic_error("Not implemented");
+            throw std::logic_error("TODO");
         } break;
 
         case CLEAR: {
@@ -327,6 +327,10 @@ static void cli_exec(Model *model, std::vector<std::string> args)
             debug_puts(query, "query");
 #endif
             std::vector<Student> &students = model->get_all_students();
+
+            // TODO:
+            // Using a vector for printing is a waste of memory.
+            // But this will not be used by anyone, anyways.
             std::vector<Student> result;
 
             for (Student &s : students) {
