@@ -20,4 +20,4 @@ $ toiletdb <database file>
 
 ## Bulding
 
-`./build.sh` (POSIX), `./build.bat` (Windows)
+`./build.sh` (POSIX), `./build.bat` (Windows). Look for binary in `bin/`

@@ -148,7 +148,7 @@ static CLI_COMMAND_KIND cli_getcommand(std::string s)
         return ADD;
     if (s == "remove" || s == "rm")
         return REMOVE;
-    if (s == "grade")
+    if (s == "grade" || s == "grades")
         return GRADE;
     if (s == "clear")
         return CLEAR;
@@ -180,7 +180,7 @@ static void cli_exec(Model *model, std::vector<std::string> args)
                    "\tlist  \tList all students.\n"
                    "\tadd   \tAdd a student to database.\n"
                    "\tremove\tRemove a student from database.\n"
-                   "\tgrade \tAdd student's grades.\n"
+                   "\tgrades\tSee student's grades.\n"
                    "\tclear \tClear the database.\n"
                    "\tcommit\tSave changes to the file.\n"
                    "\trevert\tRevert uncommited changes.\n";
@@ -257,26 +257,31 @@ static void cli_exec(Model *model, std::vector<std::string> args)
         case REMOVE: {
             if (args.size() != 2) {
                 std::cout << "ERROR: Invalid number of arguments.\n"
-                             "Usage: remove <student index>\nYou can get "
-                             "student index by using 'list'.\n";
+                             "Usage: remove <student ID>\nYou can get "
+                             "student ID by using 'list' or 'query'.\n";
                 return;
             }
 
-            size_t n = std::atoll(args[1].c_str());
+            size_t n;
 
-            if (n > model->size()) {
-                std::cout << "ERROR: index is too big.\n";
-                return;
+            if (args[1] == "0") {
+                n = 0;
+            } else {
+                n = std::atoll(args[1].c_str());
+
+                if (n == 0) {
+                    std::cout << "ERROR: Invalid number.\n";
+                    return;
+                }
             }
 
-            if (n <= 0) {
-                std::cout << "ERROR: invalid number.\n";
-                return;
-            }
+            // TODO: Replace this with remove(id)
+            bool success = model->remove_id(n);
 
-            model->remove_at(n - 1);
-
-            std::cout << "Student removed successfully.\n";
+            if (success)
+                std::cout << "Student removed successfully.\n";
+            else
+                std::cout << "Could not find student with such ID.\n";
         } break;
 
         case GRADE: {
@@ -311,7 +316,7 @@ static void cli_exec(Model *model, std::vector<std::string> args)
                 return;
             }
 
-            std::cout << "Searching...\n";
+            std::cout << "Searching...\n\n";
 
             std::string query = args[1];
             size_t len = args.size();
@@ -357,7 +362,7 @@ void cli_loop(const char *filename)
     Model *model;
 
     try {
-        std::cout << "Opening '" << filename << "'...\n";
+        std::cout << "Opening '" << filename << "'...\n\n";
         model = new Model(filename);
     } catch (std::ios::failure &e) {
         // iostream error's .what() method returns weird string at the end

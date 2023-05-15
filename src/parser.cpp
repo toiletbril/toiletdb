@@ -49,7 +49,7 @@ private:
         while (c != EOF) {
             if (c != '|') {
                 std::string failstring = "Database file format is not "
-                                         "correct: invalid delimiter at line " +
+                                         "correct:\nInvalid delimiter at line " +
                                          std::to_string(line) + ":" +
                                          std::to_string(pos);
 
@@ -80,7 +80,7 @@ private:
                     if (field > 4) {
                         std::string failstring =
                             "Database file format is not "
-                            "correct: extra field at line " +
+                            "correct:\nExtra field at line " +
                             std::to_string(line) + ":" +
                             std::to_string(pos + 1);
 
@@ -99,7 +99,7 @@ private:
 
             if (field != 5) {
                 std::string failstring = "Database file format is not "
-                                         "correct: Invalid number of fields (" +
+                                         "correct:\nNumber of fields is smaller than required (" +
                                          std::to_string(field) +
                                          "/5) at line " + std::to_string(line) +
                                          ":" + std::to_string(pos);
@@ -129,9 +129,9 @@ private:
     }
 
     // Save vector of students from memory into file.
-    void serialize(std::vector<Student> students, std::fstream &file)
+    void serialize(std::vector<Student> &students, std::fstream &file)
     {
-        for (Student student : students) {
+        for (Student &student : students) {
 #ifdef DEBUG
             debug_puts(student, "FileParser.serealize");
 #endif

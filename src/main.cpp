@@ -5,9 +5,9 @@
 
 #include <ostream>
 
-//#define DEBUG
+#define DEBUG
 
-#define VERSION "0.2"
+#define VERSION "0.3"
 #define NAME "toiletdb"
 #define GITHUB "<https://github.com/toiletbril>"
 
@@ -15,7 +15,8 @@
 
 /*
     TODO:
-        - Grading
+        - Editing
+        - Grading system
         - Advanced search?
         - Check ID uniqueness?
 */

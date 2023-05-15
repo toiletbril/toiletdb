@@ -33,8 +33,6 @@ public:
 
     void save_all() { this->parser->write_file(this->students); }
 
-    size_t get_next_id() { return this->size() + 1; }
-
     inline void add(Student &s)
     {
 #ifdef DEBUG
@@ -43,12 +41,30 @@ public:
         this->students.push_back(s);
     }
 
-    void remove_at(unsigned int n)
+    void remove_at(size_t n) { this->students.erase(students.begin() + n); }
+
+    bool remove_id(size_t id)
     {
-        this->students.erase(students.begin() + n);
+        std::vector<Student> &students = this->students;
+        size_t i = 0;
+
+        for (const Student &s : students) {
+            if (s.get_id() == id) {
+#ifdef DEBUG
+                debug_puts(s, "Model.remove_id");
+#endif
+                students.erase(students.begin() + i);
+                return true;
+            }
+            ++i;
+        }
+
+        return false;
     }
 
     void clear() { this->students.clear(); }
 
     size_t size() { return this->students.size(); }
+
+    size_t get_next_id() { return this->size() + 1; }
 };
