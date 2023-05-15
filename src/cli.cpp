@@ -12,6 +12,7 @@
 #include "debug.cpp"
 #endif
 
+#include "common.cpp"
 #include "model.cpp"
 
 enum CLI_COMMAND_KIND
@@ -21,6 +22,7 @@ enum CLI_COMMAND_KIND
     EXIT,
     EXIT_NO_SAVE,
     QUERY,
+    ID,
     LIST,
     ADD,
     REMOVE,
@@ -115,19 +117,29 @@ static char cli_forbiddenchar(std::vector<std::string> &args)
     return 0;
 }
 
-// Prints entire vector of students as a table.
-static void cli_putquery(std::vector<Student> &students)
+static void cli_put_table_header()
 {
     std::cout << std::left << std::setw(12) << "ID" << std::setw(24) << "Name"
               << std::setw(30) << "Surname" << std::setw(12) << "Group"
               << std::setw(12) << "Record"
               << "\n";
+}
+
+static void cli_put_student(Student &student)
+{
+    std::cout << std::left << std::setw(12) << student.get_id() << std::setw(24)
+              << student.name << std::setw(30) << student.surname
+              << std::setw(12) << student.group << std::setw(12)
+              << student.record_book << "\n";
+}
+
+// Prints entire vector of students as a table.
+static void cli_put_student_vector(std::vector<Student> &students)
+{
+    cli_put_table_header();
 
     for (Student &student : students) {
-        std::cout << std::left << std::setw(12) << student.get_id()
-                  << std::setw(24) << student.name << std::setw(30)
-                  << student.surname << std::setw(12) << student.group
-                  << std::setw(12) << student.record_book << "\n";
+        cli_put_student(student);
     }
 }
 
@@ -142,6 +154,8 @@ static CLI_COMMAND_KIND cli_getcommand(std::string s)
         return EXIT_NO_SAVE;
     if (s == "query" || s == "search")
         return QUERY;
+    if (s == "id")
+        return ID;
     if (s == "list" || s == "ls")
         return LIST;
     if (s == "add")
@@ -174,16 +188,17 @@ static void cli_exec(Model *model, std::vector<std::string> args)
         case HELP: {
             std::cout
                 << "Available commands:\n"
-                   "\thelp  \tSee this message.\n"
-                   "\texit  \tQuit and save. Add ! to the end to skip saving.\n"
-                   "\tquery \tQuery database.\n"
-                   "\tlist  \tList all students.\n"
-                   "\tadd   \tAdd a student to database.\n"
-                   "\tremove\tRemove a student from database.\n"
-                   "\tgrades\tSee student's grades.\n"
-                   "\tclear \tClear the database.\n"
-                   "\tcommit\tSave changes to the file.\n"
-                   "\trevert\tRevert uncommited changes.\n";
+                   "\thelp  \t\tSee this message.\n"
+                   "\texit  \t\tQuit and save. Add ! to the end to skip saving.\n"
+                   "\tsearch\t\tSearch in database.\n"
+                   "\tid    \t\tSearch by ID.\n"
+                   "\tlist  \t\tList all students.\n"
+                   "\tadd   \t\tAdd a student to database.\n"
+                   "\tremove\t\tRemove a student from database.\n"
+                   "\tgrades\t\tSee student's grades.\n"
+                   "\tclear \t\tClear the database.\n"
+                   "\tcommit\t\tSave changes to the file.\n"
+                   "\trevert\t\tRevert uncommited changes.\n";
         } break;
 
         case EXIT: {
@@ -220,7 +235,7 @@ static void cli_exec(Model *model, std::vector<std::string> args)
                 return;
             }
 
-            cli_putquery(students);
+            cli_put_student_vector(students);
         } break;
 
         case ADD: {
@@ -262,17 +277,11 @@ static void cli_exec(Model *model, std::vector<std::string> args)
                 return;
             }
 
-            size_t n;
+            size_t n = cm_parsell(args[1]);
 
-            if (args[1] == "0") {
-                n = 0;
-            } else {
-                n = std::atoll(args[1].c_str());
-
-                if (n == 0) {
-                    std::cout << "ERROR: Invalid number.\n";
-                    return;
-                }
+            if (n == COMMON_INVALID_NUMBERLL) {
+                std::cout << "ERROR: Invalid number.\n";
+                return;
             }
 
             // TODO: Replace this with remove(id)
@@ -352,7 +361,33 @@ static void cli_exec(Model *model, std::vector<std::string> args)
                 return;
             }
 
-            cli_putquery(result);
+            cli_put_student_vector(result);
+        } break;
+
+        case ID: {
+            if (args.size() != 2) {
+                std::cout << "ERROR: Invalid number of arguments.\n"
+                             "Usage: id <student ID>\nYou can get "
+                             "student ID by using 'list' or 'query'.\n";
+                return;
+            }
+
+            size_t n = cm_parsell(args[1]);
+
+            if (n == COMMON_INVALID_NUMBERLL) {
+                std::cout << "ERROR: Invalid number.\n";
+                return;
+            }
+
+            size_t result = model->search(n);
+
+            if (result == MODEL_NOT_FOUND) {
+                std::cout << "No students matched your query.\n";
+                return;
+            }
+
+            cli_put_table_header();
+            cli_put_student(model->get(result));
         } break;
     }
 }

@@ -9,6 +9,7 @@
 #include "debug.cpp"
 #endif
 
+#include "common.cpp"
 #include "student.cpp"
 
 class FileParser
@@ -107,8 +108,18 @@ private:
                 throw std::range_error(failstring);
             }
 
+            size_t id = cm_parsell(fields[0]);
+            if (id == COMMON_INVALID_NUMBERLL) {
+                std::string failstring = "Database file format is not "
+                                         "correct:\nInvalid ID "
+                                         "at line " + std::to_string(line) +
+                                         ":" + std::to_string(pos);
+
+                throw std::range_error(failstring);
+            }
+
             Student st = {
-                static_cast<size_t>(std::stoi(fields[0])),
+                id,
                 fields[1].c_str(),
                 fields[2].c_str(),
                 fields[3].c_str(),

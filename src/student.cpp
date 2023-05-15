@@ -24,7 +24,7 @@ public:
         this->record_book = record_book;
     }
 
-    Student(): id(TEMP_ID) {}
+    Student(const size_t id): id(id) {}
 
     size_t get_id() const {
         return this->id;

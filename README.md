@@ -18,6 +18,11 @@ Of course, the actual task was too easy, so I decided to implement a whole datab
 $ toiletdb <database file>
 ```
 
-## Bulding
+For testing purposes, you can generate database file with:
+```console
+$ python3 testing/makedb.py <count of entries> <filename>
+```
+
+## Building
 
 `./build.sh` (POSIX), `./build.bat` (Windows). Look for binary in `bin/`

@@ -5,9 +5,9 @@
 
 #include <ostream>
 
-#define DEBUG
+//#define DEBUG
 
-#define VERSION "0.3"
+#define VERSION "0.4"
 #define NAME "toiletdb"
 #define GITHUB "<https://github.com/toiletbril>"
 
@@ -16,9 +16,9 @@
 /*
     TODO:
         - Editing
-        - Grading system
+        - Check for free IDs when adding, so IDs are not skipped
+        - Grading system???
         - Advanced search?
-        - Check ID uniqueness?
 */
 
 int main(int argc, char **argv)
