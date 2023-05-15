@@ -33,7 +33,7 @@ int main(int argc, char **argv)
         std::cout << "Usage: " << NAME
                   << " <database file>\n"
                      "If there is no such file, it will be created.\n"
-                  << "(c) toiletbril " << GITHUB << "\n";
+                  << "(c) toiletbril " << GITHUB << std::endl;
         std::exit(1);
     }
 

@@ -32,7 +32,6 @@ def generate_entry(i: int) -> str:
              "|\n")
 
 def main():
-
     if (len(argv) != 3):
         print("Usage: makedb <count> <filename>")
         exit(1)

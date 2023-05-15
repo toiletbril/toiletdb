@@ -15,6 +15,12 @@
 #include "common.cpp"
 #include "model.cpp"
 
+#define CLI_IDW 9
+#define CLI_NAMEW 24
+#define CLI_SURNAMEW 28
+#define CLI_GROUPW 16
+#define CLI_RECORDW 16
+
 enum CLI_COMMAND_KIND
 {
     UNKNOWN = 0,
@@ -123,18 +129,19 @@ static char cli_forbiddenchar(std::vector<std::string> &args)
 
 static void cli_put_table_header()
 {
-    std::cout << std::left << std::setw(12) << "ID" << std::setw(24) << "Name"
-              << std::setw(30) << "Surname" << std::setw(12) << "Group"
-              << std::setw(12) << "Record"
+    std::cout << std::left << std::setw(CLI_IDW) << "ID" << std::setw(CLI_NAMEW)
+              << "Name" << std::setw(CLI_SURNAMEW) << "Surname"
+              << std::setw(CLI_GROUPW) << "Group" << std::setw(CLI_RECORDW)
+              << "Record"
               << "\n";
 }
 
 static void cli_put_student(Student &student)
 {
-    std::cout << std::left << std::setw(12) << student.get_id() << std::setw(24)
-              << student.name << std::setw(30) << student.surname
-              << std::setw(12) << student.group << std::setw(12)
-              << student.record_book << "\n";
+    std::cout << std::left << std::setw(CLI_IDW) << student.get_id()
+              << std::setw(CLI_NAMEW) << student.name << std::setw(CLI_SURNAMEW)
+              << student.surname << std::setw(CLI_GROUPW) << student.group
+              << std::setw(CLI_RECORDW) << student.record_book << "\n";
 }
 
 // Prints entire vector of students as a table.
@@ -145,8 +152,6 @@ static void cli_put_student_vector(std::vector<Student> &students)
     for (Student &student : students) {
         cli_put_student(student);
     }
-
-    std::fflush(stdout);
 }
 
 // Translates strings to CLI_COMMAND_KIND.
@@ -192,7 +197,8 @@ static void cli_exec(Model *model, std::vector<std::string> args)
     switch (c) {
         case UNKNOWN: {
             std::cout << "Unknown command '" << args[0]
-                      << "'.\nTry 'help' to see available commands.\n";
+                      << "'.\nTry 'help' to see available commands."
+                      << std::endl;
         } break;
 
         case HELP: {
@@ -209,18 +215,19 @@ static void cli_exec(Model *model, std::vector<std::string> args)
                          "\tgrades\t\tSee student's grades.\n"
                          "\tclear \t\tClear the database.\n"
                          "\tcommit\t\tSave changes to the file.\n"
-                         "\trevert\t\tRevert uncommited changes.\n";
+                         "\trevert\t\tRevert uncommited changes."
+                      << std::endl;
         } break;
 
         case EXIT: {
             std::cout << "Saving...\n";
             model->save_all();
-            std::cout << "Exiting...\n\n";
+            std::cout << "Exiting...\n" << std::endl;
             std::exit(0);
         } break;
 
         case EXIT_NO_SAVE: {
-            std::cout << "Exiting...\n\n";
+            std::cout << "Exiting...\n" << std::endl;
             std::exit(0);
         } break;
 
@@ -241,26 +248,27 @@ static void cli_exec(Model *model, std::vector<std::string> args)
             std::vector<Student> &students = model->get_all_students();
 
             if (students.empty()) {
-                std::cout << "There are no students in database."
-                          << "\n";
+                std::cout << "There are no students in database." << std::endl;
                 return;
             }
 
             cli_put_student_vector(students);
+            std::fflush(stdout);
         } break;
 
         case DBSIZE: {
             size_t len = model->size();
 
             std::cout << "There are " << len << " students in database."
-                      << "\n";
+                      << std::endl;
         } break;
 
         case ADD: {
             char errc = cli_forbiddenchar(args);
 
             if (errc) {
-                std::cout << "ERROR: Forbidden character '" << errc << "'.\n";
+                std::cout << "ERROR: Forbidden character '" << errc << "'."
+                          << std::endl;
                 return;
             }
 
@@ -275,7 +283,8 @@ static void cli_exec(Model *model, std::vector<std::string> args)
                        "Usage: add <name> <surname> <group> <record book>\n"
                        "You can put quotes around fields.\n"
                        "EXAMPLE: \"Vasiliy Dos\" \"Super Test\" \"Very "
-                       "Humans\" 69420\n";
+                       "Humans\" 69420"
+                    << std::endl;
                 return;
             }
 
@@ -291,14 +300,15 @@ static void cli_exec(Model *model, std::vector<std::string> args)
             if (args.size() != 2) {
                 std::cout << "ERROR: Invalid number of arguments.\n"
                              "Usage: remove <student ID>\nYou can get "
-                             "student ID by using 'list' or 'query'.\n";
+                             "student ID by using 'list' or 'query'."
+                          << std::endl;
                 return;
             }
 
             size_t n = cm_parsell(args[1]);
 
             if (n == COMMON_INVALID_NUMBERLL) {
-                std::cout << "ERROR: Invalid number.\n";
+                std::cout << "ERROR: Invalid number." << std::endl;
                 return;
             }
 
@@ -306,9 +316,10 @@ static void cli_exec(Model *model, std::vector<std::string> args)
             bool success = model->remove_id(n);
 
             if (success)
-                std::cout << "Student removed successfully.\n";
+                std::cout << "Student removed successfully." << std::endl;
             else
-                std::cout << "Could not find student with such ID.\n";
+                std::cout << "Could not find student with such ID."
+                          << std::endl;
         } break;
 
         case GRADE: {
@@ -325,16 +336,16 @@ static void cli_exec(Model *model, std::vector<std::string> args)
                 return;
 
             model->clear();
-            std::cout << "Database has been erased.\n";
+            std::cout << "Database has been erased." << std::endl;
         } break;
 
         case COMMIT: {
-            std::cout << "Saving...\n";
+            std::cout << "Saving..." << std::endl;
             model->save_all();
         } break;
 
         case REVERT: {
-            std::cout << "Reverting changes...\n";
+            std::cout << "Reverting changes..." << std::endl;
             model->reread_file();
         } break;
 
@@ -410,36 +421,38 @@ static void cli_exec(Model *model, std::vector<std::string> args)
 
             cli_put_table_header();
             cli_put_student(model->get(result));
+            std::fflush(stdout);
         } break;
     }
 }
 
 void cli_loop(const char *filename)
 {
-    int err = std::setvbuf(stdout, NULL, _IOFBF, 2048);
-
-    if (err) {
-        std::cout << "Could not enable bufferin for output.\n Please buy more "
-                     "memory :c\n";
-        exit(1);
-    }
-
     Model *model;
 
     try {
-        std::cout << "Opening '" << filename << "'...\n\n";
+        std::cout << "Opening '" << filename << "'...\n";
         model = new Model(filename);
     } catch (std::ios::failure &e) {
         // iostream error's .what() method returns weird string at the end
         std::cout << filename << ": Could not open file: " << strerror(errno)
-                  << "\n";
+                  << std::endl;
         std::exit(1);
     } catch (std::range_error &e) {
-        std::cout << filename << ": Parsing error: " << e.what() << "\n";
+        std::cout << filename << ": Parsing error: " << e.what() << std::endl;
         exit(1);
     }
 
-    std::cout << "Welcome to toiletdb.\n"
+    int err = std::setvbuf(stdout, NULL, _IOFBF, 2048);
+
+    if (err) {
+        std::cout << "Could not enable bufferin for output.\n Please buy more "
+                     "memory :c"
+                  << std::endl;
+        exit(1);
+    }
+
+    std::cout << "\nWelcome to toiletdb.\n"
                  "Loaded "
               << model->size()
               << " students.\n"
@@ -459,12 +472,12 @@ void cli_loop(const char *filename)
         try {
             cli_exec(model, args);
         } catch (std::logic_error &e) {
-            std::cout << "Logic error: " << e.what() << "\n";
+            std::cout << "Logic error: " << e.what() << std::endl;
         } catch (std::ios::failure &e) {
-            std::cout << "IO error: " << strerror(errno) << "\n";
+            std::cout << "IO error: " << strerror(errno) << std::endl;
             std::exit(1);
         } catch (std::runtime_error &e) {
-            std::cout << "Runtime error: " << e.what() << "\n";
+            std::cout << "Runtime error: " << e.what() << std::endl;
             std::exit(1);
         }
     }

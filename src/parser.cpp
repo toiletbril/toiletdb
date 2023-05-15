@@ -51,7 +51,7 @@ private:
             if (c != '|') {
                 std::string failstring =
                     "Database file format is not "
-                    "correct:\nInvalid delimiter at line " +
+                    "correct: Invalid delimiter at line " +
                     std::to_string(line) + ":" + std::to_string(pos);
 
                 throw std::range_error(failstring);
@@ -81,7 +81,7 @@ private:
                     if (field > 4) {
                         std::string failstring =
                             "Database file format is not "
-                            "correct:\nExtra field at line " +
+                            "correct: Extra field at line " +
                             std::to_string(line) + ":" +
                             std::to_string(pos + 1);
 
@@ -101,7 +101,7 @@ private:
             if (field != 5) {
                 std::string failstring =
                     "Database file format is not "
-                    "correct:\nNumber of fields is smaller than required (" +
+                    "correct: Number of fields is smaller than required (" +
                     std::to_string(field) + "/5) at line " +
                     std::to_string(line) + ":" + std::to_string(pos);
 
@@ -111,8 +111,8 @@ private:
             size_t id = cm_parsell(fields[0]);
             if (id == COMMON_INVALID_NUMBERLL) {
                 std::string failstring = "Database file format is not "
-                                         "correct:\nInvalid ID "
-                                         "at line " +
+                                         "correct: Invalid ID, "
+                                         "line " +
                                          std::to_string(line) + ":" +
                                          std::to_string(pos);
 
