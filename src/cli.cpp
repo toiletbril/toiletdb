@@ -53,7 +53,7 @@ void cli_tolower(std::string *str)
 static bool cli_y_or_n()
 {
     while (true) {
-        std::cout << "\tY or N > ";
+        std::cout << "\tY or N >> ";
         std::fflush(stdout);
 
         char answer = std::tolower(std::fgetc(stdin));
@@ -67,7 +67,7 @@ static bool cli_y_or_n()
         } else if (answer == 'n') {
             return false;
         } else {
-            std::cout << "ERROR: Invalid character.\n";
+            std::cout << "ERROR: Invalid character." << std::endl;
         }
     }
 
@@ -190,7 +190,7 @@ static CLI_COMMAND_KIND cli_getcommand(std::string s)
 }
 
 // Executes commands based on vector of arguments.
-static void cli_exec(Model *model, std::vector<std::string> args)
+static void cli_exec(Model *model, std::vector<std::string> &args)
 {
     CLI_COMMAND_KIND c = cli_getcommand(args[0]);
 
@@ -212,6 +212,7 @@ static void cli_exec(Model *model, std::vector<std::string> args)
                          "\tsize  \t\tTotal amount of students in database.\n"
                          "\tadd   \t\tAdd a student to database.\n"
                          "\tremove\t\tRemove a student from database.\n"
+                         "\tedit  \t\tEdit student's details.\n"
                          "\tgrades\t\tSee student's grades.\n"
                          "\tclear \t\tClear the database.\n"
                          "\tcommit\t\tSave changes to the file.\n"
@@ -220,7 +221,7 @@ static void cli_exec(Model *model, std::vector<std::string> args)
         } break;
 
         case EXIT: {
-            std::cout << "Saving...\n";
+            std::cout << "Saving..." << std::endl;
             model->save_all();
             std::cout << "Exiting...\n" << std::endl;
             std::exit(0);
@@ -440,7 +441,7 @@ void cli_loop(const char *filename)
     Model *model;
 
     try {
-        std::cout << "Opening '" << filename << "'...\n";
+        std::cout << "Opening '" << filename << "'..." << std::endl;
         model = new Model(filename);
     } catch (std::ios::failure &e) {
         // iostream error's .what() method returns weird string at the end
@@ -460,7 +461,7 @@ void cli_loop(const char *filename)
               << std::endl;
 
     while (true) {
-        std::cout << "\n" << filename << " # ";
+        std::cout << "\n" << filename << "# ";
 
         // NOTE
         static char line[128];

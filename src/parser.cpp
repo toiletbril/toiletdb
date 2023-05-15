@@ -19,7 +19,7 @@ class FileParser
 private:
     const char *const &filename;
 
-    std::fstream open(std::ios_base::openmode mode)
+    std::fstream open(const std::ios_base::openmode mode) const
     {
         std::fstream file;
 
@@ -37,7 +37,7 @@ private:
     }
 
     // Read file from disk into memory.
-    std::vector<Student> deserealize(std::fstream &file)
+    std::vector<Student> deserealize(std::fstream &file) const
     {
         std::vector<Student> students;
         std::string temp;
@@ -144,9 +144,9 @@ private:
     }
 
     // Save vector of students from memory into file.
-    void serialize(std::vector<Student> &students, std::fstream &file)
+    void serialize(const std::vector<Student> &students, std::fstream &file) const
     {
-        for (Student &student : students) {
+        for (const Student &student : students) {
 #ifdef DEBUG
             debug_puts(student, "FileParser.serealize");
 #endif
@@ -165,7 +165,7 @@ public:
     ~FileParser() { delete this->filename; }
 
     // Return true if file exists, false if it doesn't.
-    bool exists()
+    bool exists() const
     {
         std::fstream file;
 
@@ -180,7 +180,7 @@ public:
 
     // Return true if file exists, false if it doesn't.
     // Creates file if it didn't exist.
-    bool exists_or_create()
+    bool exists_or_create() const
     {
         if (!this->exists()) {
             std::fstream file;
@@ -196,7 +196,7 @@ public:
         return true;
     }
 
-    std::vector<Student> read_file()
+    std::vector<Student> read_file() const
     {
         std::fstream file;
 
@@ -208,7 +208,7 @@ public:
         return students;
     }
 
-    void write_file(std::vector<Student> &students)
+    void write_file(const std::vector<Student> &students) const
     {
         if (!this->exists()) {
             throw std::runtime_error("File does not exist");

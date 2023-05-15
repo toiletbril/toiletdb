@@ -54,7 +54,7 @@ public:
 
     void reread_file() { this->students = this->parser->read_file(); }
 
-    void save_all() { this->parser->write_file(this->students); }
+    void save_all() const { this->parser->write_file(this->students); }
 
     // Return index of element in Model.
     // If element is not found, returns MODEL_NOT_FOUND.
@@ -103,9 +103,9 @@ public:
         return false;
     }
 
-    void clear() { this->students.clear(); }
+    inline void clear() { this->students.clear(); }
 
     size_t size() const { return this->students.size(); }
 
-    size_t get_next_id() const { return this->size() + 1; }
+    size_t get_next_id() const { return this->size(); }
 };

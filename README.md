@@ -25,4 +25,4 @@ $ python3 testing/makedb.py <count of entries> <filename>
 
 ## Building
 
-`./build.sh` (POSIX), `./build.bat` (Windows). Look for binary in `bin/`
+`./build.sh` (POSIX), `./build.bat` (Windows Clang). Look for binary in `bin/`
