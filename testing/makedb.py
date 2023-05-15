@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 from sys import argv
-from random import choice, randint
 
 import data
 
@@ -14,10 +13,6 @@ filename = argv[2]
 
 with open(filename, "w") as f:
     for i in range(count):
-        f.write(
-            f"|{i}|{choice(data.names)}"
-            f"|{choice(data.surnames)}"
-            f"|{choice(data.groups)}"
-            f"|{randint(100000, 999999)}|\n")
+        f.write(data.generate_entry(i))
 
 print("Done.")

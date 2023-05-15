@@ -1,5 +1,7 @@
 *
 !/**/
 !*.*
+!LICENSE
 .vscode/
+testing/__pycache__/
 bin/
