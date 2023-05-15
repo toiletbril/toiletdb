@@ -30,7 +30,6 @@ public:
 
     size_t get_id() const { return this->id; }
 
-    // Allows to use << operator to print out this class.
     friend std::ostream &operator<<(std::ostream &os, const Student &s)
     {
         os << "Student { " << std::to_string(s.get_id()) << ", " << s.name

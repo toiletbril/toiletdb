@@ -24,10 +24,9 @@ private:
 
 public:
     // This will create a file 'filename' and use it to store commits.
-    // If file already existed, elements will be sorted by ID to suit binary
+    // If file already exists, elements will be sorted by ID to suit binary
     // search.
-    // When you save a file which was previous unsorted, it will be
-    // sorted and possible reodered.
+    // Using previously unsorted file will result in it being reordered.
     Model(const char *const &filename)
     {
         this->parser = new FileParser(filename);

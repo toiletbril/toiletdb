@@ -35,6 +35,7 @@ private:
     }
 
     // Read file from disk into memory.
+    // TODO: incorrectly displays position in parsing errors
     std::vector<Student> deserealize(std::fstream &file)
     {
         std::vector<Student> students;
@@ -49,10 +50,10 @@ private:
 
         while (c != EOF) {
             if (c != '|') {
-                std::string failstring =
-                    "Database file format is not "
-                    "correct: Invalid delimiter at line " +
-                    std::to_string(line) + ":" + std::to_string(pos);
+                std::string failstring = "Database file format is not "
+                                         "correct: Invalid delimiter at line " +
+                                         std::to_string(line) + ":" +
+                                         std::to_string(pos);
 
                 throw std::range_error(failstring);
             } else {
@@ -109,6 +110,7 @@ private:
             }
 
             size_t id = cm_parsell(fields[0]);
+
             if (id == COMMON_INVALID_NUMBERLL) {
                 std::string failstring = "Database file format is not "
                                          "correct: Invalid ID, "
