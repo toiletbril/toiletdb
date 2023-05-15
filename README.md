@@ -1,8 +1,8 @@
 # toiletdb
 
-In-memory database with an ability to serialize into a file and a CLI for it.
+Persistent, in-memory database with an ability to serialize and a CLI for it.
 
-Implemented as a database of students. For now, file format looks like this:
+Implemented as a table of students. Database files look like this:
 ```
 |<ID>|<name>|<surname>|<group name>|<record book number>|
 ```
@@ -10,12 +10,30 @@ Implemented as a database of students. For now, file format looks like this:
 ## Why
 
 I got this idea from my friends' course project.
-Of course, the actual task was too easy, so I decided to implement a whole database instead :3c.
+The actual task was too easy, so I decided to implement a whole database instead :3c
 
 ## Usage
 
 ```console
 $ toiletdb <database file>
+```
+
+```console
+test# help
+Available commands:
+        help            See this message.
+        exit            Quit and save. Add ! to the end to skip saving.
+        search          Search the database.
+        id              Search by ID.
+        list            List all students.
+        size            See total amount of students in database.
+        add             Add a student to database.
+        remove          Remove a student from database.
+        edit            Edit student's details.
+        grades          See student's grades.
+        clear           Clear the database.
+        commit          Save changes to the file.
+        revert          Revert uncommited changes.
 ```
 
 For testing purposes, you can generate database file with:
