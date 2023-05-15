@@ -20,10 +20,7 @@ private:
     std::vector<Student> students;
     FileParser *parser;
 
-    void erase(const size_t n)
-    {
-        this->students.erase(students.begin() + n);
-    }
+    void erase(const size_t n) { this->students.erase(students.begin() + n); }
 
 public:
     // This will create a file 'filename' and use it to store commits.
@@ -47,7 +44,8 @@ public:
 
     std::vector<Student> &get_all_students() { return this->students; }
 
-    Student &get(const size_t n) {
+    Student &get(const size_t n)
+    {
         if (n >= this->size()) {
             throw std::range_error("n is too large");
         }

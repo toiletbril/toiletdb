@@ -5,7 +5,7 @@
 
 #include <ostream>
 
-//#define DEBUG
+// #define DEBUG
 
 #define VERSION "0.4"
 #define NAME "toiletdb"

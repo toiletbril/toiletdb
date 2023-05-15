@@ -49,10 +49,10 @@ private:
 
         while (c != EOF) {
             if (c != '|') {
-                std::string failstring = "Database file format is not "
-                                         "correct:\nInvalid delimiter at line " +
-                                         std::to_string(line) + ":" +
-                                         std::to_string(pos);
+                std::string failstring =
+                    "Database file format is not "
+                    "correct:\nInvalid delimiter at line " +
+                    std::to_string(line) + ":" + std::to_string(pos);
 
                 throw std::range_error(failstring);
             } else {
@@ -99,11 +99,11 @@ private:
             }
 
             if (field != 5) {
-                std::string failstring = "Database file format is not "
-                                         "correct:\nNumber of fields is smaller than required (" +
-                                         std::to_string(field) +
-                                         "/5) at line " + std::to_string(line) +
-                                         ":" + std::to_string(pos);
+                std::string failstring =
+                    "Database file format is not "
+                    "correct:\nNumber of fields is smaller than required (" +
+                    std::to_string(field) + "/5) at line " +
+                    std::to_string(line) + ":" + std::to_string(pos);
 
                 throw std::range_error(failstring);
             }
@@ -112,8 +112,9 @@ private:
             if (id == COMMON_INVALID_NUMBERLL) {
                 std::string failstring = "Database file format is not "
                                          "correct:\nInvalid ID "
-                                         "at line " + std::to_string(line) +
-                                         ":" + std::to_string(pos);
+                                         "at line " +
+                                         std::to_string(line) + ":" +
+                                         std::to_string(pos);
 
                 throw std::range_error(failstring);
             }

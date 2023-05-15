@@ -24,8 +24,10 @@ enum CLI_COMMAND_KIND
     QUERY,
     ID,
     LIST,
+    DBSIZE,
     ADD,
     REMOVE,
+    EDIT,
     GRADE,
     CLEAR,
     COMMIT,
@@ -45,6 +47,8 @@ static bool cli_y_or_n()
 {
     while (true) {
         std::cout << "\tY or N > ";
+        std::fflush(stdout);
+
         char answer = std::tolower(std::fgetc(stdin));
 
         // Discard the rest of the line.
@@ -141,6 +145,8 @@ static void cli_put_student_vector(std::vector<Student> &students)
     for (Student &student : students) {
         cli_put_student(student);
     }
+
+    std::fflush(stdout);
 }
 
 // Translates strings to CLI_COMMAND_KIND.
@@ -158,12 +164,16 @@ static CLI_COMMAND_KIND cli_getcommand(std::string s)
         return ID;
     if (s == "list" || s == "ls")
         return LIST;
+    if (s == "size")
+        return DBSIZE;
     if (s == "add")
         return ADD;
     if (s == "remove" || s == "rm")
         return REMOVE;
     if (s == "grade" || s == "grades")
         return GRADE;
+    if (s == "edit" || s == "e")
+        return EDIT;
     if (s == "clear")
         return CLEAR;
     if (s == "commit" || s == "save")
@@ -186,19 +196,20 @@ static void cli_exec(Model *model, std::vector<std::string> args)
         } break;
 
         case HELP: {
-            std::cout
-                << "Available commands:\n"
-                   "\thelp  \t\tSee this message.\n"
-                   "\texit  \t\tQuit and save. Add ! to the end to skip saving.\n"
-                   "\tsearch\t\tSearch in database.\n"
-                   "\tid    \t\tSearch by ID.\n"
-                   "\tlist  \t\tList all students.\n"
-                   "\tadd   \t\tAdd a student to database.\n"
-                   "\tremove\t\tRemove a student from database.\n"
-                   "\tgrades\t\tSee student's grades.\n"
-                   "\tclear \t\tClear the database.\n"
-                   "\tcommit\t\tSave changes to the file.\n"
-                   "\trevert\t\tRevert uncommited changes.\n";
+            std::cout << "Available commands:\n"
+                         "\thelp  \t\tSee this message.\n"
+                         "\texit  \t\tQuit and save. Add ! to the end to skip "
+                         "saving.\n"
+                         "\tsearch\t\tSearch in database.\n"
+                         "\tid    \t\tSearch by ID.\n"
+                         "\tlist  \t\tList all students.\n"
+                         "\tsize  \t\tTotal amount of students in database.\n"
+                         "\tadd   \t\tAdd a student to database.\n"
+                         "\tremove\t\tRemove a student from database.\n"
+                         "\tgrades\t\tSee student's grades.\n"
+                         "\tclear \t\tClear the database.\n"
+                         "\tcommit\t\tSave changes to the file.\n"
+                         "\trevert\t\tRevert uncommited changes.\n";
         } break;
 
         case EXIT: {
@@ -230,12 +241,19 @@ static void cli_exec(Model *model, std::vector<std::string> args)
             std::vector<Student> &students = model->get_all_students();
 
             if (students.empty()) {
-                std::cout << "There is no students in database."
+                std::cout << "There are no students in database."
                           << "\n";
                 return;
             }
 
             cli_put_student_vector(students);
+        } break;
+
+        case DBSIZE: {
+            size_t len = model->size();
+
+            std::cout << "There are " << len << " students in database."
+                      << "\n";
         } break;
 
         case ADD: {
@@ -294,6 +312,10 @@ static void cli_exec(Model *model, std::vector<std::string> args)
         } break;
 
         case GRADE: {
+            throw std::logic_error("TODO");
+        } break;
+
+        case EDIT: {
             throw std::logic_error("TODO");
         } break;
 
@@ -394,6 +416,14 @@ static void cli_exec(Model *model, std::vector<std::string> args)
 
 void cli_loop(const char *filename)
 {
+    int err = std::setvbuf(stdout, NULL, _IOFBF, 2048);
+
+    if (err) {
+        std::cout << "Could not enable bufferin for output.\n Please buy more "
+                     "memory :c\n";
+        exit(1);
+    }
+
     Model *model;
 
     try {

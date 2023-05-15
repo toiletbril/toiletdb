@@ -9,6 +9,7 @@ class Student
 {
 private:
     size_t id;
+
 public:
     std::string name;
     std::string surname;
@@ -16,7 +17,8 @@ public:
     std::string record_book;
 
     Student(const size_t id, const char *name, const char *surname,
-            const char *group, const char *record_book): id(id)
+            const char *group, const char *record_book)
+        : id(id)
     {
         this->name = name;
         this->surname = surname;
@@ -24,17 +26,16 @@ public:
         this->record_book = record_book;
     }
 
-    Student(const size_t id): id(id) {}
+    Student(const size_t id) : id(id) {}
 
-    size_t get_id() const {
-        return this->id;
-    }
+    size_t get_id() const { return this->id; }
 
     // Allows to use << operator to print out this class.
     friend std::ostream &operator<<(std::ostream &os, const Student &s)
     {
-        os << "Student { " << std::to_string(s.get_id()) << ", " << s.name << ", " << s.surname << ", " << s.group
-           << ", " << s.record_book << " }";
+        os << "Student { " << std::to_string(s.get_id()) << ", " << s.name
+           << ", " << s.surname << ", " << s.group << ", " << s.record_book
+           << " }";
         return os;
     }
 };
