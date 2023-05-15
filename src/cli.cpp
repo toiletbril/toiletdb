@@ -1,6 +1,5 @@
 #pragma once
 
-#include <algorithm>
 #include <cctype>
 #include <cstring>
 #include <fstream>
@@ -20,6 +19,8 @@
 #define CLI_SURNAMEW 28
 #define CLI_GROUPW 16
 #define CLI_RECORDW 16
+
+// TODO: Table wrapping
 
 enum CLI_COMMAND_KIND
 {
@@ -113,7 +114,6 @@ static std::vector<std::string> cli_splitargs(const std::string *s)
 }
 
 // Returns first invalid character it finds.
-// For example, model uses "|" as a separator.
 static char cli_forbiddenchar(std::vector<std::string> &args)
 {
     std::string forbidden_chars = "|[]";
@@ -428,6 +428,15 @@ static void cli_exec(Model *model, std::vector<std::string> args)
 
 void cli_loop(const char *filename)
 {
+    int err = std::setvbuf(stdout, NULL, _IOFBF, 2048);
+
+    if (err) {
+        std::cout << "Could not enable bufferin for output.\n Please buy more "
+                     "memory :c"
+                  << std::endl;
+        exit(1);
+    }
+
     Model *model;
 
     try {
@@ -443,15 +452,6 @@ void cli_loop(const char *filename)
         exit(1);
     }
 
-    int err = std::setvbuf(stdout, NULL, _IOFBF, 2048);
-
-    if (err) {
-        std::cout << "Could not enable bufferin for output.\n Please buy more "
-                     "memory :c"
-                  << std::endl;
-        exit(1);
-    }
-
     std::cout << "\nWelcome to toiletdb.\n"
                  "Loaded "
               << model->size()
@@ -462,6 +462,7 @@ void cli_loop(const char *filename)
     while (true) {
         std::cout << "\n" << filename << " # ";
 
+        // NOTE
         static char line[128];
         std::cin.getline(line, 128);
 

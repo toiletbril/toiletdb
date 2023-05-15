@@ -12,6 +12,8 @@
 #include "common.cpp"
 #include "student.cpp"
 
+// TODO: Parser incorrectly displays position in parsing errors
+
 class FileParser
 {
 private:
@@ -35,7 +37,6 @@ private:
     }
 
     // Read file from disk into memory.
-    // TODO: incorrectly displays position in parsing errors
     std::vector<Student> deserealize(std::fstream &file)
     {
         std::vector<Student> students;

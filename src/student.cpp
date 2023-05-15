@@ -1,9 +1,7 @@
 #pragma once
 
-#include <iostream>
+#include <ostream>
 #include <string>
-
-#define TEMP_ID -1
 
 class Student
 {
@@ -25,8 +23,6 @@ public:
         this->group = group;
         this->record_book = record_book;
     }
-
-    Student(const size_t id) : id(id) {}
 
     size_t get_id() const { return this->id; }
 

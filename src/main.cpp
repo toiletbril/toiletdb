@@ -16,7 +16,7 @@
 /*
     TODO:
         - Editing
-        - Check for free IDs when adding, so IDs are not skipped
+        - Checks for free IDs when adding, so IDs are not skipped
         - Grading system???
         - Advanced search?
 */
