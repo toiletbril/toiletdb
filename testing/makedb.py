@@ -10,38 +10,46 @@ name_two = ["berg", "onson", "onen", "ski", "unts", "fitz", "lu", "war", "zu", "
 
 groups = [
     "Testers",
-    "Humans",
-    "Americans",
-    "Europeans",
+    "Windows",
+    "Vacuum cleaners",
+    "Gamers",
     "Boylikers",
-    "Vegeterians"
+    "Vegeterians",
+    "Pilers"
 ]
 
-def _generate_name() -> str:
-    return choice(name_one) + choice(name_two) + choice(name_two) + choice(name_two) + choice(name_two) + choice(name_two) + choice(name_two)
+def _generate_name(suffixes: int) -> str:
+    return choice(name_one) + "".join([ choice(name_two) for _ in range(suffixes) ])
 
-def _generate_surname() -> str:
-    return choice(name_one) + choice(name_two) + choice(name_two) + choice(name_two) + choice(name_two) + choice(name_two) + choice(name_two)
+def _generate_surname(suffixes: int) -> str:
+    return choice(name_one) + "".join([ choice(name_two) for _ in range(suffixes) ])
 
-def generate_entry(i: int) -> str:
+def _generate_groups(suffixes: int) -> str:
+    return choice(groups) + ((", " + ", ".join([ choice(groups) for _ in range(suffixes) ])) if suffixes else "")
+
+def generate_entry(i: int, suffixes: int) -> str:
     return (f"|{i}"
-            f"|{_generate_name()}"
-            f"|{_generate_surname()}"
-            f"|{choice(groups)}"
-            f"|{randint(100000, 999999)}"
+            f"|{_generate_name(suffixes)}"
+            f"|{_generate_surname(suffixes)}"
+            f"|{_generate_groups(0)}"
+            f"|{randint(10000000, 99999999)}"
              "|\n")
 
 def main():
-    if (len(argv) != 3):
-        print("Usage: makedb <count> <filename>")
+    if (len(argv) < 3):
+        print("Usage: makedb <count> <filename> [suffix count]")
         exit(1)
 
     count = int(argv[1])
     filename = argv[2]
+    suffixes = 3
+
+    if (len(argv) > 3):
+        suffixes = int(argv[3])
 
     with open(filename, "w") as f:
         for i in range(count):
-            f.write(generate_entry(i))
+            f.write(generate_entry(i, suffixes))
 
     print("Done.")
 

@@ -23,7 +23,9 @@
 
 #define CLI_WRAPSPACE 4
 
-// TODO: Table wrapping
+#define CLI_SUB_NAMEW (CLI_NAMEW - CLI_WRAPSPACE)
+#define CLI_SUB_SURNAMEW (CLI_SURNAMEW - CLI_WRAPSPACE)
+#define CLI_SUB_GROUPW (CLI_GROUPW - CLI_WRAPSPACE)
 
 enum CLI_COMMAND_KIND
 {
@@ -141,29 +143,48 @@ static void cli_put_table_header()
 
 static void cli_put_student(const Student &student)
 {
-    std::stringstream second_line;
+    std::stringstream wrap_buf;
 
     bool should_wrap = false;
 
-    size_t sub_namew    = CLI_NAMEW - CLI_WRAPSPACE;
-    size_t sub_surnamew = CLI_SURNAMEW - CLI_WRAPSPACE;
+    size_t line = 1;
 
-    if (student.name.length() > sub_namew ||
-        student.surname.length() > sub_surnamew)
+    int namelen    = student.name.length();
+    int surnamelen = student.surname.length();
+    int grouplen   = student.group.length();
+
+    while (namelen > CLI_SUB_NAMEW || surnamelen > CLI_SUB_SURNAMEW ||
+           grouplen > CLI_SUB_GROUPW)
     {
         should_wrap = true;
 
-        second_line << std::left << std::setw(CLI_IDW) << ' ';
+        if (line > 1) {
+            wrap_buf << "\n";
+        }
 
-        second_line << std::setw(CLI_NAMEW)
-                    << (student.name.length() > sub_namew
-                            ? student.name.substr(sub_namew)
-                            : " ");
+        wrap_buf << std::left << std::setw(CLI_IDW) << ' ';
 
-        second_line << std::setw(CLI_SURNAMEW)
-                    << (student.surname.length() > sub_surnamew
-                            ? student.surname.substr(sub_surnamew)
-                            : " ");
+        wrap_buf << std::setw(CLI_NAMEW)
+                 << (namelen > CLI_SUB_NAMEW
+                         ? student.name.substr(CLI_SUB_NAMEW * line, CLI_SUB_NAMEW)
+                         : " ");
+
+        wrap_buf << std::setw(CLI_SURNAMEW)
+                 << (surnamelen > CLI_SUB_SURNAMEW
+                         ? student.surname.substr(CLI_SUB_SURNAMEW * line,
+                                                  CLI_SUB_SURNAMEW)
+                         : " ");
+
+        wrap_buf << std::setw(CLI_GROUPW)
+                 << (grouplen > CLI_SUB_GROUPW
+                         ? student.group.substr(CLI_SUB_GROUPW * line, CLI_SUB_GROUPW)
+                         : " ");
+
+        namelen    = namelen - CLI_SUB_NAMEW;
+        surnamelen = surnamelen - CLI_SUB_SURNAMEW;
+        grouplen   = grouplen - CLI_SUB_GROUPW;
+
+        ++line;
     }
 
     if (!should_wrap) {
@@ -174,12 +195,13 @@ static void cli_put_student(const Student &student)
                   << std::setw(CLI_RECORDW) << student.record_book << "\n";
     } else {
         std::cout << std::left << std::setw(CLI_IDW) << student.get_id()
-                  << std::setw(CLI_NAMEW) << student.name.substr(0, sub_namew)
+                  << std::setw(CLI_NAMEW) << student.name.substr(0, CLI_SUB_NAMEW)
                   << std::setw(CLI_SURNAMEW)
-                  << student.surname.substr(0, sub_surnamew)
-                  << std::setw(CLI_GROUPW) << student.group
+                  << student.surname.substr(0, CLI_SUB_SURNAMEW)
+                  << std::setw(CLI_GROUPW)
+                  << student.group.substr(0, CLI_SUB_GROUPW)
                   << std::setw(CLI_RECORDW) << student.record_book << "\n";
-        std::cout << second_line.str() << "\n";
+        std::cout << wrap_buf.str() << "\n";
     }
 }
 
