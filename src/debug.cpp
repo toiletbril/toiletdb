@@ -9,7 +9,8 @@ template <typename T, typename A>
 void debug_putv(const std::vector<T, A> &v, const char *name)
 {
     std::cout << "*** " << name << ": [\n";
-    for (const T &s : v) {
+    for (const T &s : v)
+    {
         std::cout << "\t'" << s << "',\n";
     }
     std::cout << "]\n";

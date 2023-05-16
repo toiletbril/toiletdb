@@ -27,7 +27,8 @@ private:
         debug_puts(filename, "FileParser.open");
 #endif
 
-        if (!file.is_open()) {
+        if (!file.is_open())
+        {
             throw std::ios::failure("Could not open file");
         }
 
@@ -47,15 +48,19 @@ private:
 #endif
         int c = file.get();
 
-        while (c != EOF) {
-            if (c != '|') {
+        while (c != EOF)
+        {
+            if (c != '|')
+            {
                 std::string failstring = "Database file format is not "
                                          "correct: Invalid delimiter at line " +
                                          std::to_string(line) + ":" +
                                          std::to_string(pos);
 
                 throw std::range_error(failstring);
-            } else {
+            }
+            else
+            {
                 c = file.get();
             }
 
@@ -63,10 +68,13 @@ private:
             fields.reserve(5);
             int field = 0;
 
-            while (c != '\n') {
-                if (c == '\r') {
+            while (c != '\n')
+            {
+                if (c == '\r')
+                {
 #ifdef DEBUG
-                    if (!debug_crlf) {
+                    if (!debug_crlf)
+                    {
                         debug_puts("CRLF detected", "FileParser.deserialize");
                         debug_crlf = true;
                     }
@@ -75,7 +83,8 @@ private:
                     continue;
                 }
 
-                if (field > 4) {
+                if (field > 4)
+                {
                     std::string failstring = "Database file format is not "
                                              "correct: Extra field at line " +
                                              std::to_string(line) + ":" +
@@ -84,11 +93,14 @@ private:
                     throw std::range_error(failstring);
                 }
 
-                if (c == '|') {
+                if (c == '|')
+                {
                     fields.push_back(temp);
                     temp.clear();
                     ++field;
-                } else {
+                }
+                else
+                {
                     temp += c;
                 }
 
@@ -96,7 +108,8 @@ private:
                 ++pos;
             }
 
-            if (field != 5) {
+            if (field != 5)
+            {
                 std::string failstring =
                     "Database file format is not "
                     "correct: Invalid number of fields (5 required, actual " +
@@ -108,7 +121,8 @@ private:
 
             size_t id = cm_parsell(fields[0]);
 
-            if (id == COMMON_INVALID_NUMBERLL) {
+            if (id == COMMON_INVALID_NUMBERLL)
+            {
                 std::string failstring = "Database file format is not "
                                          "correct: ID is not a number, "
                                          "line " +
@@ -143,7 +157,8 @@ private:
     void serialize(const std::vector<Student> &students,
                    std::fstream &file) const
     {
-        for (const Student &student : students) {
+        for (const Student &student : students)
+        {
 #ifdef DEBUG
             debug_puts(student, "FileParser.serealize");
 #endif
@@ -182,11 +197,13 @@ public:
     // Creates file if it didn't exist.
     bool exists_or_create() const
     {
-        if (!this->exists()) {
+        if (!this->exists())
+        {
             std::fstream file;
             file.open(this->filename, std::ios::out);
 
-            if (!file.good()) {
+            if (!file.good())
+            {
                 throw std::ios::failure("Could not create file");
             }
 
@@ -210,7 +227,8 @@ public:
 
     void write_file(const std::vector<Student> &students) const
     {
-        if (!this->exists()) {
+        if (!this->exists())
+        {
             throw std::runtime_error("File does not exist");
         }
 

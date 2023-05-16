@@ -54,7 +54,8 @@ public:
 
     Student &get(const size_t n)
     {
-        if (n >= this->size()) {
+        if (n >= this->size())
+        {
             throw std::range_error("n is too large");
         }
 
@@ -73,20 +74,26 @@ public:
 
     // Return index of element in Model.
     // If element is not found, returns MODEL_NOT_FOUND.
-    size_t search(const size_t id) const
+    size_t search(const size_t &id) const
     {
         size_t L = 0;
         size_t R = this->size();
         size_t m = -1;
 
-        while (L <= R) {
+        while (L <= R)
+        {
             m = std::floor((L + R) / 2);
 
-            if (this->students[m].get_id() < id) {
+            if (this->students[m].get_id() < id)
+            {
                 L = m + 1;
-            } else if (this->students[m].get_id() > id) {
+            }
+            else if (this->students[m].get_id() > id)
+            {
                 R = m - 1;
-            } else {
+            }
+            else
+            {
                 return m;
             }
         }
@@ -94,12 +101,46 @@ public:
         return MODEL_NOT_FOUND;
     }
 
+    std::vector<size_t> search(const std::string &name)
+    {
+        size_t pos = 0;
+        std::vector<size_t> result;
+        for (const Student &s : students)
+        {
+            std::string full_name = s.name + " " + s.surname;
+            cm_pstr_tolower(full_name);
+
+            if (full_name.rfind(name, 0) == 0)
+            {
+                result.push_back(pos);
+            }
+            ++pos;
+        }
+        return result;
+    }
+
+    std::vector<size_t> search_record(const std::string &record)
+    {
+        size_t pos = 0;
+        std::vector<size_t> result;
+        for (const Student &s : students)
+        {
+            if (s.record_book.rfind(record, 0) == 0)
+            {
+                result.push_back(pos);
+            }
+            ++pos;
+        }
+        return result;
+    }
+
     inline void add(Student &s)
     {
 #ifdef DEBUG
         debug_puts(s, "Model.add");
 #endif
-        if (this->search(s.get_id()) != MODEL_NOT_FOUND) {
+        if (this->search(s.get_id()) != MODEL_NOT_FOUND)
+        {
             throw std::logic_error("An entry exists with same ID");
         }
 
@@ -110,7 +151,8 @@ public:
     {
         size_t result = this->search(id);
 
-        if (result != MODEL_NOT_FOUND) {
+        if (result != MODEL_NOT_FOUND)
+        {
             this->erase(result);
             return true;
         }

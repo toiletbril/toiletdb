@@ -34,7 +34,6 @@ enum CLI_COMMAND_KIND
     EXIT,
     EXIT_NO_SAVE,
     QUERY,
-    ID,
     LIST,
     DBSIZE,
     ADD,
@@ -46,32 +45,30 @@ enum CLI_COMMAND_KIND
     REVERT,
 };
 
-// Is this legal ???
-void cli_tolower(std::string *str)
-{
-    for (char &c : *str) {
-        c = std::tolower(c);
-    }
-}
-
 // Prints a prompt which asks to input Y or N.
 static bool cli_y_or_n()
 {
-    while (true) {
+    while (true)
+    {
         std::cout << "\tY or N >> ";
         std::fflush(stdout);
 
         char answer = std::tolower(std::fgetc(stdin));
 
         // Discard the rest of the line.
-        while (fgetc(stdin) != '\n') {
-        }
+        while (fgetc(stdin) != '\n')
+        {}
 
-        if (answer == 'y') {
+        if (answer == 'y')
+        {
             return true;
-        } else if (answer == 'n') {
+        }
+        else if (answer == 'n')
+        {
             return false;
-        } else {
+        }
+        else
+        {
             std::cout << "ERROR: Invalid character." << std::endl;
         }
     }
@@ -79,7 +76,7 @@ static bool cli_y_or_n()
 }
 
 // Splits strings by spaces, treats "quoted sentences" as a single argument.
-static std::vector<std::string> cli_splitargs(const std::string &s)
+static std::vector<std::string> cli_split_args(const std::string &s)
 {
     size_t len = s.length();
 
@@ -88,22 +85,31 @@ static std::vector<std::string> cli_splitargs(const std::string &s)
 
     bool in_quotes = false;
 
-    for (size_t i = 0; i < len; ++i) {
+    for (size_t i = 0; i < len; ++i)
+    {
         char c = s.at(i);
 
-        if (in_quotes) {
-            if (c == '"') {
+        if (in_quotes)
+        {
+            if (c == '"')
+            {
                 in_quotes = false;
                 continue;
             }
             temp += c;
-        } else if (c == '"') {
+        }
+        else if (c == '"')
+        {
             in_quotes = true;
-        } else if (c == ' ') {
+        }
+        else if (c == ' ')
+        {
             if (!temp.empty())
                 result.push_back(temp);
             temp.clear();
-        } else {
+        }
+        else
+        {
             temp += c;
         }
     }
@@ -121,9 +127,12 @@ static std::vector<std::string> cli_splitargs(const std::string &s)
 static char cli_forbiddenchar(std::vector<std::string> &args)
 {
     std::string forbidden_chars = "|[]";
-    for (const std::string &a : args) {
-        for (char const c : a) {
-            if (forbidden_chars.find(c) != std::string::npos) {
+    for (const std::string &a : args)
+    {
+        for (char const c : a)
+        {
+            if (forbidden_chars.find(c) != std::string::npos)
+            {
                 return c;
             }
         }
@@ -157,7 +166,8 @@ static void cli_put_student(const Student &student)
     {
         should_wrap = true;
 
-        if (line > 1) {
+        if (line > 1)
+        {
             wrap_buf << "\n";
         }
 
@@ -188,13 +198,16 @@ static void cli_put_student(const Student &student)
         ++line;
     }
 
-    if (!should_wrap) {
+    if (!should_wrap)
+    {
         std::cout << std::left << std::setw(CLI_IDW) << student.get_id()
                   << std::setw(CLI_NAMEW) << student.name
                   << std::setw(CLI_SURNAMEW) << student.surname
                   << std::setw(CLI_GROUPW) << student.group
                   << std::setw(CLI_RECORDW) << student.record_book << "\n";
-    } else {
+    }
+    else
+    {
         std::cout << std::left << std::setw(CLI_IDW) << student.get_id()
                   << std::setw(CLI_NAMEW)
                   << student.name.substr(0, CLI_SUB_NAMEW)
@@ -212,13 +225,14 @@ static void cli_put_student_vector(const std::vector<Student> &students)
 {
     cli_put_table_header();
 
-    for (const Student &student : students) {
+    for (const Student &student : students)
+    {
         cli_put_student(student);
     }
 }
 
 // Translates strings to CLI_COMMAND_KIND.
-static CLI_COMMAND_KIND cli_getcommand(std::string s)
+static CLI_COMMAND_KIND cli_getcommand(std::string &s)
 {
     if (s == "help" || s == "?")
         return HELP;
@@ -228,8 +242,6 @@ static CLI_COMMAND_KIND cli_getcommand(std::string s)
         return EXIT_NO_SAVE;
     if (s == "query" || s == "search")
         return QUERY;
-    if (s == "id")
-        return ID;
     if (s == "list" || s == "ls")
         return LIST;
     if (s == "size")
@@ -257,19 +269,21 @@ static void cli_exec(Model &model, std::vector<std::string> &args)
 {
     CLI_COMMAND_KIND c = cli_getcommand(args[0]);
 
-    switch (c) {
+    switch (c)
+    {
         case UNKNOWN: {
             std::cout << "Unknown command '" << args[0]
                       << "'.\nTry 'help' to see available commands."
                       << std::endl;
-        } break;
+        }
+        break;
 
         case HELP: {
             std::cout
                 << "Available commands:\n"
                    "\thelp  \t\tSee this message.\n"
-                   "\texit  \t\tQuit and save. Add ! to the end to skip "
-                   "saving.\n"
+                   "\texit  \t\tSave and quit."
+                   " Append ! to the end to skip saving.\n"
                    "\tsearch\t\tSearch the database.\n"
                    "\tid    \t\tSearch by ID.\n"
                    "\tlist  \t\tList all students.\n"
@@ -282,56 +296,144 @@ static void cli_exec(Model &model, std::vector<std::string> &args)
                    "\tcommit\t\tSave changes to the file.\n"
                    "\trevert\t\tRevert uncommited changes."
                 << std::endl;
-        } break;
+        }
+        break;
 
         case EXIT: {
             std::cout << "Saving..." << std::endl;
             model.save_all();
             std::cout << "Exiting...\n" << std::endl;
             std::exit(0);
-        } break;
+        }
+        break;
 
         case EXIT_NO_SAVE: {
             std::cout << "Exiting...\n" << std::endl;
             std::exit(0);
-        } break;
+        }
+        break;
 
         case LIST: {
             size_t len = model.size();
 
-            if (len > 1000) {
+            if (len > 1000)
+            {
                 std::cout << "Database has over 1 000 entries (" << len
                           << ").\n"
                              "This can take a long time.\n"
                              "Do you really want to list them all?\n";
 
-                if (!cli_y_or_n()) {
+                if (!cli_y_or_n())
+                {
                     return;
                 }
             }
 
             const std::vector<Student> &students = model.get_all_students();
 
-            if (students.empty()) {
+            if (students.empty())
+            {
                 std::cout << "There are no students in database." << std::endl;
                 return;
             }
 
             cli_put_student_vector(students);
             std::fflush(stdout);
-        } break;
+        }
+        break;
+
+        case QUERY: {
+            if (args.size() < 3)
+            {
+                std::cout << "ERROR: Not enough arguments.\n"
+                             "Usage: search <field> <value>\n"
+                             "Available fields: 'id', 'record', 'name'\n";
+
+                return;
+            }
+
+            std::cout << "Searching...\n\n";
+
+            std::string query = args[2];
+            size_t len        = args.size();
+
+            // Concat args to a single string and use it as a query.
+            for (size_t i = 3; i < len; ++i)
+            {
+                query += ' ' + args[i];
+            }
+
+            cm_pstr_tolower(query);
+
+#ifdef DEBUG
+            debug_puts(query, "search");
+#endif
+            std::vector<size_t> result;
+
+            if (cm_str_tolower(args[1]) == "id")
+            {
+                size_t id = cm_parsell(query);
+
+                if (id == COMMON_INVALID_NUMBERLL)
+                {
+                    std::cout << "ERROR: ID is not a number.\n";
+                    return;
+                }
+
+                size_t pos = model.search(id);
+
+                if (pos == MODEL_NOT_FOUND)
+                {
+                    std::cout << "No students matched your query." << std::endl;
+                    return;
+                }
+
+                result.push_back(pos);
+            }
+            else if (cm_str_tolower(args[1]) == "record")
+            {
+                result = model.search_record(query);
+            }
+            else if (cm_str_tolower(args[1]) == "name")
+            {
+                result = model.search(query.c_str());
+            }
+            else
+            {
+                std::cout << "Unknown field '" << args[1]
+                          << "'.\n"
+                             "Available fields: 'id', 'record', 'name'\n";
+                return;
+            }
+
+            if (result.size() == 0)
+            {
+                std::cout << "No students matched your query." << std::endl;
+                return;
+            }
+
+            for (size_t &id : result)
+            {
+                cli_put_student(model.get(id));
+            }
+
+            std::fflush(stdout);
+        }
+        break;
 
         case DBSIZE: {
             size_t len = model.size();
 
             std::cout << "There are " << len << " students in database."
                       << std::endl;
-        } break;
+        }
+        break;
 
         case ADD: {
             char errc = cli_forbiddenchar(args);
 
-            if (errc) {
+            if (errc)
+            {
                 std::cout << "ERROR: Forbidden character '" << errc << "'."
                           << std::endl;
                 return;
@@ -339,16 +441,15 @@ static void cli_exec(Model &model, std::vector<std::string> &args)
 
             size_t len = args.size();
 
-            if (len != 5) {
+            if (len != 5)
+            {
                 std::cout
                     << "ERROR: Invalid number of arguments. "
-                       "(5 needed, actual "
-                    << len
-                    << ")\n"
-                       "Usage: add <name> <surname> <group> <record book>\n"
+                    << "(5 needed, actual " << len << ")\n"
+                    << "Usage: add <name> <surname> <group> <record book>\n"
                        "You can put quotes around fields.\n"
-                       "EXAMPLE: \"Vasiliy Dos\" \"Super Test\" \"Very "
-                       "Humans\" 69420"
+                       "EXAMPLE: Vasiliy \"Ivanov Petrov\" \"Very "
+                       "Cool\" 69420"
                     << std::endl;
                 return;
             }
@@ -359,10 +460,12 @@ static void cli_exec(Model &model, std::vector<std::string> &args)
             model.add(student);
 
             std::cout << "Student added successfully.\n";
-        } break;
+        }
+        break;
 
         case REMOVE: {
-            if (args.size() != 2) {
+            if (args.size() != 2)
+            {
                 std::cout << "ERROR: Invalid number of arguments.\n"
                              "Usage: remove <student ID>\nYou can get "
                              "student ID by using 'list' or 'query'."
@@ -372,8 +475,9 @@ static void cli_exec(Model &model, std::vector<std::string> &args)
 
             size_t n = cm_parsell(args[1]);
 
-            if (n == COMMON_INVALID_NUMBERLL) {
-                std::cout << "ERROR: Invalid number." << std::endl;
+            if (n == COMMON_INVALID_NUMBERLL)
+            {
+                std::cout << "ERROR: Invalid ID." << std::endl;
                 return;
             }
 
@@ -385,15 +489,77 @@ static void cli_exec(Model &model, std::vector<std::string> &args)
             else
                 std::cout << "Could not find student with such ID."
                           << std::endl;
-        } break;
+        }
+        break;
+
+        case EDIT: {
+            if (args.size() < 3)
+            {
+                std::cout
+                    << "ERROR: Not enough arguments.\n"
+                       "Usage: edit <ID> <field> <new value>\n"
+                       "Available fields: 'name', 'surname', 'group', "
+                       "'record'.\n"
+                       "You can get student ID by using 'list' or 'query'.\n";
+
+                return;
+            }
+
+            size_t n = cm_parsell(args[1]);
+
+            if (n == COMMON_INVALID_NUMBERLL)
+            {
+                std::cout << "ERROR: ID is not a number." << std::endl;
+                return;
+            }
+
+            size_t pos = model.search(n);
+
+            if (pos == MODEL_NOT_FOUND)
+            {
+                std::cout << "ERROR: Invalid ID." << std::endl;
+                return;
+            }
+
+            Student &student = model.get(pos);
+
+            std::string value;
+            size_t len = args.size();
+
+            // Concat args to a single string and use it as a query.
+            for (size_t i = 3; i < len; ++i)
+            {
+                value += ' ' + args[i];
+            }
+
+            if (cm_str_tolower(args[2]) == "name")
+            {
+                student.name = value;
+            }
+            if (cm_str_tolower(args[2]) == "surname")
+            {
+                student.surname = value;
+            }
+            if (cm_str_tolower(args[2]) == "group")
+            {
+                student.group = value;
+            }
+            if (cm_str_tolower(args[2]) == "record")
+            {
+                student.record_book = value;
+            }
+
+            cli_put_student(student);
+
+            std::fflush(stdout);
+        }
+
+        break;
 
         case GRADE: {
             throw std::logic_error("TODO");
-        } break;
-
-        case EDIT: {
-            throw std::logic_error("TODO");
-        } break;
+        }
+        break;
 
         case CLEAR: {
             std::cout << "Do you really want to do that?\n";
@@ -402,92 +568,20 @@ static void cli_exec(Model &model, std::vector<std::string> &args)
 
             model.clear();
             std::cout << "Database has been erased." << std::endl;
-        } break;
+        }
+        break;
 
         case COMMIT: {
             std::cout << "Saving..." << std::endl;
             model.save_all();
-        } break;
+        }
+        break;
 
         case REVERT: {
             std::cout << "Reverting changes..." << std::endl;
             model.reread_file();
-        } break;
-
-        case QUERY: {
-            // Search by name prefix
-            if (args.size() < 2) {
-                std::cout << "ERROR: Invalid number of arguments.\n"
-                             "Usage: query <student name>\n";
-
-                return;
-            }
-
-            std::cout << "Searching...\n\n";
-
-            std::string query = args[1];
-            size_t len        = args.size();
-
-            // Concat args to a single string and use it as a query.
-            for (size_t i = 2; i < len; ++i) {
-                query += ' ' + args[i];
-            }
-
-            cli_tolower(&query);
-
-#ifdef DEBUG
-            debug_puts(query, "query");
-#endif
-            const std::vector<Student> &students = model.get_all_students();
-
-            // TODO:
-            // Using a vector for printing is a waste of memory.
-            // But this will not be used by anyone, anyways.
-            std::vector<Student> result;
-
-            for (const Student &s : students) {
-                std::string full_name = s.name + " " + s.surname;
-                cli_tolower(&full_name);
-
-                if (full_name.rfind(query, 0) == 0) {
-                    result.push_back(s);
-                }
-            }
-
-            if (result.size() == 0) {
-                std::cout << "No students matched your query.\n";
-                return;
-            }
-
-            cli_put_student_vector(result);
-        } break;
-
-        case ID: {
-            if (args.size() != 2) {
-                std::cout << "ERROR: Invalid number of arguments.\n"
-                             "Usage: id <student ID>\nYou can get "
-                             "student ID by using 'list' or 'query'.\n";
-                return;
-            }
-
-            size_t n = cm_parsell(args[1]);
-
-            if (n == COMMON_INVALID_NUMBERLL) {
-                std::cout << "ERROR: Invalid number.\n";
-                return;
-            }
-
-            size_t result = model.search(n);
-
-            if (result == MODEL_NOT_FOUND) {
-                std::cout << "No students matched your query.\n";
-                return;
-            }
-
-            cli_put_table_header();
-            cli_put_student(model.get(result));
-            std::fflush(stdout);
-        } break;
+        }
+        break;
     }
 }
 
@@ -495,7 +589,8 @@ void cli_loop(const char *filename)
 {
     int err = std::setvbuf(stdout, NULL, _IOFBF, 2048);
 
-    if (err) {
+    if (err)
+    {
         std::cout << "Could not enable bufferin for output.\n Please buy more "
                      "memory :c"
                   << std::endl;
@@ -504,17 +599,20 @@ void cli_loop(const char *filename)
 
     Model *model;
 
-    try {
+    try
+    {
         std::cout << "Opening '" << filename << "'..." << std::endl;
         model = new Model(filename);
     }
-    catch (std::ios::failure &e) {
+    catch (std::ios::failure &e)
+    {
         // iostream error's .what() method returns weird string at the end
         std::cout << filename << ": Could not open file: " << strerror(errno)
                   << std::endl;
         std::exit(1);
     }
-    catch (std::range_error &e) {
+    catch (std::range_error &e)
+    {
         std::cout << filename << ": Parsing error: " << e.what() << std::endl;
         exit(1);
     }
@@ -526,25 +624,30 @@ void cli_loop(const char *filename)
                  "Try 'help' to see available commands."
               << std::endl;
 
-    while (true) {
+    while (true)
+    {
         std::cout << "\n" << filename << "# ";
 
         static std::string line;
         std::getline(std::cin, line);
 
-        std::vector<std::string> args = cli_splitargs(line);
+        std::vector<std::string> args = cli_split_args(line);
 
-        try {
+        try
+        {
             cli_exec(*model, args);
         }
-        catch (std::logic_error &e) {
+        catch (std::logic_error &e)
+        {
             std::cout << "Logic error: " << e.what() << std::endl;
         }
-        catch (std::ios::failure &e) {
+        catch (std::ios::failure &e)
+        {
             std::cout << "IO error: " << strerror(errno) << std::endl;
             std::exit(1);
         }
-        catch (std::runtime_error &e) {
+        catch (std::runtime_error &e)
+        {
             std::cout << "Runtime error: " << e.what() << std::endl;
             std::exit(1);
         }

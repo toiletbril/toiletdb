@@ -5,7 +5,7 @@
 
 #include <ostream>
 
-// #define DEBUG
+#define DEBUG
 
 #define VERSION "0.5"
 #define NAME "toiletdb"
@@ -15,11 +15,8 @@
 
 /*
     TODO:
-        - Editing
-        - Use record book as ID
         - Checks for free IDs when adding, so IDs are not skipped
-        - Grading system???
-        - Advanced search?
+        - Grading system (idk how to implement)
 */
 
 int main(int argc, char **argv)
@@ -30,7 +27,8 @@ int main(int argc, char **argv)
     SetConsoleOutputCP(1251);
 #endif
 
-    if (argc < 2) {
+    if (argc < 2)
+    {
         std::cout << "Usage: " << NAME
                   << " <database file>\n"
                      "If there is no such file, it will be created.\n"
