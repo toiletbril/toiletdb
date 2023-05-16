@@ -75,7 +75,6 @@ static bool cli_y_or_n()
             std::cout << "ERROR: Invalid character." << std::endl;
         }
     }
-
     return false;
 }
 
@@ -166,7 +165,8 @@ static void cli_put_student(const Student &student)
 
         wrap_buf << std::setw(CLI_NAMEW)
                  << (namelen > CLI_SUB_NAMEW
-                         ? student.name.substr(CLI_SUB_NAMEW * line, CLI_SUB_NAMEW)
+                         ? student.name.substr(CLI_SUB_NAMEW * line,
+                                               CLI_SUB_NAMEW)
                          : " ");
 
         wrap_buf << std::setw(CLI_SURNAMEW)
@@ -177,7 +177,8 @@ static void cli_put_student(const Student &student)
 
         wrap_buf << std::setw(CLI_GROUPW)
                  << (grouplen > CLI_SUB_GROUPW
-                         ? student.group.substr(CLI_SUB_GROUPW * line, CLI_SUB_GROUPW)
+                         ? student.group.substr(CLI_SUB_GROUPW * line,
+                                                CLI_SUB_GROUPW)
                          : " ");
 
         namelen    = namelen - CLI_SUB_NAMEW;
@@ -195,7 +196,8 @@ static void cli_put_student(const Student &student)
                   << std::setw(CLI_RECORDW) << student.record_book << "\n";
     } else {
         std::cout << std::left << std::setw(CLI_IDW) << student.get_id()
-                  << std::setw(CLI_NAMEW) << student.name.substr(0, CLI_SUB_NAMEW)
+                  << std::setw(CLI_NAMEW)
+                  << student.name.substr(0, CLI_SUB_NAMEW)
                   << std::setw(CLI_SURNAMEW)
                   << student.surname.substr(0, CLI_SUB_SURNAMEW)
                   << std::setw(CLI_GROUPW)

@@ -5,7 +5,7 @@
 
 #include <ostream>
 
-#define DEBUG
+// #define DEBUG
 
 #define VERSION "0.4"
 #define NAME "toiletdb"
@@ -16,6 +16,7 @@
 /*
     TODO:
         - Editing
+        - Use record book as ID
         - Checks for free IDs when adding, so IDs are not skipped
         - Grading system???
         - Advanced search?
