@@ -10,7 +10,7 @@ Implemented as a table of students. Database files look like this:
 ## Why
 
 I got this idea from my friends' course project.
-The actual task was too easy, so I decided to implement a whole database instead :3c
+The actual task was too easy, so I decided to implement a whole database instead :3c.
 
 ## Usage
 

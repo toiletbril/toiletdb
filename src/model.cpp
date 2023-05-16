@@ -6,7 +6,7 @@
 #include <vector>
 
 #ifdef DEBUG
-#include "debug.cpp"
+    #include "debug.cpp"
 #endif
 
 #include "parser.cpp"
@@ -20,7 +20,10 @@ private:
     std::vector<Student> students;
     FileParser *parser;
 
-    void erase(const size_t n) { this->students.erase(students.begin() + n); }
+    void erase(const size_t n)
+    {
+        this->students.erase(students.begin() + n);
+    }
 
 public:
     // This will create a file 'filename' and use it to store commits.
@@ -39,9 +42,15 @@ public:
                   });
     }
 
-    ~Model() { delete this->parser; }
+    ~Model()
+    {
+        delete this->parser;
+    }
 
-    std::vector<Student> &get_all_students() { return this->students; }
+    const std::vector<Student> &get_all_students() const
+    {
+        return this->students;
+    }
 
     Student &get(const size_t n)
     {
@@ -52,9 +61,15 @@ public:
         return this->students[n];
     }
 
-    void reread_file() { this->students = this->parser->read_file(); }
+    void reread_file()
+    {
+        this->students = this->parser->read_file();
+    }
 
-    void save_all() const { this->parser->write_file(this->students); }
+    void save_all() const
+    {
+        this->parser->write_file(this->students);
+    }
 
     // Return index of element in Model.
     // If element is not found, returns MODEL_NOT_FOUND.
@@ -103,9 +118,18 @@ public:
         return false;
     }
 
-    inline void clear() { this->students.clear(); }
+    inline void clear()
+    {
+        this->students.clear();
+    }
 
-    size_t size() const { return this->students.size(); }
+    size_t size() const
+    {
+        return this->students.size();
+    }
 
-    size_t get_next_id() const { return this->size(); }
+    size_t get_next_id() const
+    {
+        return this->size();
+    }
 };

@@ -5,20 +5,23 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <vector>
 
 #ifdef DEBUG
-#include "debug.cpp"
+    #include "debug.cpp"
 #endif
 
 #include "common.cpp"
 #include "model.cpp"
 
-#define CLI_IDW 9
+#define CLI_IDW 12
 #define CLI_NAMEW 24
-#define CLI_SURNAMEW 28
+#define CLI_SURNAMEW 24
 #define CLI_GROUPW 16
 #define CLI_RECORDW 16
+
+#define CLI_WRAPSPACE 4
 
 // TODO: Table wrapping
 
@@ -75,9 +78,9 @@ static bool cli_y_or_n()
 }
 
 // Splits strings by spaces, treats "quoted sentences" as a single argument.
-static std::vector<std::string> cli_splitargs(const std::string *s)
+static std::vector<std::string> cli_splitargs(const std::string &s)
 {
-    size_t len = s->length();
+    size_t len = s.length();
 
     std::vector<std::string> result;
     std::string temp;
@@ -85,7 +88,7 @@ static std::vector<std::string> cli_splitargs(const std::string *s)
     bool in_quotes = false;
 
     for (size_t i = 0; i < len; ++i) {
-        char c = s->at(i);
+        char c = s.at(i);
 
         if (in_quotes) {
             if (c == '"') {
@@ -136,20 +139,56 @@ static void cli_put_table_header()
               << "\n";
 }
 
-static void cli_put_student(Student &student)
+static void cli_put_student(const Student &student)
 {
-    std::cout << std::left << std::setw(CLI_IDW) << student.get_id()
-              << std::setw(CLI_NAMEW) << student.name << std::setw(CLI_SURNAMEW)
-              << student.surname << std::setw(CLI_GROUPW) << student.group
-              << std::setw(CLI_RECORDW) << student.record_book << "\n";
+    std::stringstream second_line;
+
+    bool should_wrap = false;
+
+    size_t sub_namew    = CLI_NAMEW - CLI_WRAPSPACE;
+    size_t sub_surnamew = CLI_SURNAMEW - CLI_WRAPSPACE;
+
+    if (student.name.length() > sub_namew ||
+        student.surname.length() > sub_surnamew)
+    {
+        should_wrap = true;
+
+        second_line << std::left << std::setw(CLI_IDW) << ' ';
+
+        second_line << std::setw(CLI_NAMEW)
+                    << (student.name.length() > sub_namew
+                            ? student.name.substr(sub_namew)
+                            : " ");
+
+        second_line << std::setw(CLI_SURNAMEW)
+                    << (student.surname.length() > sub_surnamew
+                            ? student.surname.substr(sub_surnamew)
+                            : " ");
+    }
+
+    if (!should_wrap) {
+        std::cout << std::left << std::setw(CLI_IDW) << student.get_id()
+                  << std::setw(CLI_NAMEW) << student.name
+                  << std::setw(CLI_SURNAMEW) << student.surname
+                  << std::setw(CLI_GROUPW) << student.group
+                  << std::setw(CLI_RECORDW) << student.record_book << "\n";
+    } else {
+        std::cout << std::left << std::setw(CLI_IDW) << student.get_id()
+                  << std::setw(CLI_NAMEW) << student.name.substr(0, sub_namew)
+                  << std::setw(CLI_SURNAMEW)
+                  << student.surname.substr(0, sub_surnamew)
+                  << std::setw(CLI_GROUPW) << student.group
+                  << std::setw(CLI_RECORDW) << student.record_book << "\n";
+        std::cout << second_line.str() << "\n";
+    }
 }
 
 // Prints entire vector of students as a table.
-static void cli_put_student_vector(std::vector<Student> &students)
+static void cli_put_student_vector(const std::vector<Student> &students)
 {
     cli_put_table_header();
 
-    for (Student &student : students) {
+    for (const Student &student : students) {
         cli_put_student(student);
     }
 }
@@ -190,7 +229,7 @@ static CLI_COMMAND_KIND cli_getcommand(std::string s)
 }
 
 // Executes commands based on vector of arguments.
-static void cli_exec(Model *model, std::vector<std::string> &args)
+static void cli_exec(Model &model, std::vector<std::string> &args)
 {
     CLI_COMMAND_KIND c = cli_getcommand(args[0]);
 
@@ -202,27 +241,28 @@ static void cli_exec(Model *model, std::vector<std::string> &args)
         } break;
 
         case HELP: {
-            std::cout << "Available commands:\n"
-                         "\thelp  \t\tSee this message.\n"
-                         "\texit  \t\tQuit and save. Add ! to the end to skip "
-                         "saving.\n"
-                         "\tsearch\t\tSearch the database.\n"
-                         "\tid    \t\tSearch by ID.\n"
-                         "\tlist  \t\tList all students.\n"
-                         "\tsize  \t\tSee total amount of students in database.\n"
-                         "\tadd   \t\tAdd a student to database.\n"
-                         "\tremove\t\tRemove a student from database.\n"
-                         "\tedit  \t\tEdit student's details.\n"
-                         "\tgrades\t\tSee student's grades.\n"
-                         "\tclear \t\tClear the database.\n"
-                         "\tcommit\t\tSave changes to the file.\n"
-                         "\trevert\t\tRevert uncommited changes."
-                      << std::endl;
+            std::cout
+                << "Available commands:\n"
+                   "\thelp  \t\tSee this message.\n"
+                   "\texit  \t\tQuit and save. Add ! to the end to skip "
+                   "saving.\n"
+                   "\tsearch\t\tSearch the database.\n"
+                   "\tid    \t\tSearch by ID.\n"
+                   "\tlist  \t\tList all students.\n"
+                   "\tsize  \t\tSee total amount of students in database.\n"
+                   "\tadd   \t\tAdd a student to database.\n"
+                   "\tremove\t\tRemove a student from database.\n"
+                   "\tedit  \t\tEdit student's details.\n"
+                   "\tgrades\t\tSee student's grades.\n"
+                   "\tclear \t\tClear the database.\n"
+                   "\tcommit\t\tSave changes to the file.\n"
+                   "\trevert\t\tRevert uncommited changes."
+                << std::endl;
         } break;
 
         case EXIT: {
             std::cout << "Saving..." << std::endl;
-            model->save_all();
+            model.save_all();
             std::cout << "Exiting...\n" << std::endl;
             std::exit(0);
         } break;
@@ -233,10 +273,10 @@ static void cli_exec(Model *model, std::vector<std::string> &args)
         } break;
 
         case LIST: {
-            size_t len = model->size();
+            size_t len = model.size();
 
             if (len > 1000) {
-                std::cout << "Database has over 1000 entries (" << len
+                std::cout << "Database has over 1 000 entries (" << len
                           << ").\n"
                              "This can take a long time.\n"
                              "Do you really want to list them all?\n";
@@ -246,7 +286,7 @@ static void cli_exec(Model *model, std::vector<std::string> &args)
                 }
             }
 
-            std::vector<Student> &students = model->get_all_students();
+            const std::vector<Student> &students = model.get_all_students();
 
             if (students.empty()) {
                 std::cout << "There are no students in database." << std::endl;
@@ -258,7 +298,7 @@ static void cli_exec(Model *model, std::vector<std::string> &args)
         } break;
 
         case DBSIZE: {
-            size_t len = model->size();
+            size_t len = model.size();
 
             std::cout << "There are " << len << " students in database."
                       << std::endl;
@@ -289,10 +329,10 @@ static void cli_exec(Model *model, std::vector<std::string> &args)
                 return;
             }
 
-            Student student(model->get_next_id(), args[1].c_str(),
+            Student student(model.get_next_id(), args[1].c_str(),
                             args[2].c_str(), args[3].c_str(), args[4].c_str());
 
-            model->add(student);
+            model.add(student);
 
             std::cout << "Student added successfully.\n";
         } break;
@@ -314,7 +354,7 @@ static void cli_exec(Model *model, std::vector<std::string> &args)
             }
 
             // TODO: Replace this with remove(id)
-            bool success = model->remove_id(n);
+            bool success = model.remove_id(n);
 
             if (success)
                 std::cout << "Student removed successfully." << std::endl;
@@ -336,18 +376,18 @@ static void cli_exec(Model *model, std::vector<std::string> &args)
             if (!cli_y_or_n())
                 return;
 
-            model->clear();
+            model.clear();
             std::cout << "Database has been erased." << std::endl;
         } break;
 
         case COMMIT: {
             std::cout << "Saving..." << std::endl;
-            model->save_all();
+            model.save_all();
         } break;
 
         case REVERT: {
             std::cout << "Reverting changes..." << std::endl;
-            model->reread_file();
+            model.reread_file();
         } break;
 
         case QUERY: {
@@ -362,7 +402,7 @@ static void cli_exec(Model *model, std::vector<std::string> &args)
             std::cout << "Searching...\n\n";
 
             std::string query = args[1];
-            size_t len = args.size();
+            size_t len        = args.size();
 
             // Concat args to a single string and use it as a query.
             for (size_t i = 2; i < len; ++i) {
@@ -374,14 +414,14 @@ static void cli_exec(Model *model, std::vector<std::string> &args)
 #ifdef DEBUG
             debug_puts(query, "query");
 #endif
-            std::vector<Student> &students = model->get_all_students();
+            const std::vector<Student> &students = model.get_all_students();
 
             // TODO:
             // Using a vector for printing is a waste of memory.
             // But this will not be used by anyone, anyways.
             std::vector<Student> result;
 
-            for (Student &s : students) {
+            for (const Student &s : students) {
                 std::string full_name = s.name + " " + s.surname;
                 cli_tolower(&full_name);
 
@@ -413,7 +453,7 @@ static void cli_exec(Model *model, std::vector<std::string> &args)
                 return;
             }
 
-            size_t result = model->search(n);
+            size_t result = model.search(n);
 
             if (result == MODEL_NOT_FOUND) {
                 std::cout << "No students matched your query.\n";
@@ -421,7 +461,7 @@ static void cli_exec(Model *model, std::vector<std::string> &args)
             }
 
             cli_put_table_header();
-            cli_put_student(model->get(result));
+            cli_put_student(model.get(result));
             std::fflush(stdout);
         } break;
     }
@@ -443,12 +483,14 @@ void cli_loop(const char *filename)
     try {
         std::cout << "Opening '" << filename << "'..." << std::endl;
         model = new Model(filename);
-    } catch (std::ios::failure &e) {
+    }
+    catch (std::ios::failure &e) {
         // iostream error's .what() method returns weird string at the end
         std::cout << filename << ": Could not open file: " << strerror(errno)
                   << std::endl;
         std::exit(1);
-    } catch (std::range_error &e) {
+    }
+    catch (std::range_error &e) {
         std::cout << filename << ": Parsing error: " << e.what() << std::endl;
         exit(1);
     }
@@ -463,22 +505,22 @@ void cli_loop(const char *filename)
     while (true) {
         std::cout << "\n" << filename << "# ";
 
-        // NOTE
-        static char line[128];
-        std::cin.getline(line, 128);
+        static std::string line;
+        std::getline(std::cin, line);
 
-        std::string line_string = line;
-
-        std::vector<std::string> args = cli_splitargs(&line_string);
+        std::vector<std::string> args = cli_splitargs(line);
 
         try {
-            cli_exec(model, args);
-        } catch (std::logic_error &e) {
+            cli_exec(*model, args);
+        }
+        catch (std::logic_error &e) {
             std::cout << "Logic error: " << e.what() << std::endl;
-        } catch (std::ios::failure &e) {
+        }
+        catch (std::ios::failure &e) {
             std::cout << "IO error: " << strerror(errno) << std::endl;
             std::exit(1);
-        } catch (std::runtime_error &e) {
+        }
+        catch (std::runtime_error &e) {
             std::cout << "Runtime error: " << e.what() << std::endl;
             std::exit(1);
         }

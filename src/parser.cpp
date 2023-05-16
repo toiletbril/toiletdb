@@ -6,13 +6,11 @@
 #include <vector>
 
 #ifdef DEBUG
-#include "debug.cpp"
+    #include "debug.cpp"
 #endif
 
 #include "common.cpp"
 #include "student.cpp"
-
-// TODO: Parser incorrectly displays position in parsing errors
 
 class FileParser
 {
@@ -43,7 +41,7 @@ private:
         std::string temp;
 
         size_t line = 1;
-        size_t pos = 1;
+        size_t pos  = 1;
 #ifdef DEBUG
         bool debug_crlf = false;
 #endif
@@ -77,19 +75,17 @@ private:
                     continue;
                 }
 
+                if (field > 4) {
+                    std::string failstring = "Database file format is not "
+                                             "correct: Extra field at line " +
+                                             std::to_string(line) + ":" +
+                                             std::to_string(pos + 1);
+
+                    throw std::range_error(failstring);
+                }
+
                 if (c == '|') {
                     fields.push_back(temp);
-
-                    if (field > 4) {
-                        std::string failstring =
-                            "Database file format is not "
-                            "correct: Extra field at line " +
-                            std::to_string(line) + ":" +
-                            std::to_string(pos + 1);
-
-                        throw std::range_error(failstring);
-                    }
-
                     temp.clear();
                     ++field;
                 } else {
@@ -103,8 +99,8 @@ private:
             if (field != 5) {
                 std::string failstring =
                     "Database file format is not "
-                    "correct: Number of fields is smaller than required (" +
-                    std::to_string(field) + "/5) at line " +
+                    "correct: Invalid number of fields (5 required, actual " +
+                    std::to_string(field) + ") at line " +
                     std::to_string(line) + ":" + std::to_string(pos);
 
                 throw std::range_error(failstring);
@@ -114,7 +110,7 @@ private:
 
             if (id == COMMON_INVALID_NUMBERLL) {
                 std::string failstring = "Database file format is not "
-                                         "correct: Invalid ID, "
+                                         "correct: ID is not a number, "
                                          "line " +
                                          std::to_string(line) + ":" +
                                          std::to_string(pos);
@@ -144,7 +140,8 @@ private:
     }
 
     // Save vector of students from memory into file.
-    void serialize(const std::vector<Student> &students, std::fstream &file) const
+    void serialize(const std::vector<Student> &students,
+                   std::fstream &file) const
     {
         for (const Student &student : students) {
 #ifdef DEBUG
@@ -162,7 +159,10 @@ private:
 public:
     FileParser(const char *const &filename) : filename(filename) {}
 
-    ~FileParser() { delete this->filename; }
+    ~FileParser()
+    {
+        delete this->filename;
+    }
 
     // Return true if file exists, false if it doesn't.
     bool exists() const

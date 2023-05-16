@@ -18,10 +18,10 @@ groups = [
 ]
 
 def _generate_name() -> str:
-    return choice(name_one)
+    return choice(name_one) + choice(name_two) + choice(name_two) + choice(name_two) + choice(name_two) + choice(name_two) + choice(name_two)
 
 def _generate_surname() -> str:
-    return choice(name_one) + choice(name_two)
+    return choice(name_one) + choice(name_two) + choice(name_two) + choice(name_two) + choice(name_two) + choice(name_two) + choice(name_two)
 
 def generate_entry(i: int) -> str:
     return (f"|{i}"

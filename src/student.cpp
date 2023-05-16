@@ -15,16 +15,15 @@ public:
     std::string record_book;
 
     Student(const size_t id, const char *name, const char *surname,
-            const char *group, const char *record_book)
-        : id(id)
-    {
-        this->name = name;
-        this->surname = surname;
-        this->group = group;
-        this->record_book = record_book;
-    }
+            const char *group, const char *record_book) :
+        id(id),
+        name(name), surname(surname), group(group), record_book(record_book)
+    {}
 
-    size_t get_id() const { return this->id; }
+    size_t get_id() const
+    {
+        return this->id;
+    }
 
     friend std::ostream &operator<<(std::ostream &os, const Student &s)
     {

@@ -1,11 +1,11 @@
 #ifdef _WIN32
-#define _CRT_SECURE_NO_WARNINGS
-#include <Windows.h>
+    #define _CRT_SECURE_NO_WARNINGS
+    #include <Windows.h>
 #endif
 
 #include <ostream>
 
-// #define DEBUG
+#define DEBUG
 
 #define VERSION "0.4"
 #define NAME "toiletdb"
@@ -33,8 +33,8 @@ int main(int argc, char **argv)
         std::cout << "Usage: " << NAME
                   << " <database file>\n"
                      "If there is no such file, it will be created.\n"
-                  << "(c) toiletbril " << GITHUB << std::endl;
-        std::exit(1);
+                  << "v" VERSION << " (c) toiletbril " << GITHUB << std::endl;
+        std::exit(0);
     }
 
 #ifdef DEBUG
