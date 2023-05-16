@@ -283,7 +283,7 @@ static void cli_exec(Model &model, std::vector<std::string> &args)
                 << "Available commands:\n"
                    "\thelp  \t\tSee this message.\n"
                    "\texit  \t\tSave and quit."
-                   " Append ! to the end to skip saving.\n"
+                   " Append '!' to the end to skip saving.\n"
                    "\tsearch\t\tSearch the database.\n"
                    "\tid    \t\tSearch by ID.\n"
                    "\tlist  \t\tList all students.\n"

@@ -5,9 +5,9 @@
 
 #include <ostream>
 
-#define DEBUG
+// #define DEBUG
 
-#define VERSION "0.5"
+#define VERSION "0.6"
 #define NAME "toiletdb"
 #define GITHUB "<https://github.com/toiletbril>"
 

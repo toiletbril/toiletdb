@@ -22,7 +22,7 @@ $ toiletdb <database file>
 test# help
 Available commands:
         help            See this message.
-        exit            Quit and save. Add ! to the end to skip saving.
+        exit            Save and quit. Append '!' to the end to skip saving.
         search          Search the database.
         id              Search by ID.
         list            List all students.
