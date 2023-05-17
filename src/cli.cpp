@@ -248,11 +248,11 @@ static CLI_COMMAND_KIND cli_getcommand(std::string &s)
 {
     if (s == "help" || s == "?")
         return HELP;
-    if (s == "exit" || s == "quit")
+    if (s == "exit" || s == "quit" || s == "q")
         return EXIT;
     if (s == "exit!" || s == "quit!" || s == "q!")
         return EXIT_NO_SAVE;
-    if (s == "query" || s == "search" || s == "s")
+    if (s == "search" || s == "s")
         return QUERY;
     if (s == "list" || s == "ls")
         return LIST;
@@ -293,20 +293,19 @@ static void cli_exec(Model &model, std::vector<std::string> &args)
         case HELP: {
             std::cout
                 << "Available commands:\n"
-                   "\thelp  \t\tSee this message.\n"
-                   "\texit  \t\tSave and quit."
+                   "\thelp  \t?\t\tSee this message.\n"
+                   "\texit  \tq, quit\t\tSave and quit."
                    " Append '!' to the end to skip saving.\n"
-                   "\tsearch\t\tSearch the database.\n"
-                   "\tid    \t\tSearch by ID.\n"
-                   "\tlist  \t\tList all students.\n"
-                   "\tsize  \t\tSee total amount of students in database.\n"
-                   "\tadd   \t\tAdd a student to database.\n"
-                   "\tremove\t\tRemove a student from database.\n"
-                   "\tedit  \t\tEdit student's details.\n"
-                   "\tgrades\t\tSee student's grades.\n"
-                   "\tclear \t\tClear the database.\n"
-                   "\tcommit\t\tSave changes to the file.\n"
-                   "\trevert\t\tRevert uncommited changes."
+                   "\tsearch\ts\t\tSearch the database.\n"
+                   "\tlist  \tls\t\tList all students.\n"
+                   "\tsize  \t\t\tSee total amount of students in database.\n"
+                   "\tadd   \t\t\tAdd a student to database.\n"
+                   "\tremove\trm\t\tRemove a student from database.\n"
+                   "\tedit  \te\t\tEdit student's details.\n"
+                   "\tgrades\tgrade\t\tSee student's grades.\n"
+                   "\tclear \t\t\tClear the database.\n"
+                   "\tcommit\tsave\t\tSave changes to the file.\n"
+                   "\trevert\treverse\t\tRevert uncommited changes."
                 << std::endl;
         }
         break;
@@ -547,19 +546,28 @@ static void cli_exec(Model &model, std::vector<std::string> &args)
             {
                 student.name = value;
             }
-            if (cm_str_tolower(args[2]) == "surname")
+            else if (cm_str_tolower(args[2]) == "surname")
             {
                 student.surname = value;
             }
-            if (cm_str_tolower(args[2]) == "group")
+            else if (cm_str_tolower(args[2]) == "group")
             {
                 student.group = value;
             }
-            if (cm_str_tolower(args[2]) == "record")
+            else if (cm_str_tolower(args[2]) == "record")
             {
                 student.record_book = value;
             }
+            else
+            {
+                std::cout << "ERROR: Unknown field. "
+                             "Available fields: 'name', 'surname', 'group', "
+                             "'record'."
+                          << std::endl;
+                return;
+            }
 
+            fputc('\n', stdout);
             cli_put_student(student);
 
             std::fflush(stdout);
@@ -598,7 +606,7 @@ static void cli_exec(Model &model, std::vector<std::string> &args)
 
 void cli_loop(const char *filepath)
 {
-    int err = std::setvbuf(stdout, NULL, _IOFBF, 2048);
+    int err = std::setvbuf(stdout, NULL, _IOLBF, 1024);
 
     if (err)
     {
