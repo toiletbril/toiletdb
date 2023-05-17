@@ -163,7 +163,7 @@ static void cli_put_table_header()
 
 static void cli_put_student(const Student &student)
 {
-    static std::stringstream wrap_buf;
+    std::stringstream wrap_buf;
 
     bool should_wrap = false;
 
@@ -229,7 +229,6 @@ static void cli_put_student(const Student &student)
                   << student.group.substr(0, CLI_SUB_GROUPW)
                   << std::setw(CLI_RECORDW) << student.record_book << "\n";
         std::cout << wrap_buf.str() << "\n";
-        wrap_buf.clear();
     }
 }
 
