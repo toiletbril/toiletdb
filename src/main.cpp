@@ -15,7 +15,8 @@
 
 /*
     TODO:
-        - Checks for free IDs when adding, so IDs are not skipped
+        - ID uniqueness checking.
+        - Remove ID columns and use record book numbers instead.
         - Grading system (idk how to implement)
 */
 
