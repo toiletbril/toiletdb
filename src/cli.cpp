@@ -45,34 +45,16 @@ enum CLI_COMMAND_KIND
     REVERT,
 };
 
-// Prints a prompt which asks to input Y or N.
-static bool cli_y_or_n()
+// Extracts filename from file path.
+static std::string cli_extract_filename(const std::string &path)
 {
-    while (true)
-    {
-        std::cout << "\tY or N >> ";
-        std::fflush(stdout);
+#ifdef _WIN32
+    char delimiter[] = "\\/";
+#else
+    char delimiter = '/';
+#endif
 
-        char answer = std::tolower(std::fgetc(stdin));
-
-        // Discard the rest of the line.
-        while (fgetc(stdin) != '\n')
-        {}
-
-        if (answer == 'y')
-        {
-            return true;
-        }
-        else if (answer == 'n')
-        {
-            return false;
-        }
-        else
-        {
-            std::cout << "ERROR: Invalid character." << std::endl;
-        }
-    }
-    return false;
+    return path.substr(path.find_last_of(delimiter) + 1);
 }
 
 // Splits strings by spaces, treats "quoted sentences" as a single argument.
@@ -123,6 +105,36 @@ static std::vector<std::string> cli_split_args(const std::string &s)
     return result;
 }
 
+// Prints a prompt which asks to input Y or N.
+static bool cli_y_or_n()
+{
+    while (true)
+    {
+        std::cout << "\tY or N >> ";
+        std::fflush(stdout);
+
+        char answer = std::tolower(std::fgetc(stdin));
+
+        // Discard the rest of the line.
+        while (fgetc(stdin) != '\n')
+        {}
+
+        if (answer == 'y')
+        {
+            return true;
+        }
+        else if (answer == 'n')
+        {
+            return false;
+        }
+        else
+        {
+            std::cout << "ERROR: Invalid character." << std::endl;
+        }
+    }
+    return false;
+}
+
 // Returns first invalid character it finds.
 static char cli_forbiddenchar(std::vector<std::string> &args)
 {
@@ -151,7 +163,7 @@ static void cli_put_table_header()
 
 static void cli_put_student(const Student &student)
 {
-    std::stringstream wrap_buf;
+    static std::stringstream wrap_buf;
 
     bool should_wrap = false;
 
@@ -217,6 +229,7 @@ static void cli_put_student(const Student &student)
                   << student.group.substr(0, CLI_SUB_GROUPW)
                   << std::setw(CLI_RECORDW) << student.record_book << "\n";
         std::cout << wrap_buf.str() << "\n";
+        wrap_buf.clear();
     }
 }
 
@@ -240,7 +253,7 @@ static CLI_COMMAND_KIND cli_getcommand(std::string &s)
         return EXIT;
     if (s == "exit!" || s == "quit!" || s == "q!")
         return EXIT_NO_SAVE;
-    if (s == "query" || s == "search")
+    if (s == "query" || s == "search" || s == "s")
         return QUERY;
     if (s == "list" || s == "ls")
         return LIST;
@@ -329,7 +342,7 @@ static void cli_exec(Model &model, std::vector<std::string> &args)
                 }
             }
 
-            const std::vector<Student> &students = model.get_all_students();
+            const std::vector<Student> &students = model.get_all();
 
             if (students.empty())
             {
@@ -481,8 +494,7 @@ static void cli_exec(Model &model, std::vector<std::string> &args)
                 return;
             }
 
-            // TODO: Replace this with remove(id)
-            bool success = model.remove_id(n);
+            bool success = model.erase_id(n);
 
             if (success)
                 std::cout << "Student removed successfully." << std::endl;
@@ -521,7 +533,7 @@ static void cli_exec(Model &model, std::vector<std::string> &args)
                 return;
             }
 
-            Student &student = model.get(pos);
+            Student &student = model.get_mut_ref(pos);
 
             std::string value;
             size_t len = args.size();
@@ -585,13 +597,13 @@ static void cli_exec(Model &model, std::vector<std::string> &args)
     }
 }
 
-void cli_loop(const char *filename)
+void cli_loop(const char *filepath)
 {
     int err = std::setvbuf(stdout, NULL, _IOFBF, 2048);
 
     if (err)
     {
-        std::cout << "Could not enable bufferin for output.\n Please buy more "
+        std::cout << "Could not enable bufferin for output.\nPlease buy more "
                      "memory :c"
                   << std::endl;
         exit(1);
@@ -601,21 +613,24 @@ void cli_loop(const char *filename)
 
     try
     {
-        std::cout << "Opening '" << filename << "'..." << std::endl;
-        model = new Model(filename);
+        std::cout << "Opening '" << filepath << "'..." << std::endl;
+        model = new Model(filepath);
     }
     catch (std::ios::failure &e)
     {
         // iostream error's .what() method returns weird string at the end
-        std::cout << filename << ": Could not open file: " << strerror(errno)
+        std::cout << filepath << ": Could not open file: " << strerror(errno)
                   << std::endl;
         std::exit(1);
     }
-    catch (std::range_error &e)
+    // Logic errors while opening should be parsing errors.
+    catch (std::logic_error &e)
     {
-        std::cout << filename << ": Parsing error: " << e.what() << std::endl;
+        std::cout << filepath << ": Parsing error: " << e.what() << std::endl;
         exit(1);
     }
+
+    std::string filename = cli_extract_filename(filepath);
 
     std::cout << "\nWelcome to toiletdb.\n"
                  "Loaded "
@@ -637,6 +652,7 @@ void cli_loop(const char *filename)
         {
             cli_exec(*model, args);
         }
+        // Logic exceptions at execution should be recoverable errors.
         catch (std::logic_error &e)
         {
             std::cout << "Logic error: " << e.what() << std::endl;

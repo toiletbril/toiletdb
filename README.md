@@ -38,7 +38,7 @@ Available commands:
 
 For testing purposes, you can generate database file with:
 ```console
-$ python3 testing/makedb.py <count of entries> <filename>
+$ python3 testing/makedb.py <count of entries> <filename> [name complexity]
 ```
 
 ## Building

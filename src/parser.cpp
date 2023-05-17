@@ -57,7 +57,7 @@ private:
                                          std::to_string(line) + ":" +
                                          std::to_string(pos);
 
-                throw std::range_error(failstring);
+                throw std::logic_error(failstring);
             }
             else
             {
@@ -90,7 +90,7 @@ private:
                                              std::to_string(line) + ":" +
                                              std::to_string(pos + 1);
 
-                    throw std::range_error(failstring);
+                    throw std::logic_error(failstring);
                 }
 
                 if (c == '|')
@@ -116,7 +116,7 @@ private:
                     std::to_string(field) + ") at line " +
                     std::to_string(line) + ":" + std::to_string(pos);
 
-                throw std::range_error(failstring);
+                throw std::logic_error(failstring);
             }
 
             size_t id = cm_parsell(fields[0]);
@@ -129,7 +129,7 @@ private:
                                          std::to_string(line) + ":" +
                                          std::to_string(pos);
 
-                throw std::range_error(failstring);
+                throw std::logic_error(failstring);
             }
 
             Student st = {

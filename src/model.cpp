@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cmath>
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -20,9 +21,9 @@ private:
     std::vector<Student> students;
     FileParser *parser;
 
-    void erase(const size_t n)
+    void erase(const size_t pos)
     {
-        this->students.erase(students.begin() + n);
+        this->students.erase(students.begin() + pos);
     }
 
 public:
@@ -33,6 +34,7 @@ public:
     Model(const char *const &filename)
     {
         this->parser = new FileParser(filename);
+
         this->parser->exists_or_create();
         this->students = this->parser->read_file();
 
@@ -47,16 +49,27 @@ public:
         delete this->parser;
     }
 
-    const std::vector<Student> &get_all_students() const
+    const std::vector<Student> &get_all() const
     {
         return this->students;
     }
 
-    Student &get(const size_t n)
+    // Get student by his position in vector.
+    Student &get_mut_ref(const size_t pos)
+    {
+        if (pos >= this->size())
+        {
+            throw std::range_error("get_mut_ref: students[n] is out of bounds");
+        }
+
+        return this->students[pos];
+    }
+
+    const Student &get(const size_t n) const
     {
         if (n >= this->size())
         {
-            throw std::range_error("n is too large");
+            throw std::range_error("get: students[n] is out of bounds");
         }
 
         return this->students[n];
@@ -101,11 +114,11 @@ public:
         return MODEL_NOT_FOUND;
     }
 
-    std::vector<size_t> search(const std::string &name)
+    std::vector<size_t> search(const std::string &name) const
     {
         size_t pos = 0;
         std::vector<size_t> result;
-        for (const Student &s : students)
+        for (const Student &s : this->students)
         {
             std::string full_name = s.name + " " + s.surname;
             cm_pstr_tolower(full_name);
@@ -119,11 +132,11 @@ public:
         return result;
     }
 
-    std::vector<size_t> search_record(const std::string &record)
+    std::vector<size_t> search_record(const std::string &record) const
     {
         size_t pos = 0;
         std::vector<size_t> result;
-        for (const Student &s : students)
+        for (const Student &s : this->students)
         {
             if (s.record_book.rfind(record, 0) == 0)
             {
@@ -147,7 +160,7 @@ public:
         this->students.push_back(s);
     }
 
-    bool remove_id(const size_t id)
+    bool erase_id(const size_t id)
     {
         size_t result = this->search(id);
 

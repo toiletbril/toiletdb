@@ -7,7 +7,7 @@
 
 // #define DEBUG
 
-#define VERSION "0.6"
+#define VERSION "0.7"
 #define NAME "toiletdb"
 #define GITHUB "<https://github.com/toiletbril>"
 
