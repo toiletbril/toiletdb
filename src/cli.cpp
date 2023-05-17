@@ -56,6 +56,20 @@ static std::string cli_extract_filename(const std::string &path)
     return path.substr(path.find_last_of(delimiter) + 1);
 }
 
+// Concatenates args from pos to the end into a single string.
+static std::string cli_concat_args(std::vector<std::string> &args, size_t pos)
+{
+    size_t len = args.size();
+    std::string result = args[pos];
+
+    for (size_t i = pos + 1; i < len; ++i)
+    {
+        result += ' ' + args[i];
+    }
+
+    return result;
+}
+
 // Splits strings by spaces, treats "quoted sentences" as a single argument.
 static std::vector<std::string> cli_split_args(const std::string &s)
 {
@@ -366,14 +380,7 @@ static void cli_exec(Model &model, std::vector<std::string> &args)
 
             std::cout << "Searching...\n\n";
 
-            std::string query = args[2];
-            size_t len        = args.size();
-
-            // Concat args to a single string and use it as a query.
-            for (size_t i = 3; i < len; ++i)
-            {
-                query += ' ' + args[i];
-            }
+            std::string query = cli_concat_args(args, 2);
 
             cm_pstr_tolower(query);
 
@@ -423,6 +430,8 @@ static void cli_exec(Model &model, std::vector<std::string> &args)
                 std::cout << "No students matched your query." << std::endl;
                 return;
             }
+
+            cli_put_table_header();
 
             for (size_t &id : result)
             {
@@ -534,14 +543,9 @@ static void cli_exec(Model &model, std::vector<std::string> &args)
 
             Student &student = model.get_mut_ref(pos);
 
-            std::string value;
-            size_t len = args.size();
+            std::string value = cli_concat_args(args, 3);
 
-            // Concat args to a single string and use it as a query.
-            for (size_t i = 3; i < len; ++i)
-            {
-                value += ' ' + args[i];
-            }
+            std::cout << std::quoted(value) << std::endl;
 
             if (cm_str_tolower(args[2]) == "name")
             {
@@ -569,6 +573,8 @@ static void cli_exec(Model &model, std::vector<std::string> &args)
             }
 
             fputc('\n', stdout);
+
+            cli_put_table_header();
             cli_put_student(student);
 
             std::fflush(stdout);
@@ -653,6 +659,11 @@ void cli_loop(const char *filepath)
 
         static std::string line;
         std::getline(std::cin, line);
+
+        if (line.empty())
+        {
+            continue;
+        }
 
         std::vector<std::string> args = cli_split_args(line);
 

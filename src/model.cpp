@@ -150,7 +150,7 @@ public:
         return result;
     }
 
-    inline void add(Student &s)
+    void add(Student &s)
     {
 #ifdef DEBUG
         debug_puts(s, "Model.add");
@@ -176,7 +176,8 @@ public:
         return false;
     }
 
-    inline void clear()
+
+    void clear()
     {
         this->students.clear();
     }
