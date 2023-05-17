@@ -141,7 +141,7 @@ static char cli_forbiddenchar(std::vector<std::string> &args)
     std::string forbidden_chars = "|[]";
     for (const std::string &a : args)
     {
-        for (char const c : a)
+        for (char const &c : a)
         {
             if (forbidden_chars.find(c) != std::string::npos)
             {
@@ -161,6 +161,8 @@ static void cli_put_table_header()
               << "\n";
 }
 
+// Prints out a student as column.
+// Wraps words by breaking them to the next line if they exceed column width.
 static void cli_put_student(const Student &student)
 {
     std::stringstream wrap_buf;
@@ -312,7 +314,7 @@ static void cli_exec(Model &model, std::vector<std::string> &args)
 
         case EXIT: {
             std::cout << "Saving..." << std::endl;
-            model.save_all();
+            model.write_file();
             std::cout << "Exiting...\n" << std::endl;
             std::exit(0);
         }
@@ -592,7 +594,7 @@ static void cli_exec(Model &model, std::vector<std::string> &args)
 
         case COMMIT: {
             std::cout << "Saving..." << std::endl;
-            model.save_all();
+            model.write_file();
         }
         break;
 

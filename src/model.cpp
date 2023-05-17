@@ -54,7 +54,7 @@ public:
         return this->students;
     }
 
-    // Get student by his position in vector.
+    // Get a mutable reference to a student by his position in vector.
     Student &get_mut_ref(const size_t pos)
     {
         if (pos >= this->size())
@@ -65,6 +65,7 @@ public:
         return this->students[pos];
     }
 
+    // Readonly reference by position.
     const Student &get(const size_t n) const
     {
         if (n >= this->size())
@@ -75,17 +76,19 @@ public:
         return this->students[n];
     }
 
+    // Clear student vector and parse the file again.
     void reread_file()
     {
         this->students = this->parser->read_file();
     }
 
-    void save_all() const
+    // Serialize.
+    void write_file() const
     {
         this->parser->write_file(this->students);
     }
 
-    // Return index of element in Model.
+    // Search methods return index of the element in the vector.
     // If element is not found, returns MODEL_NOT_FOUND.
     size_t search(const size_t &id) const
     {
