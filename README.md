@@ -21,19 +21,18 @@ $ toiletdb <database file>
 ```console
 test# help
 Available commands:
-        help            See this message.
-        exit            Save and quit. Append '!' to the end to skip saving.
-        search          Search the database.
-        id              Search by ID.
-        list            List all students.
-        size            See total amount of students in database.
-        add             Add a student to database.
-        remove          Remove a student from database.
-        edit            Edit student's details.
-        grades          See student's grades.
-        clear           Clear the database.
-        commit          Save changes to the file.
-        revert          Revert uncommited changes.
+        help    ?               See this message.
+        exit    q, quit         Save and quit. Append '!' to the end to skip saving.
+        search  s               Search the database.
+        list    ls              List all students.
+        size                    See total amount of students in database.
+        add                     Add a student to database.
+        remove  rm              Remove a student from database.
+        edit    e               Edit student's details.
+        grades  grade           See student's grades.
+        clear                   Clear the database.
+        commit  save            Save changes to the file.
+        revert  reverse         Revert uncommited changes.
 ```
 
 For testing purposes, you can generate database file with:
