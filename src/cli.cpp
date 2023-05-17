@@ -53,7 +53,6 @@ static std::string cli_extract_filename(const std::string &path)
 #else
     char delimiter = '/';
 #endif
-
     return path.substr(path.find_last_of(delimiter) + 1);
 }
 
@@ -296,8 +295,8 @@ static void cli_exec(Model &model, std::vector<std::string> &args)
             std::cout
                 << "Available commands:\n"
                    "\thelp  \t?\t\tSee this message.\n"
-                   "\texit  \tq, quit\t\tSave and quit."
-                   " Append '!' to the end to skip saving.\n"
+                   "\texit  \tq, quit\t\tSave and quit. "
+                   "Append '!' to the end to skip saving.\n"
                    "\tsearch\ts\t\tSearch the database.\n"
                    "\tlist  \tls\t\tList all students.\n"
                    "\tsize  \t\t\tSee total amount of students in database.\n"
