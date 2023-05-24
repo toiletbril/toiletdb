@@ -11,14 +11,14 @@ tdb<format version>
 
 Available types are:
 
-- `int` 32 bit signed integer
+- `int`   32 bit signed integer
 - `b_int` 64 bit unsigned integer
-- `str` Array of 8 bit characters
+- `str`   Array of 8 bit characters
 
 Modifiers:
 
-- `const` Constant
-- `id` Column that will be used for indexing (only of type `b_int`)
+- `const` Marks column as not editable
+- `id`    Marks column to be used for indexing (available only for type `b_int`)
 
 ## Why
 
