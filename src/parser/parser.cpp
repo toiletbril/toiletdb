@@ -245,10 +245,19 @@ private:
     }
 
     // Save vector of students from memory into file.
-    void serialize(std::fstream &file, std::vector<ParserColumn *> data) const
+    void serialize(std::fstream &file,
+                   const std::vector<ParserColumn *> &columns) const
     {
-        (void)(file);
-        (void)(data);
+        switch (this->format_version)
+        {
+            case 1: {
+                return FormatOne::serialize(file, columns);
+            }
+            break;
+
+            default:
+                throw std::logic_error("Unreachable");
+        }
     }
 
 public:

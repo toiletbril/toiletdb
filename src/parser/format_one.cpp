@@ -199,21 +199,6 @@ struct FormatOne
     // Save vector of students from memory into file.
     static void serialize(std::fstream &file, std::vector<ParserColumn *> data)
     {
-        (void)(file);
-        (void)(data);
-
-        //         for (const Student &student : students)
-        //         {
-        // #ifdef DEBUG
-        //             debug_puts(student, "InMemoryFileParser.serealize");
-        // #endif
-
-        //             file << '|' << student.get_id() << '|' << student.name <<
-        //             '|'
-        //                  << student.surname << '|' << student.group << '|'
-        //                  << student.record_book << '|' << "\n";
-        //         }
-
-        //         file.flush();
+        throw std::logic_error("TODO");
     }
 };

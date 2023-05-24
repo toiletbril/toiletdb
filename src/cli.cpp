@@ -15,9 +15,11 @@
 #include "common.cpp"
 #include "model.cpp"
 
-#define CLI_STRW 24
 #define CLI_INTW 12
 #define CLI_B_INTW 16
+#define CLI_STRW 24
+
+#define CLI_MARGIN 4
 
 enum CLI_COMMAND_KIND
 {
@@ -188,7 +190,7 @@ static void cli_put_table_header(InMemoryModel &model)
     std::cout << '\n';
 }
 
-// Prints out a student as column.
+// Prints out a row.
 // Wraps words by breaking them to the next line if they exceed column width.
 static void cli_put_row(InMemoryModel &model, const size_t &pos)
 {
@@ -198,66 +200,219 @@ static void cli_put_row(InMemoryModel &model, const size_t &pos)
 
     size_t line = 1;
 
-    std::vector<int> lengths;
-
     std::vector<int> types  = model.column_types();
     std::vector<void *> row = model.get_row(pos);
 
-    while (namelen > CLI_SUB_NAMEW || surnamelen > CLI_SUB_SURNAMEW ||
-           grouplen > CLI_SUB_GROUPW)
+    size_t len = types.size();
+
+    for (size_t i = 0; i < len; ++i)
     {
-        should_wrap = true;
-
-        if (line > 1)
+        switch (types[i] & PARSER_TYPE_MASK)
         {
-            wrap_buf << "\n";
+            case FINT: {
+                // Int always should fit
+                continue;
+            }
+            break;
+
+            case FB_INT: {
+                if (*static_cast<unsigned long long *>(row[i]) >= 100000000000)
+                {
+                    should_wrap = true;
+                    break;
+                }
+            }
+            break;
+
+            case FSTR: {
+                if (static_cast<std::string *>(row[i])->size() >
+                    CLI_STRW - CLI_MARGIN)
+                {
+                    should_wrap = true;
+                    break;
+                }
+            }
+            break;
+
+            default:
+                std::logic_error("Unreachable");
         }
-
-        wrap_buf << std::left << std::setw(CLI_IDW) << ' ';
-
-        wrap_buf << std::setw(CLI_NAMEW)
-                 << (namelen > CLI_SUB_NAMEW
-                         ? student.name.substr(CLI_SUB_NAMEW * line,
-                                               CLI_SUB_NAMEW)
-                         : " ");
-
-        wrap_buf << std::setw(CLI_SURNAMEW)
-                 << (surnamelen > CLI_SUB_SURNAMEW
-                         ? student.surname.substr(CLI_SUB_SURNAMEW * line,
-                                                  CLI_SUB_SURNAMEW)
-                         : " ");
-
-        wrap_buf << std::setw(CLI_GROUPW)
-                 << (grouplen > CLI_SUB_GROUPW
-                         ? student.group.substr(CLI_SUB_GROUPW * line,
-                                                CLI_SUB_GROUPW)
-                         : " ");
-
-        namelen    = namelen - CLI_SUB_NAMEW;
-        surnamelen = surnamelen - CLI_SUB_SURNAMEW;
-        grouplen   = grouplen - CLI_SUB_GROUPW;
-
-        ++line;
     }
 
     if (!should_wrap)
     {
-        std::cout << std::left << std::setw(CLI_IDW) << student.get_id()
-                  << std::setw(CLI_NAMEW) << student.name
-                  << std::setw(CLI_SURNAMEW) << student.surname
-                  << std::setw(CLI_GROUPW) << student.group
-                  << std::setw(CLI_RECORDW) << student.record_book << "\n";
+        for (size_t i = 0; i < len; ++i)
+        {
+            switch (types[i] & PARSER_TYPE_MASK)
+            {
+                case FINT: {
+                    std::cout << std::left << std::setw(CLI_INTW)
+                              << *static_cast<int *>(row[i]);
+                }
+                break;
+
+                case FB_INT: {
+                    std::cout << std::left << std::setw(CLI_B_INTW)
+                              << *static_cast<unsigned long long *>(row[i]);
+                }
+                break;
+
+                case FSTR: {
+                    std::cout << std::left << std::setw(CLI_STRW)
+                              << *static_cast<std::string *>(row[i]);
+                }
+                break;
+
+                default:
+                    std::logic_error("Unreachable");
+            }
+        }
+        std::cout << '\n';
     }
     else
     {
-        std::cout << std::left << std::setw(CLI_IDW) << student.get_id()
-                  << std::setw(CLI_NAMEW)
-                  << student.name.substr(0, CLI_SUB_NAMEW)
-                  << std::setw(CLI_SURNAMEW)
-                  << student.surname.substr(0, CLI_SUB_SURNAMEW)
-                  << std::setw(CLI_GROUPW)
-                  << student.group.substr(0, CLI_SUB_GROUPW)
-                  << std::setw(CLI_RECORDW) << student.record_book << "\n";
+        std::vector<int> lengths;
+        std::vector<std::string> cols;
+
+        if (line > 1)
+        {
+            wrap_buf << '\n';
+        }
+
+        for (size_t i = 0; i < len; ++i)
+        {
+            switch (types[i] & PARSER_TYPE_MASK)
+            {
+                case FINT: {
+                    // Int always should fit
+                    int n         = *static_cast<int *>(row[i]);
+                    std::string s = std::to_string(n);
+
+                    cols.push_back(std::to_string(n));
+                    lengths.push_back(s.size());
+                }
+                break;
+
+                case FB_INT: {
+                    unsigned long long n =
+                        *static_cast<unsigned long long *>(row[i]);
+
+                    std::string s = std::to_string(n);
+
+                    cols.push_back(std::to_string(n));
+                    lengths.push_back(s.size());
+                }
+                break;
+
+                case FSTR: {
+                    std::string s = *static_cast<std::string *>(row[i]);
+
+                    cols.push_back(s);
+                    lengths.push_back(s.size());
+                }
+                break;
+
+                default:
+                    std::logic_error("Unreachable");
+            }
+        }
+
+        while (should_wrap)
+        {
+            if (line > 1)
+            {
+                wrap_buf << "\n";
+            }
+
+            for (size_t i = 0; i < len; ++i)
+            {
+                switch (types[i] & PARSER_TYPE_MASK)
+                {
+                    case FINT: {
+                        wrap_buf << std::left << std::setw(CLI_INTW) << ' ';
+                    }
+                    break;
+
+                    case FB_INT: {
+                        wrap_buf << std::left << std::setw(CLI_B_INTW)
+                                 << (lengths[i] > (CLI_B_INTW - CLI_MARGIN)
+                                         ? cols[i].substr(
+                                               (CLI_B_INTW - CLI_MARGIN) * line,
+                                                CLI_B_INTW - CLI_MARGIN)
+                                         : " ");
+
+                        lengths[i] -= CLI_B_INTW - CLI_MARGIN;
+                    }
+                    break;
+
+                    case FSTR: {
+                        wrap_buf << std::left << std::setw(CLI_STRW)
+                                 << (lengths[i] > (CLI_STRW - CLI_MARGIN)
+                                         ? cols[i].substr(
+                                               (CLI_STRW - CLI_MARGIN) * line,
+                                                CLI_STRW - CLI_MARGIN)
+                                         : " ");
+
+                        lengths[i] -= (CLI_STRW - CLI_MARGIN);
+                    }
+                    break;
+                }
+            }
+
+            should_wrap = false;
+
+            for (size_t i = 0; i < len; ++i)
+            {
+                switch (types[i] & PARSER_TYPE_MASK)
+                {
+                    case FINT: {
+                        continue;
+                    }
+                    break;
+
+                    case FB_INT: {
+                        should_wrap =
+                            should_wrap || lengths[i] > CLI_B_INTW - CLI_MARGIN;
+                    }
+                    break;
+
+                    case FSTR: {
+                        should_wrap =
+                            should_wrap || lengths[i] > CLI_STRW - CLI_MARGIN;
+                    }
+                    break;
+                }
+            }
+
+            ++line;
+        }
+
+        for (size_t i = 0; i < len; ++i)
+        {
+            switch (types[i] & PARSER_TYPE_MASK)
+            {
+                case FINT: {
+                    std::cout << std::left << std::setw(CLI_INTW) << cols[i];
+                }
+                break;
+
+                case FB_INT: {
+                    std::cout << std::left << std::setw(CLI_B_INTW)
+                              << cols[i].substr(0, CLI_B_INTW - CLI_MARGIN);
+                }
+                break;
+
+                case FSTR: {
+                    std::cout << std::left << std::setw(CLI_STRW)
+                              << cols[i].substr(0, CLI_STRW - CLI_MARGIN);
+                }
+                break;
+
+                default:
+                    std::logic_error("Unreachable");
+            }
+        }
+
         std::cout << wrap_buf.str() << "\n";
     }
 }
@@ -364,77 +519,17 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
 
             cli_put_table_header(model);
 
-            for ()
-            // std::fflush(stdout);
+            for (size_t i = 0; i < len; ++i)
+            {
+                cli_put_row(model, i);
+            }
+
+            std::fflush(stdout);
         }
         break;
 
         case QUERY: {
-            if (args.size() < 3)
-            {
-                std::cout << "ERROR: Not enough arguments.\n"
-                             "USAGE: search <field> <value>\n"
-                             "Available fields: 'id', 'record', 'name'\n";
-
-                return;
-            }
-
-            std::cout << "Searching...\n\n";
-
-            std::string query = cli_concat_args(args, 2);
-
-            cm_pstr_tolower(query);
-
-#ifdef DEBUG
-            debug_puts(query, "search");
-#endif
-            std::vector<size_t> result;
-
-            if (cm_str_tolower(args[1]) == "id")
-            {
-                size_t id = cm_parsell(query);
-
-                if (id == COMMON_INVALID_NUMBERLL)
-                {
-                    std::cout << "ERROR: ID is not a number.\n";
-                    return;
-                }
-
-                size_t pos = model.search(id);
-
-                if (pos == MODEL_NOT_FOUND)
-                {
-                    std::cout << "No students matched your query." << std::endl;
-                    return;
-                }
-
-                result.push_back(pos);
-            }
-            else
-            {
-                result = model.search(args[1], query);
-            }
-            // else
-            // {
-            //     std::cout << "Unknown field '" << args[1]
-            //               << "'.\n"
-            //     return;
-            // }
-
-            if (result.size() == 0)
-            {
-                std::cout << "No rows matched your query." << std::endl;
-                return;
-            }
-
-            cli_put_table_header(model);
-
-            // for (size_t &pos : result)
-            // {
-            //     cli_put_row(model.get(pos));
-            // }
-
-            std::fflush(stdout);
+            throw std::logic_error("TODO");
         }
         break;
 
@@ -447,134 +542,17 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
         break;
 
         case ADD: {
-            char errc = cli_forbiddenchar(args);
-
-            if (errc)
-            {
-                std::cout << "ERROR: Forbidden character '" << errc << "'."
-                          << std::endl;
-                return;
-            }
-
-            size_t len = args.size();
-
-            if (len != 5)
-            {
-                std::cout
-                    << "ERROR: Invalid number of arguments. "
-                    << "(5 needed, actual " << len << ")\n"
-                    << "USAGE: add <name> <surname> <group> <record book>\n"
-                       "You can put quotes around fields.\n"
-                       "EXAMPLE: "
-                       "Vasiliy \"Ivanov Petrov\" \"Long Group\" 69420"
-                    << std::endl;
-                return;
-            }
-
-            // Student student(model.get_next_id(), args[1].c_str(),
-            //                 args[2].c_str(), args[3].c_str(),
-            //                 args[4].c_str());
-
-            // model.add(student);
-
-            std::cout << "Student added successfully.\n";
+            throw std::logic_error("TODO");
         }
         break;
 
         case REMOVE: {
-            if (args.size() != 2)
-            {
-                std::cout << "ERROR: Invalid number of arguments.\n"
-                             "USAGE: remove <student ID>\nYou can get "
-                             "student ID by using 'list' or 'query'."
-                          << std::endl;
-                return;
-            }
-
-            size_t n = cm_parsell(args[1]);
-
-            if (n == COMMON_INVALID_NUMBERLL)
-            {
-                std::cout << "ERROR: Invalid ID." << std::endl;
-                return;
-            }
-
-            bool success = model.erase_id(n);
-
-            if (success)
-                std::cout << "Student removed successfully." << std::endl;
-            else
-                std::cout << "Could not find student with such ID."
-                          << std::endl;
+           throw std::logic_error("TODO");
         }
         break;
 
         case EDIT: {
-            if (args.size() < 3)
-            {
-                std::cout
-                    << "ERROR: Not enough arguments.\n"
-                       "USAGE: edit <ID> <field> <new value>\n"
-                       "Available fields: 'name', 'surname', 'group', "
-                       "'record'.\n"
-                       "You can get student ID by using 'list' or 'query'.\n";
-
-                return;
-            }
-
-            size_t n = cm_parsell(args[1]);
-
-            if (n == COMMON_INVALID_NUMBERLL)
-            {
-                std::cout << "ERROR: ID is not a number." << std::endl;
-                return;
-            }
-
-            size_t pos = model.search(n);
-
-            if (pos == MODEL_NOT_FOUND)
-            {
-                std::cout << "ERROR: Invalid ID." << std::endl;
-                return;
-            }
-
-            // Student &student = model.get_mut_ref(pos);
-
-            // std::string value = cli_concat_args(args, 3);
-
-            // std::cout << std::quoted(value) << std::endl;
-
-            // if (cm_str_tolower(args[2]) == "name")
-            // {
-            //     student.name = value;
-            // }
-            // else if (cm_str_tolower(args[2]) == "surname")
-            // {
-            //     student.surname = value;
-            // }
-            // else if (cm_str_tolower(args[2]) == "group")
-            // {
-            //     student.group = value;
-            // }
-            // else if (cm_str_tolower(args[2]) == "record")
-            // {
-            //     student.record_book = value;
-            // }
-            // else
-            // {
-            //     std::cout << "ERROR: Unknown field. "
-            //                  "Available fields: 'name', 'surname', 'group', "
-            //                  "'record'."
-            //               << std::endl;
-            //     return;
-            // }
-
-            // fputc('\n', stdout);
-
-            // cli_put_table_header();
-            // cli_put_row(student);
-
-            std::fflush(stdout);
+           throw std::logic_error("TODO");
         }
 
         break;

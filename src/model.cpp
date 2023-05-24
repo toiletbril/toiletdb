@@ -131,14 +131,15 @@ public:
                 break;
 
                 case FB_INT: {
-                    result.push_back(
-                        static_cast<void *>(&(*static_cast<std::vector<unsigned long long> *>(
+                    result.push_back(static_cast<void *>(
+                        &(*static_cast<std::vector<unsigned long long> *>(
                             (*c).get_data()))[pos]));
-                } break;
+                }
+                break;
 
                 case FSTR: {
-                    result.push_back(
-                        static_cast<void *>(&(*static_cast<std::vector<std::string> *>(
+                    result.push_back(static_cast<void *>(
+                        &(*static_cast<std::vector<std::string> *>(
                             (*c).get_data()))[pos]));
                 }
                 break;
