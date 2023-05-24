@@ -5,16 +5,20 @@
 
 #include <ostream>
 
-#define DEBUG
+//#define DEBUG
 
 #include "cli.cpp"
 #include "common.cpp"
 
 /*
+    FIXME:
+        - Type check numeric fields when parsing
+        - Word wrapping
+        - File creation
+        - CRLF parsing
     TODO:
         - ID uniqueness checking.
-        - Remove ID columns and use record book numbers instead.
-        - Grading system (idk how to implement)
+        - Arrays
 */
 
 int main(int argc, char **argv)
