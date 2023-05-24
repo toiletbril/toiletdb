@@ -3,6 +3,10 @@
 #include <cctype>
 #include <string>
 
+#define TOILET_VERSION "0.7.2"
+#define TOILET_NAME "toiletdb"
+#define TOILET_GITHUB "<https://github.com/toiletbril>"
+
 #define COMMON_INVALID_NUMBERLL (size_t)(-1)
 
 size_t cm_parsell(std::string &str)

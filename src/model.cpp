@@ -15,7 +15,7 @@
 
 #define MODEL_NOT_FOUND (size_t)(-1)
 
-class Model
+class InMemoryModel
 {
 private:
     std::vector<Student> students;
@@ -31,7 +31,7 @@ public:
     // If file already exists, elements will be sorted by ID to suit binary
     // search.
     // Using previously unsorted file will result in it being reordered.
-    Model(const char *const &filename)
+    InMemoryModel(const char *const &filename)
     {
         this->parser = new FileParser(filename);
 
@@ -44,7 +44,7 @@ public:
                   });
     }
 
-    ~Model()
+    ~InMemoryModel()
     {
         delete this->parser;
     }

@@ -1,6 +1,5 @@
 # toiletdb
-
-Persistent, in-memory database with an ability to serialize and a CLI for it.
+In-memory database with an ability to serialize into readable files and a CLI for it.
 
 Implemented as a table of students. Database files look like this:
 ```

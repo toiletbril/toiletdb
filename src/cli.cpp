@@ -59,7 +59,7 @@ static std::string cli_extract_filename(const std::string &path)
 // Concatenates args from pos to the end into a single string.
 static std::string cli_concat_args(std::vector<std::string> &args, size_t pos)
 {
-    size_t len = args.size();
+    size_t len         = args.size();
     std::string result = args[pos];
 
     for (size_t i = pos + 1; i < len; ++i)
@@ -100,7 +100,9 @@ static std::vector<std::string> cli_split_args(const std::string &s)
         else if (c == ' ')
         {
             if (!temp.empty())
+            {
                 result.push_back(temp);
+            }
             temp.clear();
         }
         else
@@ -109,7 +111,9 @@ static std::vector<std::string> cli_split_args(const std::string &s)
         }
     }
     if (!temp.empty())
+    {
         result.push_back(temp);
+    }
 
 #ifdef DEBUG
     debug_putv(result, "cli_splitstring");
@@ -145,6 +149,7 @@ static bool cli_y_or_n()
             std::cout << "ERROR: Invalid character." << std::endl;
         }
     }
+
     return false;
 }
 
@@ -292,14 +297,14 @@ static CLI_COMMAND_KIND cli_getcommand(std::string &s)
 }
 
 // Executes commands based on vector of arguments.
-static void cli_exec(Model &model, std::vector<std::string> &args)
+static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
 {
     CLI_COMMAND_KIND c = cli_getcommand(args[0]);
 
     switch (c)
     {
         case UNKNOWN: {
-            std::cout << "Unknown command '" << args[0]
+            std::cout << "ERROR: Unknown command '" << args[0]
                       << "'.\nTry 'help' to see available commands."
                       << std::endl;
         }
@@ -372,7 +377,7 @@ static void cli_exec(Model &model, std::vector<std::string> &args)
             if (args.size() < 3)
             {
                 std::cout << "ERROR: Not enough arguments.\n"
-                             "Usage: search <field> <value>\n"
+                             "USAGE: search <field> <value>\n"
                              "Available fields: 'id', 'record', 'name'\n";
 
                 return;
@@ -433,9 +438,9 @@ static void cli_exec(Model &model, std::vector<std::string> &args)
 
             cli_put_table_header();
 
-            for (size_t &id : result)
+            for (size_t &pos : result)
             {
-                cli_put_student(model.get(id));
+                cli_put_student(model.get(pos));
             }
 
             std::fflush(stdout);
@@ -467,10 +472,10 @@ static void cli_exec(Model &model, std::vector<std::string> &args)
                 std::cout
                     << "ERROR: Invalid number of arguments. "
                     << "(5 needed, actual " << len << ")\n"
-                    << "Usage: add <name> <surname> <group> <record book>\n"
+                    << "USAGE: add <name> <surname> <group> <record book>\n"
                        "You can put quotes around fields.\n"
-                       "EXAMPLE: Vasiliy \"Ivanov Petrov\" \"Very "
-                       "Cool\" 69420"
+                       "EXAMPLE: "
+                       "Vasiliy \"Ivanov Petrov\" \"Long Group\" 69420"
                     << std::endl;
                 return;
             }
@@ -488,7 +493,7 @@ static void cli_exec(Model &model, std::vector<std::string> &args)
             if (args.size() != 2)
             {
                 std::cout << "ERROR: Invalid number of arguments.\n"
-                             "Usage: remove <student ID>\nYou can get "
+                             "USAGE: remove <student ID>\nYou can get "
                              "student ID by using 'list' or 'query'."
                           << std::endl;
                 return;
@@ -517,7 +522,7 @@ static void cli_exec(Model &model, std::vector<std::string> &args)
             {
                 std::cout
                     << "ERROR: Not enough arguments.\n"
-                       "Usage: edit <ID> <field> <new value>\n"
+                       "USAGE: edit <ID> <field> <new value>\n"
                        "Available fields: 'name', 'surname', 'group', "
                        "'record'.\n"
                        "You can get student ID by using 'list' or 'query'.\n";
@@ -623,12 +628,12 @@ void cli_loop(const char *filepath)
         exit(1);
     }
 
-    Model *model;
+    InMemoryModel *model;
 
     try
     {
         std::cout << "Opening '" << filepath << "'..." << std::endl;
-        model = new Model(filepath);
+        model = new InMemoryModel(filepath);
     }
     catch (std::ios::failure &e)
     {
@@ -646,9 +651,8 @@ void cli_loop(const char *filepath)
 
     std::string filename = cli_extract_filename(filepath);
 
-    std::cout << "\nWelcome to toiletdb.\n"
-                 "Loaded "
-              << model->size()
+    std::cout << "\nWelcome to toiletdb " << TOILET_VERSION << '.' << std::endl;
+    std::cout << "Loaded " << model->size()
               << " students.\n"
                  "Try 'help' to see available commands."
               << std::endl;

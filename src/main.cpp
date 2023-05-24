@@ -7,11 +7,8 @@
 
 // #define DEBUG
 
-#define VERSION "0.7.1"
-#define NAME "toiletdb"
-#define GITHUB "<https://github.com/toiletbril>"
-
 #include "cli.cpp"
+#include "common.cpp"
 
 /*
     TODO:
@@ -30,10 +27,9 @@ int main(int argc, char **argv)
 
     if (argc < 2)
     {
-        std::cout << "Usage: " << NAME
-                  << " <database file>\n"
+        std::cout << "USAGE: " << TOILET_NAME << " <database file>\n"
                      "If there is no such file, it will be created.\n"
-                  << "v" VERSION << " (c) toiletbril " << GITHUB << std::endl;
+                  << "v" TOILET_VERSION << " (c) toiletbril " << TOILET_GITHUB << std::endl;
         std::exit(0);
     }
 
