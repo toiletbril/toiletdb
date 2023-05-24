@@ -15,17 +15,9 @@
 #include "common.cpp"
 #include "model.cpp"
 
-#define CLI_IDW 12
-#define CLI_NAMEW 24
-#define CLI_SURNAMEW 24
-#define CLI_GROUPW 16
-#define CLI_RECORDW 16
-
-#define CLI_WRAPSPACE 4
-
-#define CLI_SUB_NAMEW (CLI_NAMEW - CLI_WRAPSPACE)
-#define CLI_SUB_SURNAMEW (CLI_SURNAMEW - CLI_WRAPSPACE)
-#define CLI_SUB_GROUPW (CLI_GROUPW - CLI_WRAPSPACE)
+#define CLI_STRW 24
+#define CLI_INTW 12
+#define CLI_B_INTW 16
 
 enum CLI_COMMAND_KIND
 {
@@ -39,7 +31,6 @@ enum CLI_COMMAND_KIND
     ADD,
     REMOVE,
     EDIT,
-    GRADE,
     CLEAR,
     COMMIT,
     REVERT,
@@ -170,18 +161,36 @@ static char cli_forbiddenchar(std::vector<std::string> &args)
     return 0;
 }
 
-static void cli_put_table_header()
+static void cli_put_table_header(InMemoryModel &model)
 {
-    std::cout << std::left << std::setw(CLI_IDW) << "ID" << std::setw(CLI_NAMEW)
-              << "Name" << std::setw(CLI_SURNAMEW) << "Surname"
-              << std::setw(CLI_GROUPW) << "Group" << std::setw(CLI_RECORDW)
-              << "Record"
-              << "\n";
+    std::vector<std::string> names = model.column_names();
+    std::vector<int> types         = model.column_types();
+
+    size_t len = names.size();
+
+    for (size_t i = 0; i < len; ++i)
+    {
+        if (types[i] & FINT)
+        {
+            std::cout << std::left << std::setw(CLI_INTW) << names[i];
+        }
+
+        if (types[i] & FB_INT)
+        {
+            std::cout << std::left << std::setw(CLI_B_INTW) << names[i];
+        }
+
+        if (types[i] & FSTR)
+        {
+            std::cout << std::left << std::setw(CLI_STRW) << names[i];
+        }
+    }
+    std::cout << '\n';
 }
 
 // Prints out a student as column.
 // Wraps words by breaking them to the next line if they exceed column width.
-static void cli_put_student(const Student &student)
+static void cli_put_row(InMemoryModel &model, const size_t &pos)
 {
     std::stringstream wrap_buf;
 
@@ -189,9 +198,10 @@ static void cli_put_student(const Student &student)
 
     size_t line = 1;
 
-    int namelen    = student.name.length();
-    int surnamelen = student.surname.length();
-    int grouplen   = student.group.length();
+    std::vector<int> lengths;
+
+    std::vector<int> types  = model.column_types();
+    std::vector<void *> row = model.get_row(pos);
 
     while (namelen > CLI_SUB_NAMEW || surnamelen > CLI_SUB_SURNAMEW ||
            grouplen > CLI_SUB_GROUPW)
@@ -252,17 +262,6 @@ static void cli_put_student(const Student &student)
     }
 }
 
-// Prints entire vector of students as a table.
-static void cli_put_student_vector(const std::vector<Student> &students)
-{
-    cli_put_table_header();
-
-    for (const Student &student : students)
-    {
-        cli_put_student(student);
-    }
-}
-
 // Translates strings to CLI_COMMAND_KIND.
 static CLI_COMMAND_KIND cli_getcommand(std::string &s)
 {
@@ -282,8 +281,6 @@ static CLI_COMMAND_KIND cli_getcommand(std::string &s)
         return ADD;
     if (s == "remove" || s == "rm")
         return REMOVE;
-    if (s == "grade" || s == "grades")
-        return GRADE;
     if (s == "edit" || s == "e")
         return EDIT;
     if (s == "clear")
@@ -322,7 +319,6 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
                    "\tadd   \t\t\tAdd a student to database.\n"
                    "\tremove\trm\t\tRemove a student from database.\n"
                    "\tedit  \te\t\tEdit student's details.\n"
-                   "\tgrades\tgrade\t\tSee student's grades.\n"
                    "\tclear \t\t\tClear the database.\n"
                    "\tcommit\tsave\t\tSave changes to the file.\n"
                    "\trevert\treverse\t\tRevert uncommited changes."
@@ -360,16 +356,16 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
                 }
             }
 
-            const std::vector<Student> &students = model.get_all();
-
-            if (students.empty())
+            if (len == 0)
             {
                 std::cout << "There are no students in database." << std::endl;
                 return;
             }
 
-            cli_put_student_vector(students);
-            std::fflush(stdout);
+            cli_put_table_header(model);
+
+            for ()
+            // std::fflush(stdout);
         }
         break;
 
@@ -414,34 +410,29 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
 
                 result.push_back(pos);
             }
-            else if (cm_str_tolower(args[1]) == "record")
-            {
-                result = model.search_record(query);
-            }
-            else if (cm_str_tolower(args[1]) == "name")
-            {
-                result = model.search(query.c_str());
-            }
             else
             {
-                std::cout << "Unknown field '" << args[1]
-                          << "'.\n"
-                             "Available fields: 'id', 'record', 'name'\n";
-                return;
+                result = model.search(args[1], query);
             }
+            // else
+            // {
+            //     std::cout << "Unknown field '" << args[1]
+            //               << "'.\n"
+            //     return;
+            // }
 
             if (result.size() == 0)
             {
-                std::cout << "No students matched your query." << std::endl;
+                std::cout << "No rows matched your query." << std::endl;
                 return;
             }
 
-            cli_put_table_header();
+            cli_put_table_header(model);
 
-            for (size_t &pos : result)
-            {
-                cli_put_student(model.get(pos));
-            }
+            // for (size_t &pos : result)
+            // {
+            //     cli_put_row(model.get(pos));
+            // }
 
             std::fflush(stdout);
         }
@@ -480,10 +471,11 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
                 return;
             }
 
-            Student student(model.get_next_id(), args[1].c_str(),
-                            args[2].c_str(), args[3].c_str(), args[4].c_str());
+            // Student student(model.get_next_id(), args[1].c_str(),
+            //                 args[2].c_str(), args[3].c_str(),
+            //                 args[4].c_str());
 
-            model.add(student);
+            // model.add(student);
 
             std::cout << "Student added successfully.\n";
         }
@@ -546,50 +538,45 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
                 return;
             }
 
-            Student &student = model.get_mut_ref(pos);
+            // Student &student = model.get_mut_ref(pos);
 
-            std::string value = cli_concat_args(args, 3);
+            // std::string value = cli_concat_args(args, 3);
 
-            std::cout << std::quoted(value) << std::endl;
+            // std::cout << std::quoted(value) << std::endl;
 
-            if (cm_str_tolower(args[2]) == "name")
-            {
-                student.name = value;
-            }
-            else if (cm_str_tolower(args[2]) == "surname")
-            {
-                student.surname = value;
-            }
-            else if (cm_str_tolower(args[2]) == "group")
-            {
-                student.group = value;
-            }
-            else if (cm_str_tolower(args[2]) == "record")
-            {
-                student.record_book = value;
-            }
-            else
-            {
-                std::cout << "ERROR: Unknown field. "
-                             "Available fields: 'name', 'surname', 'group', "
-                             "'record'."
-                          << std::endl;
-                return;
-            }
+            // if (cm_str_tolower(args[2]) == "name")
+            // {
+            //     student.name = value;
+            // }
+            // else if (cm_str_tolower(args[2]) == "surname")
+            // {
+            //     student.surname = value;
+            // }
+            // else if (cm_str_tolower(args[2]) == "group")
+            // {
+            //     student.group = value;
+            // }
+            // else if (cm_str_tolower(args[2]) == "record")
+            // {
+            //     student.record_book = value;
+            // }
+            // else
+            // {
+            //     std::cout << "ERROR: Unknown field. "
+            //                  "Available fields: 'name', 'surname', 'group', "
+            //                  "'record'."
+            //               << std::endl;
+            //     return;
+            // }
 
-            fputc('\n', stdout);
+            // fputc('\n', stdout);
 
-            cli_put_table_header();
-            cli_put_student(student);
+            // cli_put_table_header();
+            // cli_put_row(student);
 
             std::fflush(stdout);
         }
 
-        break;
-
-        case GRADE: {
-            throw std::logic_error("TODO");
-        }
         break;
 
         case CLEAR: {
