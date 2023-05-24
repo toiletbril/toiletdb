@@ -1,10 +1,23 @@
 # toiletdb
 In-memory database with an ability to serialize into readable files and a CLI for it.
 
-Implemented as a table of students. Database files look like this:
+Database files look like this:
 ```
-|<ID>|<name>|<surname>|<group name>|<record book number>|
+tdb<format version>
+|[modifier] <column type> <column name>| ...
+|<value of column type>| ...
 ```
+
+Available types are:
+
+- `int` 32 bit signed integer
+- `b_int` 64 bit unsigned integer
+- `str` Array of 8 bit characters
+
+Modifiers:
+
+- `const` Constant
+- `id` Column that will be used for indexing (only of type `b_int`)
 
 ## Why
 
@@ -28,7 +41,6 @@ Available commands:
         add                     Add a student to database.
         remove  rm              Remove a student from database.
         edit    e               Edit student's details.
-        grades  grade           See student's grades.
         clear                   Clear the database.
         commit  save            Save changes to the file.
         revert  reverse         Revert uncommited changes.
