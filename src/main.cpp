@@ -27,9 +27,11 @@ int main(int argc, char **argv)
 
     if (argc < 2)
     {
-        std::cout << "USAGE: " << TOILET_NAME << " <database file>\n"
+        std::cout << "USAGE: " << TOILET_NAME
+                  << " <database file>\n"
                      "If there is no such file, it will be created.\n"
-                  << "v" TOILET_VERSION << " (c) toiletbril " << TOILET_GITHUB << std::endl;
+                  << "v" TOILET_VERSION << " (c) toiletbril " << TOILET_GITHUB
+                  << std::endl;
         std::exit(0);
     }
 

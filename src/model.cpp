@@ -176,7 +176,6 @@ public:
         return false;
     }
 
-
     void clear()
     {
         this->students.clear();
