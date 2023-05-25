@@ -48,6 +48,7 @@ def main():
         suffixes = int(argv[3])
 
     with open(filename, "w") as f:
+        f.write("tdb1\n|id b_int ID|str Name|str Surname|str Group|b_int Number|\n")
         for i in range(count):
             f.write(generate_entry(i, suffixes))
 

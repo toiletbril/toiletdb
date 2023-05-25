@@ -41,7 +41,11 @@ public:
     {
         this->parser = new InMemoryFileParser(filename);
 
-        this->parser->exists_or_create();
+        if (!this->parser->exists())
+        {
+            throw std::logic_error("In InMemoryModel constructor, there is no such file.");
+        }
+
         this->columns = this->parser->read_file();
 
         // TODO: sort
@@ -204,7 +208,7 @@ public:
         return result;
     }
 
-    void add()
+    void add(...)
     {
         // #ifdef DEBUG
         //         debug_puts(s, "Model.add");

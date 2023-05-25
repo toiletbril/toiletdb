@@ -469,11 +469,11 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
                    "\texit  \tq, quit\t\tSave and quit. "
                    "Append '!' to the end to skip saving.\n"
                    "\tsearch\ts\t\tSearch the database.\n"
-                   "\tlist  \tls\t\tList all students.\n"
-                   "\tsize  \t\t\tSee total amount of students in database.\n"
-                   "\tadd   \t\t\tAdd a student to database.\n"
-                   "\tremove\trm\t\tRemove a student from database.\n"
-                   "\tedit  \te\t\tEdit student's details.\n"
+                   "\tlist  \tls\t\tList all rows.\n"
+                   "\tsize  \t\t\tSee total amount of rows in database.\n"
+                   "\tadd   \t\t\tAdd a row to database.\n"
+                   "\tremove\trm\t\tRemove a row from database.\n"
+                   "\tedit  \te\t\tEdit a row.\n"
                    "\tclear \t\t\tClear the database.\n"
                    "\tcommit\tsave\t\tSave changes to the file.\n"
                    "\trevert\treverse\t\tRevert uncommited changes."
@@ -513,7 +513,7 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
 
             if (len == 0)
             {
-                std::cout << "There are no students in database." << std::endl;
+                std::cout << "There are no rows in database." << std::endl;
                 return;
             }
 
@@ -536,7 +536,7 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
         case DBSIZE: {
             size_t len = model.size();
 
-            std::cout << "There are " << len << " students in database."
+            std::cout << "There are " << len << " rows in database."
                       << std::endl;
         }
         break;
@@ -618,7 +618,7 @@ void cli_loop(const char *filepath)
 
     std::cout << "\nWelcome to toiletdb " << TOILET_VERSION << '.' << std::endl;
     std::cout << "Loaded " << model->size()
-              << " students.\n"
+              << " rows.\n"
                  "Try 'help' to see available commands."
               << std::endl;
 

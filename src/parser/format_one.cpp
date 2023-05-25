@@ -142,6 +142,21 @@ struct FormatOne
 
             for (size_t i = 0; i < columns.size; ++i)
             {
+                if (columns.types[i] & FID)
+                {
+                    if (!(columns.types[i] & FB_INT))
+                    {
+                        std::string failstring = "Database file format is not "
+                                                 "correct: Field with modifier "
+                                                 "'id' is not of type 'b_int', "
+                                                 "line " +
+                                                 std::to_string(line) +
+                                                 ", field " +
+                                                 std::to_string(i + 1);
+
+                        throw std::logic_error(failstring);
+                    }
+                }
                 if (columns.types[i] & FINT)
                 {
                     size_t num = cm_parsei(fields[i]);
@@ -162,7 +177,6 @@ struct FormatOne
                         parsed_columns[i]->get_data())
                         ->push_back(num);
                 }
-
                 else if (columns.types[i] & FB_INT)
                 {
                     size_t num = cm_parsell(fields[i]);

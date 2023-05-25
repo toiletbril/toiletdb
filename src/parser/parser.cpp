@@ -261,7 +261,9 @@ private:
     }
 
 public:
-    InMemoryFileParser(const char *const &filename) : filename(filename) {}
+    InMemoryFileParser(const char *const &filename) : filename(filename) {
+        this->format_version = PARSER_VERSION;
+    }
 
     ~InMemoryFileParser()
     {
@@ -305,6 +307,8 @@ public:
             {
                 throw std::ios::failure("Could not create file");
             }
+
+            // FormatOne::write_header(file);
 
             return false;
         }
