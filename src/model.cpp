@@ -4,6 +4,7 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
+#include <numeric>
 #include <vector>
 
 #ifdef DEBUG
@@ -19,6 +20,7 @@ class InMemoryModel
 {
 private:
     std::vector<ParserColumn *> columns;
+    std::vector<unsigned long long> indexes;
     InMemoryFileParser *parser;
 
     void erase(const size_t pos)
@@ -32,6 +34,32 @@ private:
         }
     }
 
+    // Creates sorted index of IDs for binary search.
+    void index()
+    {
+        std::vector<unsigned long long> id_column =
+            *(static_cast<std::vector<unsigned long long> *>(
+                this->columns[this->parser->get_id_column_index()]
+                    ->get_data()));
+
+        std::vector<unsigned long long> index;
+        index.resize(id_column.size());
+
+        std::iota(index.begin(), index.end(), 0);
+
+        std::stable_sort(index.begin(), index.end(),
+                         [&id_column](size_t a, size_t b) {
+                             return id_column[a] < id_column[b];
+                         });
+
+#ifdef DEBUG
+        debug_putv(id_column, "ids");
+        debug_putv(index, "index");
+#endif
+
+        this->indexes = index;
+    }
+
 public:
     // This will create a file 'filename' and use it to store commits.
     // If file already exists, elements will be sorted by ID to suit binary
@@ -43,12 +71,13 @@ public:
 
         if (!this->parser->exists())
         {
-            throw std::logic_error("In InMemoryModel constructor, there is no such file.");
+            throw std::runtime_error(
+                "In InMemoryModel constructor, there is no such file.");
         }
 
         this->columns = this->parser->read_file();
 
-        // TODO: sort
+        this->index();
     }
 
     ~InMemoryModel()
@@ -76,38 +105,97 @@ public:
     // Search methods return index of the element in the vector.
     // If element is not found, returns MODEL_NOT_FOUND.
 
-    // Search by id.
+    // Binary search by id.
     size_t search(const size_t &id) const
     {
-        size_t L = 0;
-        size_t R = this->columns[0]->size();
-        size_t m = -1;
-
-        size_t id_col_index = this->parser->get_id_column_index();
+        // NOTE: long instead of size_t
+        long L = 0;
+        long R = this->indexes.size();
+        long m = std::floor((L + R) / 2);
 
         std::vector<unsigned long long> *ids =
             static_cast<std::vector<unsigned long long> *>(
-                this->columns[id_col_index]->get_data());
+                this->columns[this->parser->get_id_column_index()]->get_data());
+
+#ifdef DEBUG
+        debug_putv(*ids, "ids");
+        debug_putv(this->indexes, "index");
+#endif
 
         while (L <= R)
         {
-            m = std::floor((L + R) / 2);
+            m = (L + R) / 2;
 
-            if ((*ids)[m] < id)
+            if ((*ids)[this->indexes[m]] < id)
             {
                 L = m + 1;
             }
-            else if ((*ids)[m] > id)
+            else if ((*ids)[this->indexes[m]] > id)
             {
+                // If this would become unsigned,
+                // here needs to be a test that breaks loop when R wraps
                 R = m - 1;
             }
             else
             {
-                return m;
+                return this->indexes[m];
             }
         }
 
         return MODEL_NOT_FOUND;
+    }
+
+    // Search any column by comparing strings.
+    std::vector<size_t> search(const std::string &name,
+                               std::string &query) const
+    {
+        size_t pos = 0;
+        std::vector<size_t> result;
+
+        size_t column_index = this->column_index(name);
+
+        if (column_index == MODEL_NOT_FOUND)
+        {
+            std::string failstring = "In InMemoryModel.search(), Field '" +
+                                     name + "' does not exist";
+            throw std::logic_error(failstring);
+        }
+
+        int type = this->columns[column_index]->get_type();
+
+        void *data = this->columns[column_index]->get_data();
+
+        for (size_t i = 0; i < this->size(); ++i)
+        {
+            std::string value;
+            switch (type & PARSER_TYPE_MASK)
+            {
+                case FINT: {
+                    value = std::to_string(
+                        (*(static_cast<std::vector<int> *>(data)))[i]);
+                }
+                break;
+                case FB_INT: {
+                    value = std::to_string(
+                        (*(static_cast<std::vector<unsigned long long> *>(
+                            data)))[i]);
+                    break;
+                }
+                case FSTR: {
+                    value =
+                        (*(static_cast<std::vector<std::string> *>(data)))[i];
+                    break;
+                }
+            }
+
+            if (value.rfind(query, 0) == 0)
+            {
+                result.push_back(pos);
+            }
+            ++pos;
+        }
+
+        return result;
     }
 
     // This returns a row of heterogenous types.
@@ -153,61 +241,6 @@ public:
         return result;
     }
 
-    // Search str fields
-    std::vector<size_t> search(const std::string &name,
-                               std::string &query) const
-    {
-        size_t pos = 0;
-        std::vector<size_t> result;
-
-        size_t column_index = COMMON_INVALID_NUMBERLL;
-        size_t j            = 0;
-
-        for (const ParserColumn *col : this->columns)
-        {
-            if (col->get_name() == name)
-            {
-                column_index = j;
-            }
-            ++j;
-        }
-
-        if (column_index == COMMON_INVALID_NUMBERLL)
-        {
-            std::string failstring =
-                "In InMemoryModel.search(), Invalid field '" + name + "'";
-            throw std::logic_error(failstring);
-        }
-
-        int type = this->columns[column_index]->get_type();
-
-        if (!(type & FSTR))
-        {
-            std::string failstring = "In InMemoryModel.search(), field '" +
-                                     name + "' is not of str type";
-            throw std::logic_error(failstring);
-        }
-
-        std::vector<std::string> *data =
-            static_cast<std::vector<std::string> *>(
-                this->columns[column_index]->get_data());
-
-        size_t len = data->size();
-
-        for (size_t i = 0; i < len; ++i)
-        {
-            std::string row_value = (*data)[i];
-            cm_pstr_tolower(row_value);
-
-            if (row_value.rfind(query, 0) == 0)
-            {
-                result.push_back(pos);
-            }
-            ++pos;
-        }
-        return result;
-    }
-
     void add(...)
     {
         // #ifdef DEBUG
@@ -236,7 +269,10 @@ public:
 
     void clear()
     {
-        this->columns.clear();
+        for (ParserColumn *c : this->columns)
+        {
+            c->clear();
+        }
     }
 
     size_t column_count() const
@@ -255,6 +291,32 @@ public:
 
         return names;
     }
+
+    size_t column_index(const std::string &name) const
+    {
+        std::vector<size_t> result;
+
+        size_t column_index = COMMON_INVALID_NUMBERLL;
+        size_t j            = 0;
+
+        for (const ParserColumn *col : this->columns)
+        {
+            if (col->get_name() == name)
+            {
+                column_index = j;
+                break;
+            }
+            ++j;
+        }
+
+        if (column_index == COMMON_INVALID_NUMBERLL)
+        {
+            return MODEL_NOT_FOUND;
+        }
+
+        return column_index;
+    }
+
     const std::vector<int> column_types() const
     {
         std::vector<int> types;

@@ -77,6 +77,10 @@ private:
 
         for (int i = 3; i < len; ++i)
         {
+            if (temp[i] == '\r')
+            {
+                continue;
+            }
             version_string += temp[i];
         }
 
@@ -129,6 +133,11 @@ private:
 
         while (c != '\n')
         {
+            if (c == '\r')
+            {
+                c = file.get();
+                continue;
+            }
             int type = 0;
 
             std::string buf;
@@ -261,7 +270,8 @@ private:
     }
 
 public:
-    InMemoryFileParser(const char *const &filename) : filename(filename) {
+    InMemoryFileParser(const char *const &filename) : filename(filename)
+    {
         this->format_version = PARSER_VERSION;
     }
 

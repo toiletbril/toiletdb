@@ -338,7 +338,7 @@ static void cli_put_row(InMemoryModel &model, const size_t &pos)
                                  << (lengths[i] > (CLI_B_INTW - CLI_MARGIN)
                                          ? cols[i].substr(
                                                (CLI_B_INTW - CLI_MARGIN) * line,
-                                                CLI_B_INTW - CLI_MARGIN)
+                                               CLI_B_INTW - CLI_MARGIN)
                                          : " ");
 
                         lengths[i] -= CLI_B_INTW;
@@ -350,7 +350,7 @@ static void cli_put_row(InMemoryModel &model, const size_t &pos)
                                  << (lengths[i] > (CLI_STRW - CLI_MARGIN)
                                          ? cols[i].substr(
                                                (CLI_STRW - CLI_MARGIN) * line,
-                                                CLI_STRW - CLI_MARGIN)
+                                               CLI_STRW - CLI_MARGIN)
                                          : " ");
 
                         lengths[i] -= CLI_STRW;
@@ -463,21 +463,20 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
         break;
 
         case HELP: {
-            std::cout
-                << "Available commands:\n"
-                   "\thelp  \t?\t\tSee this message.\n"
-                   "\texit  \tq, quit\t\tSave and quit. "
-                   "Append '!' to the end to skip saving.\n"
-                   "\tsearch\ts\t\tSearch the database.\n"
-                   "\tlist  \tls\t\tList all rows.\n"
-                   "\tsize  \t\t\tSee total amount of rows in database.\n"
-                   "\tadd   \t\t\tAdd a row to database.\n"
-                   "\tremove\trm\t\tRemove a row from database.\n"
-                   "\tedit  \te\t\tEdit a row.\n"
-                   "\tclear \t\t\tClear the database.\n"
-                   "\tcommit\tsave\t\tSave changes to the file.\n"
-                   "\trevert\treverse\t\tRevert uncommited changes."
-                << std::endl;
+            std::cout << "Available commands:\n"
+                         "\thelp  \t?\t\tSee this message.\n"
+                         "\texit  \tq, quit\t\tSave and quit. "
+                         "Append '!' to the end to skip saving.\n"
+                         "\tsearch\ts\t\tSearch the database.\n"
+                         "\tlist  \tls\t\tList all rows.\n"
+                         "\tsize  \t\t\tSee total amount of rows in database.\n"
+                         "\tadd   \t\t\tAdd a row to database.\n"
+                         "\tremove\trm\t\tRemove a row from database.\n"
+                         "\tedit  \te\t\tEdit a row.\n"
+                         "\tclear \t\t\tClear the database.\n"
+                         "\tcommit\tsave\t\tSave changes to the file.\n"
+                         "\trevert\treverse\t\tRevert uncommited changes."
+                      << std::endl;
         }
         break;
 
@@ -511,12 +510,6 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
                 }
             }
 
-            if (len == 0)
-            {
-                std::cout << "There are no rows in database." << std::endl;
-                return;
-            }
-
             cli_put_table_header(model);
 
             for (size_t i = 0; i < len; ++i)
@@ -529,7 +522,62 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
         break;
 
         case QUERY: {
-            throw std::logic_error("TODO");
+            if (args.size() < 3)
+            {
+                std::string fields;
+                size_t len                     = model.column_count();
+                std::vector<std::string> names = model.column_names();
+
+                for (size_t i = 0; i < len - 1; ++i)
+                {
+                    fields += "'" + names[i] + "', ";
+                }
+                fields += "'" + names[len - 1] + "'";
+
+                std::cout << "ERROR: Not enough arguments.\n"
+                             "Usage: search <field> <value>\n"
+                             "Available fields: "
+                          << fields << "\n";
+
+                return;
+            }
+
+            std::string query = cli_concat_args(args, 2);
+
+            // If columns specified is of type 'id', use binary search.
+            if (model.column_types()[model.column_index(args[1])] & FID)
+            {
+                size_t value = cm_parsell(query);
+                // 
+                if (value == COMMON_INVALID_NUMBERLL)
+                {
+                    std::cout << "ERROR: ID is not a number." << std::endl;
+                    return;
+                }
+
+                size_t pos = model.search(value);
+
+                cli_put_table_header(model);
+
+                if (pos != MODEL_NOT_FOUND)
+                {
+                    cli_put_row(model, model.search(value));
+                }
+
+                std::fflush(stdout);
+
+                return;
+            };
+
+            std::vector<size_t> positions = model.search(args[1], query);
+
+            cli_put_table_header(model);
+            for (const size_t &pos : positions)
+            {
+                cli_put_row(model, pos);
+            }
+
+            std::fflush(stdout);
         }
         break;
 
@@ -547,12 +595,12 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
         break;
 
         case REMOVE: {
-           throw std::logic_error("TODO");
+            throw std::logic_error("TODO");
         }
         break;
 
         case EDIT: {
-           throw std::logic_error("TODO");
+            throw std::logic_error("TODO");
         }
 
         break;
@@ -610,7 +658,22 @@ void cli_loop(const char *filepath)
     // Logic errors while opening should be parsing errors.
     catch (std::logic_error &e)
     {
-        std::cout << filepath << ": Parsing error: " << e.what() << std::endl;
+        std::cout << filepath << ": Parsing error: " << e.what()
+                  << "\n"
+                     "Try '--help-format' to see help for database format."
+                  << std::endl;
+        exit(1);
+    }
+    catch (std::runtime_error &e)
+    {
+#ifdef DEBUG
+        debug_puts(e.what(), "cli_loop");
+#endif
+        std::cout << filepath << ": File does not exist."
+                  << "\n"
+                     "You need to create database file first.\n"
+                     "Try '--help-format' to see help for database format."
+                  << std::endl;
         exit(1);
     }
 

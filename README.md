@@ -48,9 +48,9 @@ Available commands:
         revert  reverse         Revert uncommited changes.
 ```
 
-For testing purposes, you can generate database file with:
+For testing purposes, you can generate student database file with:
 ```console
-$ python3 testing/makedb.py <count of entries> <filename> [name complexity]
+$ python3 testing/makedb.py <count of entries> <filename> [name complexity, number from 1 to 5]
 ```
 
 ## Building

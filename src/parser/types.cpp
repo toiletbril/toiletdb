@@ -33,6 +33,7 @@ public:
     virtual std::string get_name() const = 0;
     virtual size_t size() const          = 0;
     virtual void erase(size_t pos)       = 0;
+    virtual void clear()                 = 0;
     virtual void add(void *data)         = 0;
     virtual void *get(size_t pos)        = 0;
     virtual void *get_data()             = 0;
@@ -75,6 +76,11 @@ public:
     void erase(size_t pos)
     {
         this->data->erase(this->data->begin() + pos);
+    }
+
+    void clear()
+    {
+        this->data->clear();
     }
 
     void add(void *data)
@@ -138,6 +144,11 @@ public:
         this->data->erase(this->data->begin() + pos);
     }
 
+    void clear()
+    {
+        this->data->clear();
+    }
+
     void add(void *data)
     {
         int number = *static_cast<unsigned long long *>(data);
@@ -197,6 +208,11 @@ public:
     void erase(size_t pos)
     {
         this->data->erase(this->data->begin() + pos);
+    }
+
+    void clear()
+    {
+        this->data->clear();
     }
 
     void add(void *data)
