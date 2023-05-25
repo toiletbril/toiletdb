@@ -11,10 +11,10 @@
 
 #include "../common.cpp"
 
-#include "format_one.cpp"
+#include "format.cpp"
 #include "types.cpp"
 
-// File format 1:
+// File format:
 // 1    tdb002
 // 2    |[modifier] <type> <name>|...
 //

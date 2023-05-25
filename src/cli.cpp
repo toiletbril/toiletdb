@@ -132,10 +132,13 @@ static bool cli_y_or_n()
     return false;
 }
 
+#define CLI_FORBIDDEN_CHARS "|[]"
+
 // Returns first invalid character it finds.
 static char cli_forbiddenchar(std::vector<std::string> &args)
 {
-    std::string forbidden_chars = "|[]";
+    std::string forbidden_chars = CLI_FORBIDDEN_CHARS;
+
     for (const std::string &a : args) {
         for (char const &c : a) {
             if (forbidden_chars.find(c) != std::string::npos) {
@@ -148,7 +151,7 @@ static char cli_forbiddenchar(std::vector<std::string> &args)
 
 static char cli_forbiddenchar(std::string &arg)
 {
-    std::string forbidden_chars = "|[]";
+    std::string forbidden_chars = CLI_FORBIDDEN_CHARS;
 
     for (char const &c : arg) {
         if (forbidden_chars.find(c) != std::string::npos) {
@@ -161,8 +164,8 @@ static char cli_forbiddenchar(std::string &arg)
 // Puts modifiers first, then names of columns.
 static void cli_put_table_header(InMemoryModel &model)
 {
-    std::vector<std::string> names = model.column_names();
-    std::vector<int> types         = model.column_types();
+    std::vector<std::string> names = model.get_column_names();
+    std::vector<int> types         = model.get_column_types();
 
     size_t len = names.size();
 
@@ -204,8 +207,8 @@ static void cli_put_table_header(InMemoryModel &model)
 }
 
 // Prints out a row.
-// Wraps words by breaking them to the next line if they exceed column
-// width.
+// Wraps words by breaking them to the next line
+// if they exceed column width.
 static void cli_put_row(InMemoryModel &model, const size_t &pos)
 {
     std::stringstream wrap_buf;
@@ -214,7 +217,7 @@ static void cli_put_row(InMemoryModel &model, const size_t &pos)
 
     size_t line = 1;
 
-    std::vector<int> types  = model.column_types();
+    std::vector<int> types  = model.get_column_types();
     std::vector<void *> row = model.get_row(pos);
 
     size_t len = types.size();
@@ -222,7 +225,7 @@ static void cli_put_row(InMemoryModel &model, const size_t &pos)
     for (size_t i = 0; i < len; ++i) {
         switch (types[i] & PARSER_TYPE_MASK) {
             case FINT: {
-                // Int always should fit
+                // Int should always fit.
                 continue;
             } break;
 
@@ -317,6 +320,9 @@ static void cli_put_row(InMemoryModel &model, const size_t &pos)
                 wrap_buf << "\n";
             }
 
+            // Slice very long string into lines.
+            // Can be several lines long.
+
             for (size_t i = 0; i < len; ++i) {
                 switch (types[i] & PARSER_TYPE_MASK) {
                     case FINT: {
@@ -346,6 +352,8 @@ static void cli_put_row(InMemoryModel &model, const size_t &pos)
                     } break;
                 }
             }
+
+            // Recheck if any column still exceeds width.
 
             should_wrap = false;
 
@@ -395,7 +403,6 @@ static void cli_put_row(InMemoryModel &model, const size_t &pos)
     }
 }
 
-// Translates strings to CLI_COMMAND_KIND.
 static CLI_COMMAND_KIND cli_getcommand(std::string &s)
 {
     if (s == "help" || s == "?")
@@ -426,7 +433,6 @@ static CLI_COMMAND_KIND cli_getcommand(std::string &s)
     return UNKNOWN;
 }
 
-// Executes commands based on vector of arguments.
 static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
 {
     CLI_COMMAND_KIND c = cli_getcommand(args[0]);
@@ -492,9 +498,10 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
 
         case QUERY: {
             if (args.size() < 3) {
+                size_t len                     = model.get_column_count();
+                std::vector<std::string> names = model.get_column_names();
+
                 std::string fields;
-                size_t len                     = model.column_count();
-                std::vector<std::string> names = model.column_names();
 
                 for (size_t i = 0; i < len - 1; ++i) {
                     fields += "'" + names[i] + "', ";
@@ -511,10 +518,10 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
 
             std::string query = cli_concat_args(args, 2);
 
-            // If columns specified is of type 'id', use binary search.
-            if (model.column_types()[model.column_index(args[1])] & FID) {
+            // If column specified has modifier 'id', use binary search.
+            if (model.get_column_types()[model.search_column_index(args[1])] & FID) {
                 size_t value = cm_parsell(query);
-                //
+
                 if (value == COMMON_INVALID_NUMBERLL) {
                     std::cout << "ERROR: ID is not a number." << std::endl;
                     return;
@@ -549,15 +556,15 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
         } break;
 
         case ADD: {
-            size_t len             = model.column_count();
-            std::vector<int> types = model.column_types();
+            size_t len             = model.get_column_count();
+            std::vector<int> types = model.get_column_types();
 
-            if (args.size() - 1 != model.column_count() - 1) {
+            if (args.size() - 1 != model.get_column_count() - 1) {
                 std::string fields;
-                std::vector<std::string> names = model.column_names();
+                std::vector<std::string> names = model.get_column_names();
 
                 for (size_t i = 0; i < len - 1; ++i) {
-                    // ID field will be added automatically
+                    // ID field will be added automatically.
                     if (types[i] & FID) {
                         continue;
                     }
@@ -598,7 +605,7 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
                 std::cout << "Row added successfully." << std::endl;
             }
             else {
-                std::cout << "Something is wrong." << std::endl;
+                std::cout << "ERROR" << std::endl;
             }
         } break;
 
@@ -628,12 +635,12 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
         } break;
 
         case EDIT: {
-            std::vector<int> types = model.column_types();
+            std::vector<int> types = model.get_column_types();
 
             if (args.size() < 4) {
                 std::string fields;
-                size_t len                     = model.column_count();
-                std::vector<std::string> names = model.column_names();
+                size_t len                     = model.get_column_count();
+                std::vector<std::string> names = model.get_column_names();
 
                 for (size_t i = 0; i < len - 1; ++i) {
                     // ID field will be added automatically
@@ -668,7 +675,7 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
                 return;
             }
 
-            size_t column_index = model.column_index(args[2]);
+            size_t column_index = model.search_column_index(args[2]);
 
             if (column_index == MODEL_NOT_FOUND) {
                 std::cout << "Invalid field '" << args[2] << "'" << std::endl;
