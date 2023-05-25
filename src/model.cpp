@@ -241,17 +241,82 @@ public:
         return result;
     }
 
-    void add(...)
+    bool add(std::vector<std::string> &args)
     {
-        // #ifdef DEBUG
-        //         debug_puts(s, "Model.add");
-        // #endif
-        //         if (this->search(s.get_id()) != MODEL_NOT_FOUND)
-        //         {
-        //             throw std::logic_error("An entry exists with same ID");
-        //         }
+        std::vector<int> types = this->column_types();
 
-        // this->students.push_back(s);
+        // Ignoring ID
+        if (args.size() != this->column_count() - 1)
+        {
+            return false;
+        }
+
+        std::vector<std::string>::iterator it = args.begin();
+
+        // TODO:
+        // This is just typechecking.
+        // Surely this can be compressed (Clueless)
+        for (size_t i = 1; i < this->column_count(); ++i)
+        {
+            if (types[i] & FID)
+            {
+                continue;
+            }
+
+            switch (types[i] & PARSER_TYPE_MASK)
+            {
+                case FINT: {
+                    int value = cm_parsei(*it++);
+
+                    if (value == COMMON_INVALID_NUMBERI)
+                    {
+                        return false;
+                    }
+                }
+                break;
+
+                case FB_INT: {
+                    size_t value = cm_parsell(*it++);
+
+                    if (value == COMMON_INVALID_NUMBERLL)
+                    {
+                        return false;
+                    }
+                }
+                break;
+
+                default: {
+                    ++it;
+                }
+            }
+        }
+
+        it = args.begin();
+
+        // TODO: Doesn't look like a transaction to me
+        for (size_t i = 0; i < this->column_count(); ++i)
+        {
+            if (types[i] & FID)
+            {
+                size_t new_id = this->get_next_id();
+                this->columns[i]->add(static_cast<void *>(&new_id));
+            }
+            else if (types[i] & FINT)
+            {
+                int value = cm_parsei(*it++);
+                this->columns[i]->add(static_cast<void *>(&value));
+            }
+            else if (types[i] & FB_INT)
+            {
+                unsigned long long value = cm_parsell(*it++);
+                this->columns[i]->add(static_cast<void *>(&value));
+            }
+            else if (types[i] & FSTR)
+            {
+                this->columns[i]->add(static_cast<void *>(&(*it++)));
+            }
+        }
+        return true;
     }
 
     bool erase_id(const size_t id)

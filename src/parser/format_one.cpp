@@ -260,6 +260,10 @@ struct FormatOne
         }
         header += '|';
 
+#ifdef DEBUG
+        debug_puts(header, "InMemoryFileParser.write_header");
+#endif
+
         file << header << std::endl;
     }
 
@@ -315,5 +319,8 @@ struct FormatOne
             }
             file << "|\n";
         }
+#ifdef DEBUG
+        debug_puts(row_count, "InMemoryFileParser.serialize rows saved");
+#endif
     }
 };

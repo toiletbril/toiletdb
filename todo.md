@@ -1,7 +1,6 @@
 TODO:
-    FIX:
-        - Rewrite all commands
     TODO:
+        - Good error reporting.
         - ID uniqueness checking.
-        - Array
-        - Table creator
+        - When there is no file, open up a table creator.
+        - Arrays.

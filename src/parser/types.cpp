@@ -151,7 +151,7 @@ public:
 
     void add(void *data)
     {
-        int number = *static_cast<unsigned long long *>(data);
+        unsigned long long number = *static_cast<unsigned long long *>(data);
         this->data->push_back(number);
     }
 

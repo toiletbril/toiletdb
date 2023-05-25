@@ -163,6 +163,21 @@ static char cli_forbiddenchar(std::vector<std::string> &args)
     return 0;
 }
 
+static char cli_forbiddenchar(std::string &arg)
+{
+    std::string forbidden_chars = "|[]";
+
+    for (char const &c : arg)
+    {
+        if (forbidden_chars.find(c) != std::string::npos)
+        {
+            return c;
+        }
+    }
+    return 0;
+}
+
+// Puts modifiers first, then names of columns.
 static void cli_put_table_header(InMemoryModel &model)
 {
     std::vector<std::string> names = model.column_names();
@@ -170,28 +185,52 @@ static void cli_put_table_header(InMemoryModel &model)
 
     size_t len = names.size();
 
+    std::stringstream type;
+    std::stringstream modifier;
+
+    size_t padding = 0;
+
     for (size_t i = 0; i < len; ++i)
     {
         if (types[i] & FINT)
         {
-            std::cout << std::left << std::setw(CLI_INTW) << names[i];
+            padding = CLI_INTW;
+            type << std::left << std::setw(CLI_INTW) << names[i];
+        }
+        else if (types[i] & FB_INT)
+        {
+            padding = CLI_B_INTW;
+            type << std::left << std::setw(CLI_B_INTW) << names[i];
+        }
+        else if (types[i] & FSTR)
+        {
+            padding = CLI_STRW;
+            type << std::left << std::setw(CLI_STRW) << names[i];
         }
 
-        if (types[i] & FB_INT)
+        std::string temp;
+
+        if (types[i] & FID)
         {
-            std::cout << std::left << std::setw(CLI_B_INTW) << names[i];
+            temp += "[ID]";
         }
 
-        if (types[i] & FSTR)
+        if (types[i] & FCONST)
         {
-            std::cout << std::left << std::setw(CLI_STRW) << names[i];
+            temp += "[CONST]";
         }
+
+        modifier << std::left << std::setw(padding)
+                 << (temp.empty() ? " " : temp);
     }
-    std::cout << '\n';
+
+    std::cout << modifier.str() << "\n";
+    std::cout << type.str() << "\n";
 }
 
 // Prints out a row.
-// Wraps words by breaking them to the next line if they exceed column width.
+// Wraps words by breaking them to the next line if they exceed column
+// width.
 static void cli_put_row(InMemoryModel &model, const size_t &pos)
 {
     std::stringstream wrap_buf;
@@ -548,7 +587,7 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
             if (model.column_types()[model.column_index(args[1])] & FID)
             {
                 size_t value = cm_parsell(query);
-                // 
+                //
                 if (value == COMMON_INVALID_NUMBERLL)
                 {
                     std::cout << "ERROR: ID is not a number." << std::endl;
@@ -582,25 +621,213 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
         break;
 
         case DBSIZE: {
-            size_t len = model.size();
-
-            std::cout << "There are " << len << " rows in database."
+            std::cout << "There are " << model.size() << " rows in database."
                       << std::endl;
         }
         break;
 
         case ADD: {
-            throw std::logic_error("TODO");
+            size_t len             = model.column_count();
+            std::vector<int> types = model.column_types();
+
+            if (args.size() - 1 != model.column_count() - 1)
+            {
+                std::string fields;
+                std::vector<std::string> names = model.column_names();
+
+                for (size_t i = 0; i < len - 1; ++i)
+                {
+                    // ID field will be added automatically
+                    if (types[i] & FID)
+                    {
+                        continue;
+                    }
+                    fields += "<" + names[i] + "> ";
+                }
+                fields += "<" + names[len - 1] + ">";
+
+                std::cout << "ERROR: Invalid number of arguments. "
+                          << "(" << len - 1 << " needed, actual "
+                          << args.size() - 1 << ")\n"
+                          << "Usage: add " << fields
+                          << "\n"
+                             "You can put quotes around fields.\n"
+                             "EXAMPLE: Vasiliy \"Ivanov Petrov\" \"Very "
+                             "Cool\" 69420"
+                          << std::endl;
+                return;
+            }
+
+            // Remove the command from vector, so only values remain
+            args.erase(args.begin());
+
+            char errc = cli_forbiddenchar(args);
+
+            if (errc)
+            {
+                std::cout << "ERROR: Forbidden character '" << errc << "'."
+                          << std::endl;
+                return;
+            }
+
+#ifdef DEBUG
+            debug_putv(args, "add() args");
+#endif
+
+            bool result = model.add(args);
+
+            if (result)
+            {
+                std::cout << "Row added successfully." << std::endl;
+            }
+            else
+            {
+                std::cout << "Something is wrong." << std::endl;
+            }
         }
         break;
 
         case REMOVE: {
-            throw std::logic_error("TODO");
+            if (args.size() != 2)
+            {
+                std::cout << "ERROR: Invalid number of arguments.\n"
+                             "Usage: remove <ID>\n"
+                             "You can get ID by using 'list' or 'search'."
+                          << std::endl;
+                return;
+            }
+
+            size_t n = cm_parsell(args[1]);
+
+            if (n == COMMON_INVALID_NUMBERLL)
+            {
+                std::cout << "ERROR: Invalid ID." << std::endl;
+                return;
+            }
+
+            bool success = model.erase_id(n);
+
+            if (success)
+                std::cout << "Row removed successfully." << std::endl;
+            else
+                std::cout << "Could not find row with specified ID."
+                          << std::endl;
         }
         break;
 
         case EDIT: {
-            throw std::logic_error("TODO");
+            std::vector<int> types = model.column_types();
+
+            if (args.size() < 4)
+            {
+                std::string fields;
+                size_t len                     = model.column_count();
+                std::vector<std::string> names = model.column_names();
+
+                for (size_t i = 0; i < len - 1; ++i)
+                {
+                    // ID field will be added automatically
+                    if (types[i] & FCONST)
+                    {
+                        continue;
+                    }
+                    fields += "'" + names[i] + "' ";
+                }
+                if (!(types[len - 1] & FCONST))
+                {
+                    fields += "'" + names[len - 1] + "'";
+                }
+
+                std::cout << "ERROR: Not enough arguments.\n"
+                             "Usage: edit <ID> <field> <value>\n"
+                             "Available fields: "
+                          << fields << "\n";
+
+                return;
+            }
+
+            size_t n = cm_parsell(args[1]);
+
+            if (n == COMMON_INVALID_NUMBERLL)
+            {
+                std::cout << "ERROR: ID is not a number." << std::endl;
+                return;
+            }
+
+            size_t pos = model.search(n);
+
+            if (pos == MODEL_NOT_FOUND)
+            {
+                std::cout << "ERROR: Invalid ID." << std::endl;
+                return;
+            }
+
+            size_t column_index = model.column_index(args[2]);
+
+            if (column_index == MODEL_NOT_FOUND)
+            {
+                std::cout << "Invalid field '" << args[2] << "'" << std::endl;
+            }
+
+            std::string value = cli_concat_args(args, 3);
+
+            char errc = cli_forbiddenchar(value);
+
+            if (errc)
+            {
+                std::cout << "ERROR: Forbidden character '" << errc << "'."
+                          << std::endl;
+                return;
+            }
+
+            void *data = (model.get_row(pos))[column_index];
+
+            if (types[column_index] & FCONST)
+            {
+                std::cout << "ERROR: Can not edit value with 'const' modifier."
+                          << std::endl;
+
+                return;
+            }
+
+            switch (types[column_index] & PARSER_TYPE_MASK)
+            {
+                case FINT: {
+                    int number = cm_parsei(value);
+
+                    if (n == COMMON_INVALID_NUMBERI)
+                    {
+                        std::cout << "ERROR: Value is not a number."
+                                  << std::endl;
+                        return;
+                    }
+
+                    *static_cast<int *>(data) = number;
+                }
+                break;
+
+                case FB_INT: {
+                    unsigned long long number = cm_parsell(value);
+
+                    if (n == COMMON_INVALID_NUMBERLL)
+                    {
+                        std::cout << "ERROR: Value is not a number."
+                                  << std::endl;
+                        return;
+                    }
+
+                    *static_cast<unsigned long long *>(data) = number;
+                }
+                break;
+
+                case FSTR: {
+                    *static_cast<std::string *>(data) = value;
+                }
+                break;
+            }
+
+            cli_put_table_header(model);
+            cli_put_row(model, pos);
         }
 
         break;
