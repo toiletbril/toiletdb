@@ -27,8 +27,8 @@ def _generate_surname(suffixes: int) -> str:
 def _generate_groups(suffixes: int) -> str:
     return choice(groups) + ((", " + ", ".join([ choice(groups) for _ in range(suffixes) ])) if suffixes else "")
 
-def generate_entry(i: int, suffixes: int) -> str:
-    return (f"|{i}"
+def generate_entry(suffixes: int) -> str:
+    return (f"|{randint(0, 99999999)}"
             f"|{_generate_name(suffixes)}"
             f"|{_generate_surname(suffixes)}"
             f"|{_generate_groups(0)}"
@@ -48,8 +48,9 @@ def main():
         suffixes = int(argv[3])
 
     with open(filename, "w") as f:
-        for i in range(count):
-            f.write(generate_entry(i, suffixes))
+        f.write("tdb1\n|id b_int ID|str Name|str Surname|str Group|b_int Number|\n")
+        for _ in range(count):
+            f.write(generate_entry(suffixes))
 
     print("Done.")
 

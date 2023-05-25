@@ -2,8 +2,14 @@
 
 #include <cctype>
 #include <string>
+#include <climits>
+
+#define TOILET_VERSION "1.0.0"
+#define TOILET_NAME "toiletdb"
+#define TOILET_GITHUB "<https://github.com/toiletbril>"
 
 #define COMMON_INVALID_NUMBERLL (size_t)(-1)
+#define COMMON_INVALID_NUMBERI INT_MAX
 
 size_t cm_parsell(std::string &str)
 {
@@ -22,6 +28,30 @@ size_t cm_parsell(std::string &str)
     }
 
     return result;
+}
+
+int cm_parsei(std::string &str)
+{
+    int result = 0;
+    int mult   = 1;
+
+    for (char &c : str)
+    {
+        if (c == '-' && result == 0)
+        {
+            mult *= -1;
+        }
+        else if (std::isdigit(c))
+        {
+            result = result * 10 + (c - '0');
+        }
+        else
+        {
+            return COMMON_INVALID_NUMBERI;
+        }
+    }
+
+    return result * mult;
 }
 
 std::string cm_str_tolower(std::string &str)

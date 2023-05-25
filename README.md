@@ -1,11 +1,25 @@
 # toiletdb
+In-memory database with an ability to serialize into readable files and a CLI for it.
 
-Persistent, in-memory database with an ability to serialize and a CLI for it.
+Database files look like this:
+```
+tdb<format version>
+|[modifier] <column type> <column name>| ...
+|<value of column type>| ...
+|<value of column type>| ...
+...
+```
 
-Implemented as a table of students. Database files look like this:
-```
-|<ID>|<name>|<surname>|<group name>|<record book number>|
-```
+Available types are:
+
+- `int`   32 bit signed integer
+- `b_int` 64 bit unsigned integer
+- `str`   Array of 8 bit characters
+
+Modifiers:
+
+- `const` Marks column as not editable
+- `id`    Marks column to be used for indexing (available only for type `b_int`)
 
 ## Why
 
@@ -21,23 +35,22 @@ $ toiletdb <database file>
 ```console
 test# help
 Available commands:
-        help    ?               See this message.
-        exit    q, quit         Save and quit. Append '!' to the end to skip saving.
-        search  s               Search the database.
-        list    ls              List all students.
-        size                    See total amount of students in database.
-        add                     Add a student to database.
-        remove  rm              Remove a student from database.
-        edit    e               Edit student's details.
-        grades  grade           See student's grades.
-        clear                   Clear the database.
-        commit  save            Save changes to the file.
-        revert  reverse         Revert uncommited changes.
+	help  	?		See this message.
+	exit  	q, quit		Save and quit. Append '!' to the end to skip saving.
+	search	s		Search the database.
+	list  	ls		List all rows.
+	size  			See total amount of rows in database.
+	add   			Add a row to database.
+	remove	rm		Remove a row from database.
+	edit  	e		Edit a row.
+	clear 			Clear the database.
+	commit	save		Save changes to the file.
+	revert	reverse		Revert uncommited changes.
 ```
 
-For testing purposes, you can generate database file with:
+For testing purposes, you can generate student database file with:
 ```console
-$ python3 testing/makedb.py <count of entries> <filename> [name complexity]
+$ python3 testing/makedb.py <count of entries> <filename> [name complexity, number from 1 to 5]
 ```
 
 ## Building
