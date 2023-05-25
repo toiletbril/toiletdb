@@ -44,8 +44,7 @@ private:
         debug_puts(filename, "InMemoryFileParser.open");
 #endif
 
-        if (!file.is_open())
-        {
+        if (!file.is_open()) {
             throw std::ios::failure("Could not open file");
         }
 
@@ -60,10 +59,8 @@ private:
         std::getline(file, temp);
 
         // Check for magic string
-        for (int i = 0; i < 3; ++i)
-        {
-            if (temp[i] != MAGIC[i])
-            {
+        for (int i = 0; i < 3; ++i) {
+            if (temp[i] != MAGIC[i]) {
                 std::string failstring = "Database file format is not "
                                          "correct: File is not a tdb database";
 
@@ -75,10 +72,8 @@ private:
         int len = temp.size();
         std::string version_string;
 
-        for (int i = 3; i < len; ++i)
-        {
-            if (temp[i] == '\r')
-            {
+        for (int i = 3; i < len; ++i) {
+            if (temp[i] == '\r') {
                 continue;
             }
             version_string += temp[i];
@@ -86,14 +81,12 @@ private:
 
         size_t version = cm_parsell(version_string);
 
-        if (version == COMMON_INVALID_NUMBERLL)
-        {
+        if (version == COMMON_INVALID_NUMBERLL) {
             throw std::logic_error("Database format is not "
                                    "correct: Invalid version number");
         }
 
-        if (version > PARSER_VERSION)
-        {
+        if (version > PARSER_VERSION) {
             throw std::logic_error("Database format is not "
                                    "supported: Version is too new");
         };
@@ -121,8 +114,7 @@ private:
 
         char c = file.get();
 
-        if (c != '|')
-        {
+        if (c != '|') {
             throw std::logic_error("update_types() first char is not |");
         }
 
@@ -131,10 +123,8 @@ private:
 
         bool set_id = false;
 
-        while (c != '\n')
-        {
-            if (c == '\r')
-            {
+        while (c != '\n') {
+            if (c == '\r') {
                 c = file.get();
                 continue;
             }
@@ -144,33 +134,25 @@ private:
 
             bool set_type = false;
 
-            while (c != '|')
-            {
-                if (c == ' ')
-                {
-                    if (buf == "int" && !set_type)
-                    {
+            while (c != '|') {
+                if (c == ' ') {
+                    if (buf == "int" && !set_type) {
                         type |= (int)FINT;
                         set_type = true;
                     }
-                    else if (buf == "b_int" && !set_type)
-                    {
+                    else if (buf == "b_int" && !set_type) {
                         type |= (int)FB_INT;
                         set_type = true;
                     }
-                    else if (buf == "str" && !set_type)
-                    {
+                    else if (buf == "str" && !set_type) {
                         type |= (int)FSTR;
                         set_type = true;
                     }
-                    else if (buf == "const")
-                    {
+                    else if (buf == "const") {
                         type |= (int)FCONST;
                     }
-                    else if (buf == "id")
-                    {
-                        if (set_id)
-                        {
+                    else if (buf == "id") {
+                        if (set_id) {
                             std::string failstring =
                                 "Format error: ID is already set at 2:" +
                                 std::to_string(pos) +
@@ -186,8 +168,7 @@ private:
                         id_pos = pos;
                         set_id = true;
                     }
-                    else if (!set_type)
-                    {
+                    else if (!set_type) {
                         std::string failstring =
                             "Format error: Unknown type modifier at 2:" +
                             std::to_string(pos);
@@ -196,8 +177,7 @@ private:
 
                     buf.clear();
                 }
-                else
-                {
+                else {
                     buf += c;
                 }
 
@@ -206,8 +186,7 @@ private:
             }
 
             // Last word will be the name
-            if (buf.empty())
-            {
+            if (buf.empty()) {
                 std::string failstring = "Format error: No column name at "
                                          "2:" +
                                          std::to_string(pos);
@@ -241,12 +220,10 @@ private:
     std::vector<ParserColumn *> deserealize(std::fstream &file,
                                             std::vector<std::string> &names)
     {
-        switch (this->format_version)
-        {
+        switch (this->format_version) {
             case 1: {
                 return FormatOne::deserealize(file, this->columns, names);
-            }
-            break;
+            } break;
 
             default:
                 throw std::logic_error("Unreachable");
@@ -257,12 +234,10 @@ private:
     void serialize(std::fstream &file,
                    const std::vector<ParserColumn *> &columns) const
     {
-        switch (this->format_version)
-        {
+        switch (this->format_version) {
             case 1: {
                 return FormatOne::serialize(file, columns);
-            }
-            break;
+            } break;
 
             default:
                 throw std::logic_error("Unreachable");
@@ -308,13 +283,11 @@ public:
     // Creates file if it didn't exist.
     bool exists_or_create() const
     {
-        if (!this->exists())
-        {
+        if (!this->exists()) {
             std::fstream file;
             file.open(this->filename, std::ios::out);
 
-            if (!file.good())
-            {
+            if (!file.good()) {
                 throw std::ios::failure("Could not create file");
             }
 
@@ -344,8 +317,7 @@ public:
 
     void write_file(const std::vector<ParserColumn *> &columns) const
     {
-        if (!this->exists())
-        {
+        if (!this->exists()) {
             throw std::runtime_error("File does not exist");
         }
 

@@ -20,8 +20,7 @@ struct FormatOne
         std::vector<ParserColumn *> parsed_columns;
         parsed_columns.reserve(columns.size);
 
-        if (names.size() != columns.size)
-        {
+        if (names.size() != columns.size) {
             std::string failstring =
                 "In FormatOne.deserialize(), names.size() (" +
                 std::to_string(names.size()) +
@@ -31,22 +30,18 @@ struct FormatOne
             throw std::logic_error(failstring);
         }
 
-        for (size_t i = 0; i < columns.size; ++i)
-        {
+        for (size_t i = 0; i < columns.size; ++i) {
             int type = columns.types[i];
 
-            if (type & FINT)
-            {
+            if (type & FINT) {
                 ParserColumn *v = new ParserColumnInt(names[i], type);
                 parsed_columns.push_back(v);
             }
-            else if (type & FB_INT)
-            {
+            else if (type & FB_INT) {
                 ParserColumn *v = new ParserColumnB_Int(names[i], type);
                 parsed_columns.push_back(v);
             }
-            else if (type & FSTR)
-            {
+            else if (type & FSTR) {
                 ParserColumn *v = new ParserColumnStr(names[i], type);
                 parsed_columns.push_back(v);
             }
@@ -63,10 +58,8 @@ struct FormatOne
 #endif
         int c = file.get();
 
-        while (c != EOF)
-        {
-            if (c != '|')
-            {
+        while (c != EOF) {
+            if (c != '|') {
                 std::string failstring = "Database file format is not "
                                          "correct: Invalid delimiter at line " +
                                          std::to_string(line) + ":" +
@@ -74,8 +67,7 @@ struct FormatOne
 
                 throw std::logic_error(failstring);
             }
-            else
-            {
+            else {
                 c = file.get();
             }
 
@@ -83,13 +75,10 @@ struct FormatOne
             fields.reserve(columns.size);
             size_t field = 0;
 
-            while (c != '\n')
-            {
-                if (c == '\r')
-                {
+            while (c != '\n') {
+                if (c == '\r') {
 #ifdef DEBUG
-                    if (!debug_crlf)
-                    {
+                    if (!debug_crlf) {
                         debug_puts("CRLF detected",
                                    "InMemoryFileParser.deserialize");
                         debug_crlf = true;
@@ -99,8 +88,7 @@ struct FormatOne
                     continue;
                 }
 
-                if (field > columns.size)
-                {
+                if (field > columns.size) {
                     std::string failstring = "Database file format is not "
                                              "correct: Extra field at line " +
                                              std::to_string(line) + ":" +
@@ -109,14 +97,12 @@ struct FormatOne
                     throw std::logic_error(failstring);
                 }
 
-                if (c == '|')
-                {
+                if (c == '|') {
                     fields.push_back(temp);
                     temp.clear();
                     ++field;
                 }
-                else
-                {
+                else {
                     temp += c;
                 }
 
@@ -124,8 +110,7 @@ struct FormatOne
                 ++pos;
             }
 
-            if (field != columns.size)
-            {
+            if (field != columns.size) {
                 std::string failstring =
                     "Database file format is not "
                     "correct: Invalid number of fields (" +
@@ -140,12 +125,9 @@ struct FormatOne
             debug_putv(fields, "InMemoryFileParser.deserealize");
 #endif
 
-            for (size_t i = 0; i < columns.size; ++i)
-            {
-                if (columns.types[i] & FID)
-                {
-                    if (!(columns.types[i] & FB_INT))
-                    {
+            for (size_t i = 0; i < columns.size; ++i) {
+                if (columns.types[i] & FID) {
+                    if (!(columns.types[i] & FB_INT)) {
                         std::string failstring = "Database file format is not "
                                                  "correct: Field with modifier "
                                                  "'id' is not of type 'b_int', "
@@ -157,12 +139,10 @@ struct FormatOne
                         throw std::logic_error(failstring);
                     }
                 }
-                if (columns.types[i] & FINT)
-                {
+                if (columns.types[i] & FINT) {
                     size_t num = cm_parsei(fields[i]);
 
-                    if (num == COMMON_INVALID_NUMBERI)
-                    {
+                    if (num == COMMON_INVALID_NUMBERI) {
                         std::string failstring =
                             "Database file format is not "
                             "correct: Field of type 'int' is not a number, "
@@ -177,12 +157,10 @@ struct FormatOne
                         parsed_columns[i]->get_data())
                         ->push_back(num);
                 }
-                else if (columns.types[i] & FB_INT)
-                {
+                else if (columns.types[i] & FB_INT) {
                     size_t num = cm_parsell(fields[i]);
 
-                    if (num == COMMON_INVALID_NUMBERLL)
-                    {
+                    if (num == COMMON_INVALID_NUMBERLL) {
                         std::string failstring =
                             "Database file format is not "
                             "correct: Field of type 'b_int' is not a number, "
@@ -198,8 +176,7 @@ struct FormatOne
                         ->push_back(num);
                 }
 
-                else if (columns.types[i] & FSTR)
-                {
+                else if (columns.types[i] & FSTR) {
                     static_cast<std::vector<std::string> *>(
                         parsed_columns[i]->get_data())
                         ->push_back(fields[i]);
@@ -219,40 +196,33 @@ struct FormatOne
     {
         std::string header = "tdb1\n";
 
-        for (const ParserColumn *c : data)
-        {
+        for (const ParserColumn *c : data) {
             header += '|';
 
             int modifiers = c->get_type();
 
             // Write modifiers
-            if (modifiers & FID)
-            {
+            if (modifiers & FID) {
                 header += "id ";
             }
 
-            if (modifiers & FCONST)
-            {
+            if (modifiers & FCONST) {
                 header += "const ";
             }
 
             // Write type
-            switch (modifiers & PARSER_TYPE_MASK)
-            {
+            switch (modifiers & PARSER_TYPE_MASK) {
                 case FINT: {
                     header += "int ";
-                }
-                break;
+                } break;
 
                 case FB_INT: {
                     header += "b_int ";
-                }
-                break;
+                } break;
 
                 case FSTR: {
                     header += "str ";
-                }
-                break;
+                } break;
             }
 
             // Write name. No space at the end.
@@ -275,8 +245,7 @@ struct FormatOne
 
         size_t column_count = data.size();
 
-        if (!data[0])
-        {
+        if (!data[0]) {
             std::logic_error(
                 "In FormatOne.serialize(), there is no elements in data");
         }
@@ -286,35 +255,28 @@ struct FormatOne
         std::vector<int> types;
         types.reserve(column_count);
 
-        for (const ParserColumn *c : data)
-        {
+        for (const ParserColumn *c : data) {
             types.push_back(c->get_type());
         }
 
-        for (size_t row = 0; row < row_count; ++row)
-        {
-            for (size_t col = 0; col < column_count; ++col)
-            {
+        for (size_t row = 0; row < row_count; ++row) {
+            for (size_t col = 0; col < column_count; ++col) {
                 file << '|';
                 ParserColumn *c = data[col];
                 void *item      = c->get(row);
 
-                switch (c->get_type() & PARSER_TYPE_MASK)
-                {
+                switch (c->get_type() & PARSER_TYPE_MASK) {
                     case FINT: {
                         file << *(static_cast<int *>(item));
-                    }
-                    break;
+                    } break;
 
                     case FB_INT: {
                         file << *(static_cast<unsigned long long *>(item));
-                    }
-                    break;
+                    } break;
 
                     case FSTR: {
                         file << *(static_cast<std::string *>(item));
-                    }
-                    break;
+                    } break;
                 }
             }
             file << "|\n";

@@ -10,17 +10,6 @@
 #include "cli.cpp"
 #include "common.cpp"
 
-/*
-    FIXME:
-        - Type check numeric fields when parsing
-        - File creation when there is no file
-        - CRLF parsing for Windows
-        - Rewrite all commands
-    TODO:
-        - ID uniqueness checking.
-        - Arrays
-*/
-
 static bool help        = false;
 static bool help_format = false;
 
@@ -69,32 +58,25 @@ void show_help_format()
 
 void set_flag(const char *s)
 {
-    if (s[0] == '-')
-    {
-        if (s[1] == '?')
-        {
+    if (s[0] == '-') {
+        if (s[1] == '?') {
             help = true;
         }
         // Long flags
-        else if (s[1] == '-')
-        {
-            if (strcmp(s, "--help") == 0)
-            {
+        else if (s[1] == '-') {
+            if (strcmp(s, "--help") == 0) {
                 help = true;
             }
-            else if (strcmp(s, "--help-format") == 0)
-            {
+            else if (strcmp(s, "--help-format") == 0) {
                 help_format = true;
             }
-            else
-            {
+            else {
                 std::cout << "Unknown flag " << s << ". Try '--help'."
                           << std::endl;
                 exit(1);
             }
         }
-        else
-        {
+        else {
             std::cout << "Unknown flag " << s << ". Try '--help'." << std::endl;
             exit(1);
         }
@@ -109,8 +91,7 @@ int main(int argc, char **argv)
     SetConsoleOutputCP(1251);
 #endif
 
-    if (argc < 2)
-    {
+    if (argc < 2) {
         std::cout << "ERROR: Not enough arguments.\n"
                   << "USAGE: " << TOILET_NAME
                   << " <database file>\n"
@@ -121,18 +102,15 @@ int main(int argc, char **argv)
         std::exit(0);
     }
 
-    for (int i = 1; i < argc; ++i)
-    {
+    for (int i = 1; i < argc; ++i) {
         set_flag(argv[i]);
     }
 
-    if (help)
-    {
+    if (help) {
         show_help();
     }
 
-    if (help_format)
-    {
+    if (help_format) {
         show_help_format();
     }
 

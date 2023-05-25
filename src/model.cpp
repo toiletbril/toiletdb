@@ -28,8 +28,7 @@ private:
         // Erase data in all columns
         size_t len = this->columns.size();
 
-        for (size_t i = 0; i < len; ++i)
-        {
+        for (size_t i = 0; i < len; ++i) {
             this->columns[i]->erase(pos);
         }
     }
@@ -69,8 +68,7 @@ public:
     {
         this->parser = new InMemoryFileParser(filename);
 
-        if (!this->parser->exists())
-        {
+        if (!this->parser->exists()) {
             throw std::runtime_error(
                 "In InMemoryModel constructor, there is no such file.");
         }
@@ -122,22 +120,18 @@ public:
         debug_putv(this->indexes, "index");
 #endif
 
-        while (L <= R)
-        {
+        while (L <= R) {
             m = (L + R) / 2;
 
-            if ((*ids)[this->indexes[m]] < id)
-            {
+            if ((*ids)[this->indexes[m]] < id) {
                 L = m + 1;
             }
-            else if ((*ids)[this->indexes[m]] > id)
-            {
+            else if ((*ids)[this->indexes[m]] > id) {
                 // If this would become unsigned,
                 // here needs to be a test that breaks loop when R wraps
                 R = m - 1;
             }
-            else
-            {
+            else {
                 return this->indexes[m];
             }
         }
@@ -154,8 +148,7 @@ public:
 
         size_t column_index = this->column_index(name);
 
-        if (column_index == MODEL_NOT_FOUND)
-        {
+        if (column_index == MODEL_NOT_FOUND) {
             std::string failstring = "In InMemoryModel.search(), Field '" +
                                      name + "' does not exist";
             throw std::logic_error(failstring);
@@ -165,16 +158,13 @@ public:
 
         void *data = this->columns[column_index]->get_data();
 
-        for (size_t i = 0; i < this->size(); ++i)
-        {
+        for (size_t i = 0; i < this->size(); ++i) {
             std::string value;
-            switch (type & PARSER_TYPE_MASK)
-            {
+            switch (type & PARSER_TYPE_MASK) {
                 case FINT: {
                     value = std::to_string(
                         (*(static_cast<std::vector<int> *>(data)))[i]);
-                }
-                break;
+                } break;
                 case FB_INT: {
                     value = std::to_string(
                         (*(static_cast<std::vector<unsigned long long> *>(
@@ -188,8 +178,7 @@ public:
                 }
             }
 
-            if (value.rfind(query, 0) == 0)
-            {
+            if (value.rfind(query, 0) == 0) {
                 result.push_back(pos);
             }
             ++pos;
@@ -204,37 +193,31 @@ public:
     {
         std::vector<void *> result;
 
-        if (pos > this->size())
-        {
+        if (pos > this->size()) {
             throw std::logic_error(
                 "In InMemoryModel.get_row(), pos is larger than data size");
         }
 
-        for (ParserColumn *c : this->columns)
-        {
+        for (ParserColumn *c : this->columns) {
             // This is unbearable
-            switch (c->get_type() & PARSER_TYPE_MASK)
-            {
+            switch (c->get_type() & PARSER_TYPE_MASK) {
                 case FINT: {
                     result.push_back(
                         static_cast<void *>(&(*static_cast<std::vector<int> *>(
                             (*c).get_data()))[pos]));
-                }
-                break;
+                } break;
 
                 case FB_INT: {
                     result.push_back(static_cast<void *>(
                         &(*static_cast<std::vector<unsigned long long> *>(
                             (*c).get_data()))[pos]));
-                }
-                break;
+                } break;
 
                 case FSTR: {
                     result.push_back(static_cast<void *>(
                         &(*static_cast<std::vector<std::string> *>(
                             (*c).get_data()))[pos]));
-                }
-                break;
+                } break;
             }
         }
 
@@ -246,8 +229,7 @@ public:
         std::vector<int> types = this->column_types();
 
         // Ignoring ID
-        if (args.size() != this->column_count() - 1)
-        {
+        if (args.size() != this->column_count() - 1) {
             return false;
         }
 
@@ -256,34 +238,27 @@ public:
         // TODO:
         // This is just typechecking.
         // Surely this can be compressed (Clueless)
-        for (size_t i = 1; i < this->column_count(); ++i)
-        {
-            if (types[i] & FID)
-            {
+        for (size_t i = 1; i < this->column_count(); ++i) {
+            if (types[i] & FID) {
                 continue;
             }
 
-            switch (types[i] & PARSER_TYPE_MASK)
-            {
+            switch (types[i] & PARSER_TYPE_MASK) {
                 case FINT: {
                     int value = cm_parsei(*it++);
 
-                    if (value == COMMON_INVALID_NUMBERI)
-                    {
+                    if (value == COMMON_INVALID_NUMBERI) {
                         return false;
                     }
-                }
-                break;
+                } break;
 
                 case FB_INT: {
                     size_t value = cm_parsell(*it++);
 
-                    if (value == COMMON_INVALID_NUMBERLL)
-                    {
+                    if (value == COMMON_INVALID_NUMBERLL) {
                         return false;
                     }
-                }
-                break;
+                } break;
 
                 default: {
                     ++it;
@@ -294,25 +269,20 @@ public:
         it = args.begin();
 
         // TODO: Doesn't look like a transaction to me
-        for (size_t i = 0; i < this->column_count(); ++i)
-        {
-            if (types[i] & FID)
-            {
+        for (size_t i = 0; i < this->column_count(); ++i) {
+            if (types[i] & FID) {
                 size_t new_id = this->get_next_id();
                 this->columns[i]->add(static_cast<void *>(&new_id));
             }
-            else if (types[i] & FINT)
-            {
+            else if (types[i] & FINT) {
                 int value = cm_parsei(*it++);
                 this->columns[i]->add(static_cast<void *>(&value));
             }
-            else if (types[i] & FB_INT)
-            {
+            else if (types[i] & FB_INT) {
                 unsigned long long value = cm_parsell(*it++);
                 this->columns[i]->add(static_cast<void *>(&value));
             }
-            else if (types[i] & FSTR)
-            {
+            else if (types[i] & FSTR) {
                 this->columns[i]->add(static_cast<void *>(&(*it++)));
             }
         }
@@ -323,8 +293,7 @@ public:
     {
         size_t result = this->search(id);
 
-        if (result != MODEL_NOT_FOUND)
-        {
+        if (result != MODEL_NOT_FOUND) {
             this->erase(result);
             return true;
         }
@@ -334,8 +303,7 @@ public:
 
     void clear()
     {
-        for (ParserColumn *c : this->columns)
-        {
+        for (ParserColumn *c : this->columns) {
             c->clear();
         }
     }
@@ -349,8 +317,7 @@ public:
     {
         std::vector<std::string> names;
 
-        for (ParserColumn *c : this->columns)
-        {
+        for (ParserColumn *c : this->columns) {
             names.push_back(c->get_name());
         }
 
@@ -364,18 +331,15 @@ public:
         size_t column_index = COMMON_INVALID_NUMBERLL;
         size_t j            = 0;
 
-        for (const ParserColumn *col : this->columns)
-        {
-            if (col->get_name() == name)
-            {
+        for (const ParserColumn *col : this->columns) {
+            if (col->get_name() == name) {
                 column_index = j;
                 break;
             }
             ++j;
         }
 
-        if (column_index == COMMON_INVALID_NUMBERLL)
-        {
+        if (column_index == COMMON_INVALID_NUMBERLL) {
             return MODEL_NOT_FOUND;
         }
 
@@ -385,8 +349,7 @@ public:
     const std::vector<int> column_types() const
     {
         std::vector<int> types;
-        for (ParserColumn *c : this->columns)
-        {
+        for (ParserColumn *c : this->columns) {
             types.push_back(c->get_type());
         }
 
@@ -395,8 +358,7 @@ public:
 
     size_t size() const
     {
-        if (!this->columns[0])
-        {
+        if (!this->columns[0]) {
             throw std::logic_error(
                 "In InMemoryModel.size(), there is no columns");
         }

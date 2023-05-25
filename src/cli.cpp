@@ -55,8 +55,7 @@ static std::string cli_concat_args(std::vector<std::string> &args, size_t pos)
     size_t len         = args.size();
     std::string result = args[pos];
 
-    for (size_t i = pos + 1; i < len; ++i)
-    {
+    for (size_t i = pos + 1; i < len; ++i) {
         result += ' ' + args[i];
     }
 
@@ -73,38 +72,30 @@ static std::vector<std::string> cli_split_args(const std::string &s)
 
     bool in_quotes = false;
 
-    for (size_t i = 0; i < len; ++i)
-    {
+    for (size_t i = 0; i < len; ++i) {
         char c = s.at(i);
 
-        if (in_quotes)
-        {
-            if (c == '"')
-            {
+        if (in_quotes) {
+            if (c == '"') {
                 in_quotes = false;
                 continue;
             }
             temp += c;
         }
-        else if (c == '"')
-        {
+        else if (c == '"') {
             in_quotes = true;
         }
-        else if (c == ' ')
-        {
-            if (!temp.empty())
-            {
+        else if (c == ' ') {
+            if (!temp.empty()) {
                 result.push_back(temp);
             }
             temp.clear();
         }
-        else
-        {
+        else {
             temp += c;
         }
     }
-    if (!temp.empty())
-    {
+    if (!temp.empty()) {
         result.push_back(temp);
     }
 
@@ -118,27 +109,22 @@ static std::vector<std::string> cli_split_args(const std::string &s)
 // Prints a prompt which asks to input Y or N.
 static bool cli_y_or_n()
 {
-    while (true)
-    {
+    while (true) {
         std::cout << "\tY or N >> ";
         std::fflush(stdout);
 
         char answer = std::tolower(std::fgetc(stdin));
 
         // Discard the rest of the line.
-        while (fgetc(stdin) != '\n')
-        {}
+        while (fgetc(stdin) != '\n') {}
 
-        if (answer == 'y')
-        {
+        if (answer == 'y') {
             return true;
         }
-        else if (answer == 'n')
-        {
+        else if (answer == 'n') {
             return false;
         }
-        else
-        {
+        else {
             std::cout << "ERROR: Invalid character." << std::endl;
         }
     }
@@ -150,12 +136,9 @@ static bool cli_y_or_n()
 static char cli_forbiddenchar(std::vector<std::string> &args)
 {
     std::string forbidden_chars = "|[]";
-    for (const std::string &a : args)
-    {
-        for (char const &c : a)
-        {
-            if (forbidden_chars.find(c) != std::string::npos)
-            {
+    for (const std::string &a : args) {
+        for (char const &c : a) {
+            if (forbidden_chars.find(c) != std::string::npos) {
                 return c;
             }
         }
@@ -167,10 +150,8 @@ static char cli_forbiddenchar(std::string &arg)
 {
     std::string forbidden_chars = "|[]";
 
-    for (char const &c : arg)
-    {
-        if (forbidden_chars.find(c) != std::string::npos)
-        {
+    for (char const &c : arg) {
+        if (forbidden_chars.find(c) != std::string::npos) {
             return c;
         }
     }
@@ -190,33 +171,27 @@ static void cli_put_table_header(InMemoryModel &model)
 
     size_t padding = 0;
 
-    for (size_t i = 0; i < len; ++i)
-    {
-        if (types[i] & FINT)
-        {
+    for (size_t i = 0; i < len; ++i) {
+        if (types[i] & FINT) {
             padding = CLI_INTW;
             type << std::left << std::setw(CLI_INTW) << names[i];
         }
-        else if (types[i] & FB_INT)
-        {
+        else if (types[i] & FB_INT) {
             padding = CLI_B_INTW;
             type << std::left << std::setw(CLI_B_INTW) << names[i];
         }
-        else if (types[i] & FSTR)
-        {
+        else if (types[i] & FSTR) {
             padding = CLI_STRW;
             type << std::left << std::setw(CLI_STRW) << names[i];
         }
 
         std::string temp;
 
-        if (types[i] & FID)
-        {
+        if (types[i] & FID) {
             temp += "[ID]";
         }
 
-        if (types[i] & FCONST)
-        {
+        if (types[i] & FCONST) {
             temp += "[CONST]";
         }
 
@@ -244,63 +219,51 @@ static void cli_put_row(InMemoryModel &model, const size_t &pos)
 
     size_t len = types.size();
 
-    for (size_t i = 0; i < len; ++i)
-    {
-        switch (types[i] & PARSER_TYPE_MASK)
-        {
+    for (size_t i = 0; i < len; ++i) {
+        switch (types[i] & PARSER_TYPE_MASK) {
             case FINT: {
                 // Int always should fit
                 continue;
-            }
-            break;
+            } break;
 
             case FB_INT: {
-                if (*static_cast<unsigned long long *>(row[i]) >= 100000000000)
-                {
+                if (*static_cast<unsigned long long *>(row[i]) >=
+                    100000000000) {
                     should_wrap = true;
                     break;
                 }
-            }
-            break;
+            } break;
 
             case FSTR: {
                 if (static_cast<std::string *>(row[i])->size() >
-                    CLI_STRW - CLI_MARGIN)
-                {
+                    CLI_STRW - CLI_MARGIN) {
                     should_wrap = true;
                     break;
                 }
-            }
-            break;
+            } break;
 
             default:
                 std::logic_error("Unreachable");
         }
     }
 
-    if (!should_wrap)
-    {
-        for (size_t i = 0; i < len; ++i)
-        {
-            switch (types[i] & PARSER_TYPE_MASK)
-            {
+    if (!should_wrap) {
+        for (size_t i = 0; i < len; ++i) {
+            switch (types[i] & PARSER_TYPE_MASK) {
                 case FINT: {
                     std::cout << std::left << std::setw(CLI_INTW)
                               << *static_cast<int *>(row[i]);
-                }
-                break;
+                } break;
 
                 case FB_INT: {
                     std::cout << std::left << std::setw(CLI_B_INTW)
                               << *static_cast<unsigned long long *>(row[i]);
-                }
-                break;
+                } break;
 
                 case FSTR: {
                     std::cout << std::left << std::setw(CLI_STRW)
                               << *static_cast<std::string *>(row[i]);
-                }
-                break;
+                } break;
 
                 default:
                     std::logic_error("Unreachable");
@@ -308,20 +271,16 @@ static void cli_put_row(InMemoryModel &model, const size_t &pos)
         }
         std::cout << '\n';
     }
-    else
-    {
+    else {
         std::vector<int> lengths;
         std::vector<std::string> cols;
 
-        if (line > 1)
-        {
+        if (line > 1) {
             wrap_buf << '\n';
         }
 
-        for (size_t i = 0; i < len; ++i)
-        {
-            switch (types[i] & PARSER_TYPE_MASK)
-            {
+        for (size_t i = 0; i < len; ++i) {
+            switch (types[i] & PARSER_TYPE_MASK) {
                 case FINT: {
                     // Int always should fit
                     int n         = *static_cast<int *>(row[i]);
@@ -329,8 +288,7 @@ static void cli_put_row(InMemoryModel &model, const size_t &pos)
 
                     cols.push_back(std::to_string(n));
                     lengths.push_back(s.size());
-                }
-                break;
+                } break;
 
                 case FB_INT: {
                     unsigned long long n =
@@ -340,37 +298,30 @@ static void cli_put_row(InMemoryModel &model, const size_t &pos)
 
                     cols.push_back(std::to_string(n));
                     lengths.push_back(s.size());
-                }
-                break;
+                } break;
 
                 case FSTR: {
                     std::string s = *static_cast<std::string *>(row[i]);
 
                     cols.push_back(s);
                     lengths.push_back(s.size());
-                }
-                break;
+                } break;
 
                 default:
                     std::logic_error("Unreachable");
             }
         }
 
-        while (should_wrap)
-        {
-            if (line > 1)
-            {
+        while (should_wrap) {
+            if (line > 1) {
                 wrap_buf << "\n";
             }
 
-            for (size_t i = 0; i < len; ++i)
-            {
-                switch (types[i] & PARSER_TYPE_MASK)
-                {
+            for (size_t i = 0; i < len; ++i) {
+                switch (types[i] & PARSER_TYPE_MASK) {
                     case FINT: {
                         wrap_buf << std::left << std::setw(CLI_INTW) << ' ';
-                    }
-                    break;
+                    } break;
 
                     case FB_INT: {
                         wrap_buf << std::left << std::setw(CLI_B_INTW)
@@ -381,8 +332,7 @@ static void cli_put_row(InMemoryModel &model, const size_t &pos)
                                          : " ");
 
                         lengths[i] -= CLI_B_INTW;
-                    }
-                    break;
+                    } break;
 
                     case FSTR: {
                         wrap_buf << std::left << std::setw(CLI_STRW)
@@ -393,59 +343,48 @@ static void cli_put_row(InMemoryModel &model, const size_t &pos)
                                          : " ");
 
                         lengths[i] -= CLI_STRW;
-                    }
-                    break;
+                    } break;
                 }
             }
 
             should_wrap = false;
 
-            for (size_t i = 0; i < len; ++i)
-            {
-                switch (types[i] & PARSER_TYPE_MASK)
-                {
+            for (size_t i = 0; i < len; ++i) {
+                switch (types[i] & PARSER_TYPE_MASK) {
                     case FINT: {
                         continue;
-                    }
-                    break;
+                    } break;
 
                     case FB_INT: {
                         should_wrap =
                             should_wrap || lengths[i] > CLI_B_INTW - CLI_MARGIN;
-                    }
-                    break;
+                    } break;
 
                     case FSTR: {
                         should_wrap =
                             should_wrap || lengths[i] > CLI_STRW - CLI_MARGIN;
-                    }
-                    break;
+                    } break;
                 }
             }
 
             ++line;
         }
 
-        for (size_t i = 0; i < len; ++i)
-        {
-            switch (types[i] & PARSER_TYPE_MASK)
-            {
+        for (size_t i = 0; i < len; ++i) {
+            switch (types[i] & PARSER_TYPE_MASK) {
                 case FINT: {
                     std::cout << std::left << std::setw(CLI_INTW) << cols[i];
-                }
-                break;
+                } break;
 
                 case FB_INT: {
                     std::cout << std::left << std::setw(CLI_B_INTW)
                               << cols[i].substr(0, CLI_B_INTW - CLI_MARGIN);
-                }
-                break;
+                } break;
 
                 case FSTR: {
                     std::cout << std::left << std::setw(CLI_STRW)
                               << cols[i].substr(0, CLI_STRW - CLI_MARGIN);
-                }
-                break;
+                } break;
 
                 default:
                     std::logic_error("Unreachable");
@@ -492,14 +431,12 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
 {
     CLI_COMMAND_KIND c = cli_getcommand(args[0]);
 
-    switch (c)
-    {
+    switch (c) {
         case UNKNOWN: {
             std::cout << "ERROR: Unknown command '" << args[0]
                       << "'.\nTry 'help' to see available commands."
                       << std::endl;
-        }
-        break;
+        } break;
 
         case HELP: {
             std::cout << "Available commands:\n"
@@ -516,59 +453,50 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
                          "\tcommit\tsave\t\tSave changes to the file.\n"
                          "\trevert\treverse\t\tRevert uncommited changes."
                       << std::endl;
-        }
-        break;
+        } break;
 
         case EXIT: {
             std::cout << "Saving..." << std::endl;
             model.write_file();
             std::cout << "Exiting...\n" << std::endl;
             std::exit(0);
-        }
-        break;
+        } break;
 
         case EXIT_NO_SAVE: {
             std::cout << "Exiting...\n" << std::endl;
             std::exit(0);
-        }
-        break;
+        } break;
 
         case LIST: {
             size_t len = model.size();
 
-            if (len > 1000)
-            {
+            if (len > 1000) {
                 std::cout << "Database has over 1 000 entries (" << len
                           << ").\n"
                              "This can take a long time.\n"
                              "Do you really want to list them all?\n";
 
-                if (!cli_y_or_n())
-                {
+                if (!cli_y_or_n()) {
                     return;
                 }
             }
 
             cli_put_table_header(model);
 
-            for (size_t i = 0; i < len; ++i)
-            {
+            for (size_t i = 0; i < len; ++i) {
                 cli_put_row(model, i);
             }
 
             std::fflush(stdout);
-        }
-        break;
+        } break;
 
         case QUERY: {
-            if (args.size() < 3)
-            {
+            if (args.size() < 3) {
                 std::string fields;
                 size_t len                     = model.column_count();
                 std::vector<std::string> names = model.column_names();
 
-                for (size_t i = 0; i < len - 1; ++i)
-                {
+                for (size_t i = 0; i < len - 1; ++i) {
                     fields += "'" + names[i] + "', ";
                 }
                 fields += "'" + names[len - 1] + "'";
@@ -584,12 +512,10 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
             std::string query = cli_concat_args(args, 2);
 
             // If columns specified is of type 'id', use binary search.
-            if (model.column_types()[model.column_index(args[1])] & FID)
-            {
+            if (model.column_types()[model.column_index(args[1])] & FID) {
                 size_t value = cm_parsell(query);
                 //
-                if (value == COMMON_INVALID_NUMBERLL)
-                {
+                if (value == COMMON_INVALID_NUMBERLL) {
                     std::cout << "ERROR: ID is not a number." << std::endl;
                     return;
                 }
@@ -598,8 +524,7 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
 
                 cli_put_table_header(model);
 
-                if (pos != MODEL_NOT_FOUND)
-                {
+                if (pos != MODEL_NOT_FOUND) {
                     cli_put_row(model, model.search(value));
                 }
 
@@ -611,35 +536,29 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
             std::vector<size_t> positions = model.search(args[1], query);
 
             cli_put_table_header(model);
-            for (const size_t &pos : positions)
-            {
+            for (const size_t &pos : positions) {
                 cli_put_row(model, pos);
             }
 
             std::fflush(stdout);
-        }
-        break;
+        } break;
 
         case DBSIZE: {
             std::cout << "There are " << model.size() << " rows in database."
                       << std::endl;
-        }
-        break;
+        } break;
 
         case ADD: {
             size_t len             = model.column_count();
             std::vector<int> types = model.column_types();
 
-            if (args.size() - 1 != model.column_count() - 1)
-            {
+            if (args.size() - 1 != model.column_count() - 1) {
                 std::string fields;
                 std::vector<std::string> names = model.column_names();
 
-                for (size_t i = 0; i < len - 1; ++i)
-                {
+                for (size_t i = 0; i < len - 1; ++i) {
                     // ID field will be added automatically
-                    if (types[i] & FID)
-                    {
+                    if (types[i] & FID) {
                         continue;
                     }
                     fields += "<" + names[i] + "> ";
@@ -663,8 +582,7 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
 
             char errc = cli_forbiddenchar(args);
 
-            if (errc)
-            {
+            if (errc) {
                 std::cout << "ERROR: Forbidden character '" << errc << "'."
                           << std::endl;
                 return;
@@ -676,20 +594,16 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
 
             bool result = model.add(args);
 
-            if (result)
-            {
+            if (result) {
                 std::cout << "Row added successfully." << std::endl;
             }
-            else
-            {
+            else {
                 std::cout << "Something is wrong." << std::endl;
             }
-        }
-        break;
+        } break;
 
         case REMOVE: {
-            if (args.size() != 2)
-            {
+            if (args.size() != 2) {
                 std::cout << "ERROR: Invalid number of arguments.\n"
                              "Usage: remove <ID>\n"
                              "You can get ID by using 'list' or 'search'."
@@ -699,8 +613,7 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
 
             size_t n = cm_parsell(args[1]);
 
-            if (n == COMMON_INVALID_NUMBERLL)
-            {
+            if (n == COMMON_INVALID_NUMBERLL) {
                 std::cout << "ERROR: Invalid ID." << std::endl;
                 return;
             }
@@ -712,29 +625,24 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
             else
                 std::cout << "Could not find row with specified ID."
                           << std::endl;
-        }
-        break;
+        } break;
 
         case EDIT: {
             std::vector<int> types = model.column_types();
 
-            if (args.size() < 4)
-            {
+            if (args.size() < 4) {
                 std::string fields;
                 size_t len                     = model.column_count();
                 std::vector<std::string> names = model.column_names();
 
-                for (size_t i = 0; i < len - 1; ++i)
-                {
+                for (size_t i = 0; i < len - 1; ++i) {
                     // ID field will be added automatically
-                    if (types[i] & FCONST)
-                    {
+                    if (types[i] & FCONST) {
                         continue;
                     }
                     fields += "'" + names[i] + "' ";
                 }
-                if (!(types[len - 1] & FCONST))
-                {
+                if (!(types[len - 1] & FCONST)) {
                     fields += "'" + names[len - 1] + "'";
                 }
 
@@ -748,24 +656,21 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
 
             size_t n = cm_parsell(args[1]);
 
-            if (n == COMMON_INVALID_NUMBERLL)
-            {
+            if (n == COMMON_INVALID_NUMBERLL) {
                 std::cout << "ERROR: ID is not a number." << std::endl;
                 return;
             }
 
             size_t pos = model.search(n);
 
-            if (pos == MODEL_NOT_FOUND)
-            {
+            if (pos == MODEL_NOT_FOUND) {
                 std::cout << "ERROR: Invalid ID." << std::endl;
                 return;
             }
 
             size_t column_index = model.column_index(args[2]);
 
-            if (column_index == MODEL_NOT_FOUND)
-            {
+            if (column_index == MODEL_NOT_FOUND) {
                 std::cout << "Invalid field '" << args[2] << "'" << std::endl;
             }
 
@@ -773,8 +678,7 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
 
             char errc = cli_forbiddenchar(value);
 
-            if (errc)
-            {
+            if (errc) {
                 std::cout << "ERROR: Forbidden character '" << errc << "'."
                           << std::endl;
                 return;
@@ -782,48 +686,41 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
 
             void *data = (model.get_row(pos))[column_index];
 
-            if (types[column_index] & FCONST)
-            {
+            if (types[column_index] & FCONST) {
                 std::cout << "ERROR: Can not edit value with 'const' modifier."
                           << std::endl;
 
                 return;
             }
 
-            switch (types[column_index] & PARSER_TYPE_MASK)
-            {
+            switch (types[column_index] & PARSER_TYPE_MASK) {
                 case FINT: {
                     int number = cm_parsei(value);
 
-                    if (n == COMMON_INVALID_NUMBERI)
-                    {
+                    if (n == COMMON_INVALID_NUMBERI) {
                         std::cout << "ERROR: Value is not a number."
                                   << std::endl;
                         return;
                     }
 
                     *static_cast<int *>(data) = number;
-                }
-                break;
+                } break;
 
                 case FB_INT: {
                     unsigned long long number = cm_parsell(value);
 
-                    if (n == COMMON_INVALID_NUMBERLL)
-                    {
+                    if (n == COMMON_INVALID_NUMBERLL) {
                         std::cout << "ERROR: Value is not a number."
                                   << std::endl;
                         return;
                     }
 
                     *static_cast<unsigned long long *>(data) = number;
-                }
-                break;
+                } break;
 
                 case FSTR: {
                     *static_cast<std::string *>(data) = value;
-                }
-                break;
+                } break;
             }
 
             cli_put_table_header(model);
@@ -839,20 +736,17 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
 
             model.clear();
             std::cout << "Database has been erased." << std::endl;
-        }
-        break;
+        } break;
 
         case COMMIT: {
             std::cout << "Saving..." << std::endl;
             model.write_file();
-        }
-        break;
+        } break;
 
         case REVERT: {
             std::cout << "Reverting changes..." << std::endl;
             model.reread_file();
-        }
-        break;
+        } break;
     }
 }
 
@@ -860,8 +754,7 @@ void cli_loop(const char *filepath)
 {
     int err = std::setvbuf(stdout, NULL, _IOLBF, 1024);
 
-    if (err)
-    {
+    if (err) {
         std::cout << "Could not enable bufferin for output.\nPlease buy more "
                      "memory :c"
                   << std::endl;
@@ -870,29 +763,25 @@ void cli_loop(const char *filepath)
 
     InMemoryModel *model;
 
-    try
-    {
+    try {
         std::cout << "Opening '" << filepath << "'..." << std::endl;
         model = new InMemoryModel(filepath);
     }
-    catch (std::ios::failure &e)
-    {
+    catch (std::ios::failure &e) {
         // iostream error's .what() method returns weird string at the end
         std::cout << filepath << ": Could not open file: " << strerror(errno)
                   << std::endl;
         std::exit(1);
     }
     // Logic errors while opening should be parsing errors.
-    catch (std::logic_error &e)
-    {
+    catch (std::logic_error &e) {
         std::cout << filepath << ": Parsing error: " << e.what()
                   << "\n"
                      "Try '--help-format' to see help for database format."
                   << std::endl;
         exit(1);
     }
-    catch (std::runtime_error &e)
-    {
+    catch (std::runtime_error &e) {
 #ifdef DEBUG
         debug_puts(e.what(), "cli_loop");
 #endif
@@ -912,36 +801,30 @@ void cli_loop(const char *filepath)
                  "Try 'help' to see available commands."
               << std::endl;
 
-    while (true)
-    {
+    while (true) {
         std::cout << "\n" << filename << "# ";
 
         static std::string line;
         std::getline(std::cin, line);
 
-        if (line.empty())
-        {
+        if (line.empty()) {
             continue;
         }
 
         std::vector<std::string> args = cli_split_args(line);
 
-        try
-        {
+        try {
             cli_exec(*model, args);
         }
         // Logic exceptions at execution should be recoverable errors.
-        catch (std::logic_error &e)
-        {
+        catch (std::logic_error &e) {
             std::cout << "Logic error: " << e.what() << std::endl;
         }
-        catch (std::ios::failure &e)
-        {
+        catch (std::ios::failure &e) {
             std::cout << "IO error: " << strerror(errno) << std::endl;
             std::exit(1);
         }
-        catch (std::runtime_error &e)
-        {
+        catch (std::runtime_error &e) {
             std::cout << "Runtime error: " << e.what() << std::endl;
             std::exit(1);
         }

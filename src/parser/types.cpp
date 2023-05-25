@@ -91,8 +91,7 @@ public:
 
     void *get(size_t pos)
     {
-        if (pos >= this->size())
-        {
+        if (pos >= this->size()) {
             throw std::logic_error("In ParserColumn, pos > size of vector");
         }
 
@@ -157,8 +156,7 @@ public:
 
     void *get(size_t pos)
     {
-        if (pos >= this->size())
-        {
+        if (pos >= this->size()) {
             throw std::logic_error("In ParserColumn, pos > size of vector");
         }
 
@@ -223,8 +221,7 @@ public:
 
     void *get(size_t pos)
     {
-        if (pos >= this->size())
-        {
+        if (pos >= this->size()) {
             throw std::logic_error("In ParserColumn, pos > size of vector");
         }
 
