@@ -13,8 +13,9 @@
 /*
     FIXME:
         - Type check numeric fields when parsing
-        - File creation
-        - CRLF parsing
+        - File creation when there is no file
+        - CRLF parsing for Windows
+        - Rewrite all commands
     TODO:
         - ID uniqueness checking.
         - Arrays

@@ -14,12 +14,12 @@
 #include "format_one.cpp"
 #include "types.cpp"
 
-// File format v002:
+// File format 1:
 // 1    tdb002
 // 2    |[modifier] <type> <name>|...
 //
-// Modifiers: ID (id), Constant (const)
-// Types: Number (int), Big Number (b_int), String (str)
+// Modifiers: ID (id), constant (const)
+// Types: Number (int), big unsigned number (b_int), string (str)
 //
 // There should be at least one field with 'id' modifier.
 // Only one field should have 'id' modifier.

@@ -33,28 +33,30 @@ struct FormatOne
 
         for (size_t i = 0; i < columns.size; ++i)
         {
-            if (columns.types[i] & FINT)
+            int type = columns.types[i];
+
+            if (type & FINT)
             {
-                ParserColumn *v = new ParserColumnInt(names[i]);
+                ParserColumn *v = new ParserColumnInt(names[i], type);
                 parsed_columns.push_back(v);
             }
-
-            if (columns.types[i] & FB_INT)
+            else if (type & FB_INT)
             {
-                ParserColumn *v = new ParserColumnB_Int(names[i]);
+                ParserColumn *v = new ParserColumnB_Int(names[i], type);
                 parsed_columns.push_back(v);
             }
-
-            if (columns.types[i] & FSTR)
+            else if (type & FSTR)
             {
-                ParserColumn *v = new ParserColumnStr(names[i]);
+                ParserColumn *v = new ParserColumnStr(names[i], type);
                 parsed_columns.push_back(v);
             }
         }
 
         std::string temp;
 
-        size_t line = 1;
+        // Data starts from third line.
+        // First line is magic, second is types.
+        size_t line = 3;
         size_t pos  = 1;
 #ifdef DEBUG
         bool debug_crlf = false;
@@ -143,14 +145,15 @@ struct FormatOne
                 if (columns.types[i] & FINT)
                 {
                     size_t num = cm_parsei(fields[i]);
-                    if (num == COMMON_INVALID_NUMBERLL)
+
+                    if (num == COMMON_INVALID_NUMBERI)
                     {
                         std::string failstring =
                             "Database file format is not "
-                            "correct: b_int field is not a number, "
+                            "correct: Field of type 'int' is not a number, "
                             "line " +
                             std::to_string(line) + ", field " +
-                            std::to_string(i);
+                            std::to_string(i + 1);
 
                         throw std::logic_error(failstring);
                     }
@@ -163,14 +166,15 @@ struct FormatOne
                 else if (columns.types[i] & FB_INT)
                 {
                     size_t num = cm_parsell(fields[i]);
-                    if (num == COMMON_INVALID_NUMBERI)
+
+                    if (num == COMMON_INVALID_NUMBERLL)
                     {
                         std::string failstring =
                             "Database file format is not "
-                            "correct: b_int field is not a number, "
+                            "correct: Field of type 'b_int' is not a number, "
                             "line " +
                             std::to_string(line) + ", field " +
-                            std::to_string(i);
+                            std::to_string(i + 1);
 
                         throw std::logic_error(failstring);
                     }
@@ -196,9 +200,106 @@ struct FormatOne
         return parsed_columns;
     }
 
-    // Save vector of students from memory into file.
-    static void serialize(std::fstream &file, std::vector<ParserColumn *> data)
+    static void write_header(std::fstream &file,
+                             const std::vector<ParserColumn *> &data)
     {
-        throw std::logic_error("TODO");
+        std::string header = "tdb1\n";
+
+        for (const ParserColumn *c : data)
+        {
+            header += '|';
+
+            int modifiers = c->get_type();
+
+            // Write modifiers
+            if (modifiers & FID)
+            {
+                header += "id ";
+            }
+
+            if (modifiers & FCONST)
+            {
+                header += "const ";
+            }
+
+            // Write type
+            switch (modifiers & PARSER_TYPE_MASK)
+            {
+                case FINT: {
+                    header += "int ";
+                }
+                break;
+
+                case FB_INT: {
+                    header += "b_int ";
+                }
+                break;
+
+                case FSTR: {
+                    header += "str ";
+                }
+                break;
+            }
+
+            // Write name. No space at the end.
+            header += c->get_name();
+        }
+        header += '|';
+
+        file << header << std::endl;
+    }
+
+    // Save vector of students from memory into file.
+    static void serialize(std::fstream &file,
+                          const std::vector<ParserColumn *> &data)
+    {
+        FormatOne::write_header(file, data);
+
+        size_t column_count = data.size();
+
+        if (!data[0])
+        {
+            std::logic_error(
+                "In FormatOne.serialize(), there is no elements in data");
+        }
+
+        size_t row_count = data[0]->size();
+
+        std::vector<int> types;
+        types.reserve(column_count);
+
+        for (const ParserColumn *c : data)
+        {
+            types.push_back(c->get_type());
+        }
+
+        for (size_t row = 0; row < row_count; ++row)
+        {
+            for (size_t col = 0; col < column_count; ++col)
+            {
+                file << '|';
+                ParserColumn *c = data[col];
+                void *item      = c->get(row);
+
+                switch (c->get_type() & PARSER_TYPE_MASK)
+                {
+                    case FINT: {
+                        file << *(static_cast<int *>(item));
+                    }
+                    break;
+
+                    case FB_INT: {
+                        file << *(static_cast<unsigned long long *>(item));
+                    }
+                    break;
+
+                    case FSTR: {
+                        file << *(static_cast<std::string *>(item));
+                    }
+                    break;
+                }
+            }
+            file << "|\n";
+        }
     }
 };
