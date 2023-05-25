@@ -341,7 +341,7 @@ static void cli_put_row(InMemoryModel &model, const size_t &pos)
                                                 CLI_B_INTW - CLI_MARGIN)
                                          : " ");
 
-                        lengths[i] -= CLI_B_INTW - CLI_MARGIN;
+                        lengths[i] -= CLI_B_INTW;
                     }
                     break;
 
@@ -353,7 +353,7 @@ static void cli_put_row(InMemoryModel &model, const size_t &pos)
                                                 CLI_STRW - CLI_MARGIN)
                                          : " ");
 
-                        lengths[i] -= (CLI_STRW - CLI_MARGIN);
+                        lengths[i] -= CLI_STRW;
                     }
                     break;
                 }
@@ -413,7 +413,7 @@ static void cli_put_row(InMemoryModel &model, const size_t &pos)
             }
         }
 
-        std::cout << wrap_buf.str() << "\n";
+        std::cout << '\n' << wrap_buf.str() << '\n';
     }
 }
 

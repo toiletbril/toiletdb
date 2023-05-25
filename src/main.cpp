@@ -5,7 +5,7 @@
 
 #include <ostream>
 
-#define DEBUG
+//#define DEBUG
 
 #include "cli.cpp"
 #include "common.cpp"
@@ -13,7 +13,6 @@
 /*
     FIXME:
         - Type check numeric fields when parsing
-        - Word wrapping
         - File creation
         - CRLF parsing
     TODO:

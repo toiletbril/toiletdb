@@ -2,6 +2,7 @@
 
 #include <cctype>
 #include <string>
+#include <climits>
 
 #define TOILET_VERSION "1.0.0"
 #define TOILET_NAME "toiletdb"
