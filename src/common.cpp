@@ -4,7 +4,7 @@
 #include <climits>
 #include <string>
 
-#define TOILET_VERSION "1.0.0"
+#define TOILET_VERSION "1.0.1"
 #define TOILET_NAME "toiletdb"
 #define TOILET_GITHUB "<https://github.com/toiletbril>"
 
