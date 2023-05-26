@@ -1,8 +1,8 @@
 # TODO:
 - Important:
-    - Test all of this
+    - Test all of this.
+    - Make header files.
 - Not important:
-    - Good error reporting.
-    - ID uniqueness checking.
+    - Dynamic ID uniqueness checking.
     - When there is no file, open up a table creator.
     - Arrays.
