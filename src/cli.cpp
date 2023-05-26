@@ -29,6 +29,7 @@ enum CLI_COMMAND_KIND
     EXIT_NO_SAVE,
     QUERY,
     LIST,
+    LIST_TYPES,
     DBSIZE,
     ADD,
     REMOVE,
@@ -169,41 +170,61 @@ static void cli_put_table_header(InMemoryModel &model)
 
     size_t len = names.size();
 
-    std::stringstream type;
     std::stringstream modifier;
+    std::stringstream type;
+    std::stringstream name;
 
     size_t padding = 0;
 
     for (size_t i = 0; i < len; ++i) {
         if (types[i] & FINT) {
             padding = CLI_INTW;
-            type << std::left << std::setw(CLI_INTW) << names[i];
+            name << std::left << std::setw(CLI_INTW) << names[i];
         }
         else if (types[i] & FB_INT) {
             padding = CLI_B_INTW;
-            type << std::left << std::setw(CLI_B_INTW) << names[i];
+            name << std::left << std::setw(CLI_B_INTW) << names[i];
         }
         else if (types[i] & FSTR) {
             padding = CLI_STRW;
-            type << std::left << std::setw(CLI_STRW) << names[i];
+            name << std::left << std::setw(CLI_STRW) << names[i];
         }
+
+        // Modifiers
 
         std::string temp;
 
         if (types[i] & FID) {
-            temp += "[ID]";
+            temp += "[id]";
         }
 
         if (types[i] & FCONST) {
-            temp += "[CONST]";
+            temp += "[const]";
         }
 
         modifier << std::left << std::setw(padding)
                  << (temp.empty() ? " " : temp);
+
+        temp.clear();
+
+        // Types
+
+        if (types[i] & FINT) {
+            temp = "[int]";
+        }
+        else if (types[i] & FB_INT) {
+            temp = "[b_int]";
+        }
+        else if (types[i] & FSTR) {
+            temp = "[str]";
+        }
+
+        type << std::left << std::setw(padding) << temp;
     }
 
     std::cout << modifier.str() << "\n";
     std::cout << type.str() << "\n";
+    std::cout << name.str() << "\n";
 }
 
 // Prints out a row.
@@ -415,6 +436,8 @@ static CLI_COMMAND_KIND cli_getcommand(std::string &s)
         return QUERY;
     if (s == "list" || s == "ls")
         return LIST;
+    if (s == "types" || s == "lst")
+        return LIST_TYPES;
     if (s == "size")
         return DBSIZE;
     if (s == "add")
@@ -450,7 +473,8 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
                          "\texit  \tq, quit\t\tSave and quit. "
                          "Append '!' to the end to skip saving.\n"
                          "\tsearch\ts\t\tSearch the database.\n"
-                         "\tlist  \tls\t\tList all rows.\n"
+                         "\tlist  \tls\t\tShow all rows.\n"
+                         "\ttypes \tlst\t\tShow only a table header.\n"
                          "\tsize  \t\t\tSee total amount of rows in database.\n"
                          "\tadd   \t\t\tAdd a row to database.\n"
                          "\tremove\trm\t\tRemove a row from database.\n"
@@ -496,6 +520,10 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
             std::fflush(stdout);
         } break;
 
+        case LIST_TYPES: {
+            cli_put_table_header(model);
+        } break;
+
         case QUERY: {
             if (args.size() < 3) {
                 size_t len                     = model.get_column_count();
@@ -508,10 +536,14 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
                 }
                 fields += "'" + names[len - 1] + "'";
 
-                std::cout << "ERROR: Not enough arguments.\n"
-                             "Usage: search <field> <value>\n"
-                             "Available fields: "
-                          << fields << "\n";
+                std::cout
+                    << "ERROR: Not enough arguments.\n"
+                       "Usage: search <field> <value>\n"
+                       "Available fields: "
+                    << fields
+                    << "\n"
+                       "For more information on column types, use 'types'."
+                    << std::endl;
 
                 return;
             }
@@ -519,7 +551,8 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
             std::string query = cli_concat_args(args, 2);
 
             // If column specified has modifier 'id', use binary search.
-            if (model.get_column_types()[model.search_column_index(args[1])] & FID) {
+            if (model.get_column_types()[model.search_column_index(args[1])] &
+                FID) {
                 size_t value = cm_parsell(query);
 
                 if (value == COMMON_INVALID_NUMBERLL) {
@@ -572,15 +605,17 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
                 }
                 fields += "<" + names[len - 1] + ">";
 
-                std::cout << "ERROR: Invalid number of arguments. "
-                          << "(" << len - 1 << " needed, actual "
-                          << args.size() - 1 << ")\n"
-                          << "Usage: add " << fields
-                          << "\n"
-                             "You can put quotes around fields.\n"
-                             "EXAMPLE: Vasiliy \"Ivanov Petrov\" \"Very "
-                             "Cool\" 69420"
-                          << std::endl;
+                std::cout
+                    << "ERROR: Invalid number of arguments. "
+                    << "(" << len - 1 << " needed, actual " << args.size() - 1
+                    << ")\n"
+                    << "Usage: add " << fields
+                    << "\n"
+                       "You can put quotes around fields.\n"
+                       "EXAMPLE: Vasiliy \"Ivanov Petrov\" \"Very "
+                       "Cool\" 69420\n"
+                       "For more information on column types, use 'types'."
+                    << std::endl;
                 return;
             }
 
@@ -599,13 +634,21 @@ static void cli_exec(InMemoryModel &model, std::vector<std::string> &args)
             debug_putv(args, "add() args");
 #endif
 
-            bool result = model.add(args);
+            int err = model.add(args);
 
-            if (result) {
-                std::cout << "Row added successfully." << std::endl;
+            if (!err) {
+                cli_put_table_header(model);
+                cli_put_row(model, model.size() - 1);
             }
             else {
-                std::cout << "ERROR" << std::endl;
+                std::cout << "ERROR: ";
+                if (err == 1) {
+                    std::cout << "Wrong number of arguments." << std::endl;
+                }
+                else if (err == 2 || err == 3) {
+                    std::cout << "Invalid value for numeric field."
+                              << std::endl;
+                }
             }
         } break;
 

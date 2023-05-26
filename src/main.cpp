@@ -5,7 +5,7 @@
 
 #include <ostream>
 
-#define DEBUG
+// #define DEBUG
 
 #include "cli.cpp"
 #include "common.cpp"
