@@ -38,7 +38,8 @@ Available commands:
 	help  	?		See this message.
 	exit  	q, quit		Save and quit. Append '!' to the end to skip saving.
 	search	s		Search the database.
-	list  	ls		List all rows.
+	list  	ls		Show all rows.
+	types 	lst		Show only a table header.
 	size  			See total amount of rows in database.
 	add   			Add a row to database.
 	remove	rm		Remove a row from database.
