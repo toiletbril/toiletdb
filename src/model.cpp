@@ -107,7 +107,7 @@ public:
         // NOTE: Long instead of size_t.
         long L = 0;
         long R = this->index.size();
-        long m = std::floor((L + R) / 2);
+        long m;
 
         std::vector<unsigned long long> *ids =
             static_cast<std::vector<unsigned long long> *>(
