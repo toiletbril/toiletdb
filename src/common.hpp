@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <string>
 
-#define TOILETDB_VERSION "1.0.2"
+#define TOILETDB_VERSION "1.0.3"
 
 #define TDB_NOT_FOUND (size_t)(-1)
 
@@ -28,4 +28,4 @@ void to_lower_pstring(std::string &str);
 
 } // namespace toiletdb
 
-#endif // TOILET_DEBUG_H_
+#endif // TOILET_COMMON_H_

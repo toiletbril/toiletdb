@@ -94,5 +94,5 @@ Available commands:
 
 For testing purposes, you can generate student database file with:
 ```console
-$ python3 testing/makedb.py <count of entries> <filename> [name complexity, number from 1 to 5]
+$ python3 scripts/make_db.py <count of entries> <filename> [name complexity, number from 1 to 5]
 ```

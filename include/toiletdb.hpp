@@ -8,12 +8,13 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <numeric>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
-#define TOILETDB_VERSION "1.0.2"
+#define TOILETDB_VERSION "1.0.3"
 #define TOILETDB_PARSER_FORMAT_VERSION 1
 
 #define TDB_NOT_FOUND (size_t)(-1)
