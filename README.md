@@ -7,7 +7,18 @@ In-memory database with an ability to serialize into readable files and a CLI fo
 I got this idea from my friends' course project.
 The actual task was too easy, so I decided to implement a whole database instead :3c.
 
-## Documentation:
+## Table of contents
+
+- [Introduction](#introduction)
+	- [Library](#library)
+	- [File format](#lile-format)
+- [Building](#building)
+	- [POSIX](#posix)
+	- [Windows](#windows)
+- [CLI](#cli)
+	- [Usage](#usage)
+
+## Introduction
 
 ### Library
 
@@ -24,9 +35,7 @@ tdb<format version>
 ...
 ```
 
-### Types
-
-Available types are:
+Available column types are:
 
 - `int`   32 bit signed integer
 - `b_int` 64 bit unsigned integer
@@ -34,8 +43,8 @@ Available types are:
 
 Modifiers:
 
-- `const` Marks column as not editable
-- `id`    Marks column to be used for indexing (available only for type `b_int`)
+- `const` Marks column as not editable through code (you can still edit it manually :3)
+- `id`    Marks column to be used for indexing (only for `b_int`)
 
 ## Building
 
