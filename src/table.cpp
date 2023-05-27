@@ -23,9 +23,8 @@ struct InMemoryTable::Private
     void update_index()
     {
         std::vector<unsigned long long> id_column =
-            *(static_cast<std::vector<unsigned long long> *>(
-                this->columns[this->parser->get_id_column_index()]
-                    ->get_data()));
+            TDB_GET_DATA(unsigned long long,
+                         this->columns[this->parser->get_id_column_index()]);
 
         std::vector<unsigned long long> index;
         index.resize(id_column.size());
@@ -90,22 +89,20 @@ size_t InMemoryTable::search(const size_t &id) const
     long R = this->private_->index.size();
     long m;
 
-    std::vector<unsigned long long> *ids =
-        static_cast<std::vector<unsigned long long> *>(
-            this->private_
-                ->columns[this->private_->parser->get_id_column_index()]
-                ->get_data());
+    std::vector<unsigned long long> id_column =
+            TDB_GET_DATA(unsigned long long,
+                         this->private_->columns[this->private_->parser->get_id_column_index()]);
 
-    TOILET_DEBUGV(*ids, "ids");
+    TOILET_DEBUGV(id_column, "ids");
     TOILET_DEBUGV(this->private_->index, "index");
 
     while (L <= R) {
         m = (L + R) / 2;
 
-        if ((*ids)[this->private_->index[m]] < id) {
+        if (id_column[this->private_->index[m]] < id) {
             L = m + 1;
         }
-        else if ((*ids)[this->private_->index[m]] > id) {
+        else if (id_column[this->private_->index[m]] > id) {
             // If this would become unsigned,
             // here needs to be a test that breaks loop when R wraps.
             R = m - 1;
@@ -129,7 +126,8 @@ std::vector<size_t> InMemoryTable::search(const std::string &name,
 
     if (column_index == TDB_NOT_FOUND) {
         std::string failstring =
-            "In ToiletDB, In InMemoryTable.search(), Field '" + name + "' does not exist";
+            "In ToiletDB, In InMemoryTable.search(), Field '" + name +
+            "' does not exist";
         throw std::logic_error(failstring);
     }
 
@@ -139,7 +137,7 @@ std::vector<size_t> InMemoryTable::search(const std::string &name,
 
     for (size_t i = 0; i < this->total_rows(); ++i) {
         std::string value;
-        switch (type & TDB_TMASK) {
+        switch (TDB_TYPE(type)) {
             case T_INT: {
                 value = std::to_string(
                     (*(static_cast<std::vector<int> *>(data)))[i]);
@@ -171,28 +169,25 @@ std::vector<void *> InMemoryTable::get_row(const size_t &pos)
     std::vector<void *> result;
 
     if (pos > this->total_rows()) {
-        throw std::logic_error(
-            "In ToiletDB, In InMemoryTable.get_row(), pos is larger than data size");
+        throw std::logic_error("In ToiletDB, In InMemoryTable.get_row(), pos "
+                               "is larger than data size");
     }
 
     for (Column *c : this->private_->columns) {
-        // This is kinda unbearable
-        switch (c->get_type() & TDB_TMASK) {
+        switch (TDB_TYPE(c->get_type())) {
             case T_INT: {
-                result.push_back(static_cast<void *>(
-                    &(*static_cast<std::vector<int> *>((*c).get_data()))[pos]));
+                result.push_back(
+                    static_cast<void *>(&(TDB_GET_DATA(int, c))[pos]));
             } break;
 
             case T_B_INT: {
                 result.push_back(static_cast<void *>(
-                    &(*static_cast<std::vector<unsigned long long> *>(
-                        (*c).get_data()))[pos]));
+                    &(TDB_GET_DATA(unsigned long long, c))[pos]));
             } break;
 
             case T_STR: {
-                result.push_back(static_cast<void *>(
-                    &(*static_cast<std::vector<std::string> *>(
-                        (*c).get_data()))[pos]));
+                result.push_back(
+                    static_cast<void *>(&(TDB_GET_DATA(std::string, c))[pos]));
             } break;
         }
     }
@@ -222,11 +217,11 @@ int InMemoryTable::add(std::vector<std::string> &args)
     // This is just typechecking.
     // Surely this can be compressed (Clueless)
     for (size_t i = 1; i < this->get_column_count(); ++i) {
-        if (types[i] & T_ID) {
+        if (TDB_IS(types[i], T_ID)) {
             continue;
         }
 
-        switch (types[i] & TDB_TMASK) {
+        switch (TDB_TYPE(types[i])) {
             case T_INT: {
                 int value = parse_int(*it++);
 
@@ -253,19 +248,19 @@ int InMemoryTable::add(std::vector<std::string> &args)
 
     // TODO: Doesn't look like a transaction to me
     for (size_t i = 0; i < this->get_column_count(); ++i) {
-        if (types[i] & T_ID) {
+        if (TDB_IS(types[i], T_ID)) {
             size_t new_id = this->get_next_id();
             this->private_->columns[i]->add(static_cast<void *>(&new_id));
         }
-        else if (types[i] & T_INT) {
+        else if (TDB_IS(types[i], T_INT)) {
             int value = parse_int(*it++);
             this->private_->columns[i]->add(static_cast<void *>(&value));
         }
-        else if (types[i] & T_B_INT) {
+        else if (TDB_IS(types[i], T_B_INT)) {
             unsigned long long value = parse_long_long(*it++);
             this->private_->columns[i]->add(static_cast<void *>(&value));
         }
-        else if (types[i] & T_STR) {
+        else if (TDB_IS(types[i], T_STR)) {
             this->private_->columns[i]->add(static_cast<void *>(&(*it++)));
         }
     }
@@ -344,7 +339,8 @@ const std::vector<int> InMemoryTable::get_column_types() const
 size_t InMemoryTable::total_rows() const
 {
     if (!this->private_->columns[0]) {
-        throw std::logic_error("In ToiletDB, In InMemoryTable.size(), there is no columns");
+        throw std::logic_error(
+            "In ToiletDB, In InMemoryTable.size(), there is no columns");
     }
 
     return this->private_->columns[0]->size();

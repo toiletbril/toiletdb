@@ -229,7 +229,7 @@ static void cli_put_row(InMemoryTable &model, const size_t &pos)
     size_t len = types.size();
 
     for (size_t i = 0; i < len; ++i) {
-        switch (types[i] & TDB_TMASK) {
+        switch (TDB_TYPE(types[i])) {
             case T_INT: {
                 // Int should always fit.
                 continue;
@@ -385,7 +385,7 @@ static void cli_put_row(InMemoryTable &model, const size_t &pos)
         }
 
         for (size_t i = 0; i < len; ++i) {
-            switch (types[i] & TDB_TMASK) {
+            switch (TDB_TYPE(types[i])) {
                 case T_INT: {
                     std::cout << std::left << std::setw(CLI_INTW) << cols[i];
                 } break;
@@ -670,12 +670,12 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
 
                 for (size_t i = 0; i < len - 1; ++i) {
                     // ID field will be added automatically
-                    if (types[i] & T_CONST) {
+                    if (TDB_IS(types[i], T_CONST)) {
                         continue;
                     }
                     fields += "'" + names[i] + "' ";
                 }
-                if (!(types[len - 1] & T_CONST)) {
+                if (!(TDB_IS(types[len - 1], T_CONST))) {
                     fields += "'" + names[len - 1] + "'";
                 }
 
@@ -720,14 +720,14 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
 
             void *data = (model.get_row(pos))[column_index];
 
-            if (types[column_index] & T_CONST) {
+            if (TDB_IS(types[column_index], T_CONST)) {
                 std::cout << "ERROR: Can not edit value with 'const' modifier."
                           << std::endl;
 
                 return;
             }
 
-            switch (types[column_index] & TDB_TMASK) {
+            switch (TDB_TYPE(types[column_index])) {
                 case T_INT: {
                     int number = parse_int(value);
 
@@ -748,12 +748,11 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
                                   << std::endl;
                         return;
                     }
-
-                    *static_cast<unsigned long long *>(data) = number;
+                    TDB_GET(unsigned long long, data) = number;
                 } break;
 
                 case T_STR: {
-                    *static_cast<std::string *>(data) = value;
+                    TDB_GET(std::string, data) = value;
                 } break;
             }
 

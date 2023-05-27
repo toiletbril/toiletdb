@@ -27,13 +27,25 @@
 #define TDB_MMASK 0b00111000
 
 /**
- * @brief Macro to extract a type from type integer.
- *
- * Example:
- *      int type = ...;
- *      if (TDB_TYPE(type) == T_INT) { ... };
+ * @brief Macro to extract a type from type integer specifically for switch
+ * statements. switch (TDB_TYPE(type)) { ... };
  */
 #define TDB_TYPE(type) (type & TDB_TMASK)
+/**
+ * @brief Macro that returns boolean if types match.
+ *      if (TDB_IS(type, T_INT)) { ... };
+ */
+#define TDB_IS(type, is_type) (type & is_type)
+/**
+ * Cast a void pointer and get it's value.
+ */
+#define TDB_GET(type, prow_value) (*(static_cast<type *>(prow_value)))
+/**
+ * Cast Column.get_data() to appropriate vector type
+ * and get pointer's value.
+ */
+#define TDB_GET_DATA(of_type, pcolumn)                                         \
+    (*(static_cast<std::vector<of_type> *>((*pcolumn).get_data())))
 
 #ifndef NDEBUG
     #define TOILET_DEBUGV(v, name) toilet_debug_putv(v, name)

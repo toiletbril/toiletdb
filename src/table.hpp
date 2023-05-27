@@ -12,6 +12,7 @@
 #include "debug.hpp"
 
 #include "common.hpp"
+#include "types.hpp"
 #include "errors.hpp"
 #include "parser.hpp"
 
