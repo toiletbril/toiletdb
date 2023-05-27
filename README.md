@@ -4,22 +4,27 @@
 
 In-memory database with an ability to serialize into readable files and a CLI for it.
 
-## Why
-
 I got this idea from my friends' course project.
 The actual task was too easy, so I decided to implement a whole database instead :3c.
 
 ## Documentation:
+
+### Library
+
 > TODO
+
+### File format
 
 Database files look like this:
 ```
 tdb<format version>
 |[modifier] <column type> <column name>| ...
 |<value of column type>| ...
-|<value of column type>| ...
+|<another value of column type>| ...
 ...
 ```
+
+### Types
 
 Available types are:
 
