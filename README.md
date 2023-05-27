@@ -26,7 +26,32 @@ Modifiers:
 I got this idea from my friends' course project.
 The actual task was too easy, so I decided to implement a whole database instead :3c.
 
-## Usage
+## Building
+
+### POSIX
+
+#### Static library
+
+`libtoiletdb.a`
+```console
+make release
+```
+
+Copy header from `include/toiletdb.hpp`, static library `libtoiletdb.a` and do whatever.
+When building, link your binary with `-ltoiletdb`.
+
+#### CLI
+
+`toiletdb`
+```console
+make cli
+```
+
+Look for binaries and libraries in `build/`
+
+## CLI
+
+### Usage
 
 ```console
 $ toiletdb <database file>
@@ -53,7 +78,3 @@ For testing purposes, you can generate student database file with:
 ```console
 $ python3 testing/makedb.py <count of entries> <filename> [name complexity, number from 1 to 5]
 ```
-
-## Building
-
-`./build.sh` (POSIX), `./build.bat` (Windows Clang). Look for binary in `bin/`

@@ -3,19 +3,21 @@
     #include <Windows.h>
 #endif
 
-#include <ostream>
+#include <cstring>
+#include <iostream>
 
-// #define DEBUG
-
-#include "cli.cpp"
-#include "common.cpp"
+#include "cli.hpp"
 
 static bool help        = false;
 static bool help_format = false;
 
+#define TOILETDB_VERSION "1.0.1"
+#define TOILETDB_NAME "toiletdb"
+#define TOILETDB_GITHUB "<https://github.com/toiletbril>"
+
 void show_help()
 {
-    std::cout << "USAGE: " << TOILET_NAME << " <database file>\n"
+    std::cout << "USAGE: " << TOILETDB_NAME << " <database file>\n"
               << "CLI for manipulating toiletdb files.\n"
                  "\n"
                  "FLAGS:\n"
@@ -23,7 +25,7 @@ void show_help()
                  "\t    --help-format\tShow help for database file format.\n"
                  "\n"
                  "v"
-              << TOILET_VERSION << " (c) toiletbril " << TOILET_GITHUB
+              << TOILETDB_VERSION << " (c) toiletbril " << TOILETDB_GITHUB
               << std::endl;
     exit(0);
 }
@@ -51,7 +53,7 @@ void show_help_format()
                  "\n"
                  "Supported format versions: 1\n"
                  "\n"
-              << TOILET_VERSION << " (c) toiletbril " << TOILET_GITHUB
+              << TOILETDB_VERSION << " (c) toiletbril " << TOILETDB_GITHUB
               << std::endl;
     exit(0);
 }
@@ -93,12 +95,12 @@ int main(int argc, char **argv)
 
     if (argc < 2) {
         std::cout << "ERROR: Not enough arguments.\n"
-                  << "USAGE: " << TOILET_NAME
+                  << "USAGE: " << TOILETDB_NAME
                   << " <database file>\n"
                      "To get more help, try '--help'.\n"
                      "\n"
-                  << "v" TOILET_VERSION << " (c) toiletbril " << TOILET_GITHUB
-                  << std::endl;
+                  << "v" TOILETDB_VERSION << " (c) toiletbril "
+                  << TOILETDB_GITHUB << std::endl;
         std::exit(0);
     }
 
@@ -114,7 +116,7 @@ int main(int argc, char **argv)
         show_help_format();
     }
 
-#ifdef DEBUG
+#ifndef NDEBUG
     std::cout << "*** Debug is enabled.\n";
 #endif
 

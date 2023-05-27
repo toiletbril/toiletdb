@@ -37,7 +37,7 @@ def generate_entry(suffixes: int) -> str:
 
 def main():
     if (len(argv) < 3):
-        print("Usage: makedb <count> <filename> [name complexity]")
+        print("Usage: makedb <count> <filename> [name complexity, number from 1 to 5]")
         exit(1)
 
     count = int(argv[1])

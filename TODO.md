@@ -1,8 +1,10 @@
 # TODO:
 - Important:
+    - Library documentation.
     - Test all of this.
-    - Make header files.
+    - Windows building script.
+    - Generate export header automatically.
 - Not important:
     - Dynamic ID uniqueness checking.
-    - When there is no file, open up a table creator.
-    - Arrays.
+    - Class for table creation.
+    - CLI: When there is no file, open up a table creator.

@@ -1,15 +1,6 @@
-#pragma once
+#include "common.hpp"
 
-#include <cctype>
-#include <climits>
-#include <string>
-
-#define TOILET_VERSION "1.0.1"
-#define TOILET_NAME "toiletdb"
-#define TOILET_GITHUB "<https://github.com/toiletbril>"
-
-#define COMMON_INVALID_NUMBERLL (size_t)(-1)
-#define COMMON_INVALID_NUMBERI INT_MAX
+namespace toiletdb {
 
 size_t cm_parsell(std::string &str)
 {
@@ -20,7 +11,7 @@ size_t cm_parsell(std::string &str)
             result = result * 10 + (c - '0');
         }
         else {
-            return COMMON_INVALID_NUMBERLL;
+            return TDB_INVALID_ULL;
         }
     }
 
@@ -40,7 +31,7 @@ int cm_parsei(std::string &str)
             result = result * 10 + (c - '0');
         }
         else {
-            return COMMON_INVALID_NUMBERI;
+            return TDB_INVALID_I;
         }
     }
 
@@ -63,3 +54,5 @@ void cm_pstr_tolower(std::string &str)
         c = std::tolower(c);
     }
 }
+
+} // namespace toiletdb

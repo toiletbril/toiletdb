@@ -2,6 +2,8 @@
 !/**/
 !*.*
 !LICENSE
+!Makefile
 .vscode/
+build/
+obj/
 testing/__pycache__/
-bin/
