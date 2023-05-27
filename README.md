@@ -1,4 +1,7 @@
 # toiletdb
+
+**THIS SOFTWARE IS UNFINISHED, UNSAFE, AND IS NOT SUITABLE FOR PRODUCTION. USE IT AT YOUR OWN RISK.**
+
 In-memory database with an ability to serialize into readable files and a CLI for it.
 
 ## Why
@@ -49,8 +52,6 @@ When building, link your binary with `-ltoiletdb`.
 ```console
 make cli
 ```
-
-Look for binaries and libraries in `build/`
 
 ### Windows
 
