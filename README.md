@@ -22,7 +22,7 @@ The actual task was too easy, so I decided to implement a whole database instead
 
 ### Library
 
-> TODO
+> TODO ([`include/toiletdb.hpp`](include/toiletdb.hpp))
 
 ### File format
 
@@ -57,7 +57,7 @@ Modifiers:
 make release
 ```
 
-Copy header from `include/toiletdb.hpp`, static library `libtoiletdb.a` and do whatever.
+Copy include header from [`include/toiletdb.hpp`](include/toiletdb.hpp), static library from `build/libtoiletdb.a` and do whatever.
 When building, link your binary with `-ltoiletdb`.
 
 #### CLI
