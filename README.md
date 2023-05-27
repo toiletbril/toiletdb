@@ -1,6 +1,14 @@
 # toiletdb
 In-memory database with an ability to serialize into readable files and a CLI for it.
 
+## Why
+
+I got this idea from my friends' course project.
+The actual task was too easy, so I decided to implement a whole database instead :3c.
+
+## Documentation:
+> TODO
+
 Database files look like this:
 ```
 tdb<format version>
@@ -21,18 +29,13 @@ Modifiers:
 - `const` Marks column as not editable
 - `id`    Marks column to be used for indexing (available only for type `b_int`)
 
-## Why
-
-I got this idea from my friends' course project.
-The actual task was too easy, so I decided to implement a whole database instead :3c.
-
 ## Building
 
 ### POSIX
 
 #### Static library
 
-`libtoiletdb.a`
+`build/libtoiletdb.a`
 ```console
 make release
 ```
@@ -42,12 +45,16 @@ When building, link your binary with `-ltoiletdb`.
 
 #### CLI
 
-`toiletdb`
+`build/toiletdb`
 ```console
 make cli
 ```
 
 Look for binaries and libraries in `build/`
+
+### Windows
+
+> TODO
 
 ## CLI
 
