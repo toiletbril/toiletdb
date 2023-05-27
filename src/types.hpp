@@ -6,7 +6,7 @@
 
 #include "common.hpp"
 
-#define TOILETDB_PARSER_VERSION 1
+#define TOILETDB_PARSER_FORMAT_VERSION 1
 #define TOILETDB_MAGIC "tdb"
 
 /// @brief Type mask for ToiletType
@@ -70,8 +70,8 @@ public:
     virtual void erase(size_t pos)       = 0;
     virtual void clear()                 = 0;
     /// @brief Appends an element to in-memory vector.
-    /// Type will be casted back in method body.
-    /// NOTE: I couldn't figure out how to make this more convenient.
+    ///        Type will be casted back in method body.
+    /// @details I couldn't figure out how to make this more convenient.
     virtual void add(void *data) = 0;
     /// @brief Void pointer to a vector member at 'pos'
     virtual void *get(size_t pos) = 0;

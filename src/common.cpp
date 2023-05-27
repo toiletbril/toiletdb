@@ -2,11 +2,11 @@
 
 namespace toiletdb {
 
-size_t cm_parsell(std::string &str)
+size_t parse_long_long(const std::string &str)
 {
     size_t result = 0;
 
-    for (char &c : str) {
+    for (const char &c : str) {
         if (std::isdigit(c)) {
             result = result * 10 + (c - '0');
         }
@@ -18,12 +18,12 @@ size_t cm_parsell(std::string &str)
     return result;
 }
 
-int cm_parsei(std::string &str)
+int parse_int(const std::string &str)
 {
     int result = 0;
     int mult   = 1;
 
-    for (char &c : str) {
+    for (const char &c : str) {
         if (c == '-' && result == 0) {
             mult *= -1;
         }
@@ -38,17 +38,17 @@ int cm_parsei(std::string &str)
     return result * mult;
 }
 
-std::string cm_str_tolower(std::string &str)
+std::string to_lower_string(const std::string &str)
 {
     std::string result;
-    for (char &c : str) {
+    for (const char &c : str) {
         result += std::tolower(c);
     }
     return result;
 }
 
 // Replaces all characters in target string with lowercase ones.
-void cm_pstr_tolower(std::string &str)
+void to_lower_pstring(std::string &str)
 {
     for (char &c : str) {
         c = std::tolower(c);

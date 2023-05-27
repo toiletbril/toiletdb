@@ -6,12 +6,12 @@
 #include <cstring>
 #include <iostream>
 
+#include "toiletdb.hpp"
 #include "cli.hpp"
 
 static bool help        = false;
 static bool help_format = false;
 
-#define TOILETDB_VERSION "1.0.1"
 #define TOILETDB_NAME "toiletdb"
 #define TOILETDB_GITHUB "<https://github.com/toiletbril>"
 
@@ -37,7 +37,7 @@ void show_help_format()
                  "\ttdb<format version>\n"
                  "\t|[modifier] <column type> <column name>| ...\n"
                  "\t|<value of column type>| ...\n"
-                 "\t|<value of column type>| ...\n"
+                 "\t|<another value of column type>| ...\n"
                  "\t...\n"
                  "```\n"
                  "\n"

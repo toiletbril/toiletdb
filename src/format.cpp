@@ -2,10 +2,7 @@
 #include <vector>
 
 #include "format.hpp"
-
-#ifndef NDEBUG
-    #include "debug.hpp"
-#endif
+#include "debug.hpp"
 
 namespace toiletdb {
 
@@ -22,7 +19,7 @@ size_t FormatOne::read_version(std::fstream &file)
             std::string failstring = "Database file format is not "
                                      "correct: File is not a tdb database";
 
-            throw std::logic_error(failstring);
+            throw ParsingError(failstring);
         }
     }
 
@@ -37,21 +34,19 @@ size_t FormatOne::read_version(std::fstream &file)
         version_string += temp[i];
     }
 
-    size_t version = cm_parsell(version_string);
+    size_t version = parse_long_long(version_string);
 
     if (version == TDB_INVALID_ULL) {
-        throw std::logic_error("Database format is not "
-                               "correct: Invalid version number");
+        throw ParsingError("Database format is not "
+                           "correct: Invalid version number");
     }
 
-    if (version > TOILETDB_PARSER_VERSION) {
-        throw std::logic_error("Database format is not "
-                               "supported: Version is too new");
+    if (version > TOILETDB_PARSER_FORMAT_VERSION) {
+        throw ParsingError("Database format is not "
+                           "supported: Version is too new");
     };
 
-#ifndef NDEBUG
-    debug_puts(version, "InMemoryFileParser.read_version");
-#endif
+    TOILET_DEBUGS(version, "InMemoryFileParser.read_version");
 
     return version;
 }
@@ -69,7 +64,7 @@ TableInfo FormatOne::read_types(std::fstream &file)
     char c = file.get();
 
     if (c != '|') {
-        throw std::logic_error("update_types() first char is not |");
+        throw ParsingError("Format error: Line 2 does not begin with |");
     }
 
     c = file.get();
@@ -112,7 +107,7 @@ TableInfo FormatOne::read_types(std::fstream &file)
                             std::to_string(pos) +
                             ", previous ID at 2:" + std::to_string(id_pos);
 
-                        throw std::logic_error(failstring);
+                        throw ParsingError(failstring);
                     }
 
                     type |= (int)T_ID;
@@ -126,7 +121,7 @@ TableInfo FormatOne::read_types(std::fstream &file)
                     std::string failstring =
                         "Format error: Unknown type modifier at 2:" +
                         std::to_string(pos);
-                    throw std::logic_error(failstring);
+                    throw ParsingError(failstring);
                 }
 
                 buf.clear();
@@ -144,7 +139,7 @@ TableInfo FormatOne::read_types(std::fstream &file)
             std::string failstring = "Format error: No column name at "
                                      "2:" +
                                      std::to_string(pos);
-            throw std::logic_error(failstring);
+            throw ParsingError(failstring);
         }
 
         names.push_back(buf);
@@ -157,7 +152,7 @@ TableInfo FormatOne::read_types(std::fstream &file)
     }
 
 #ifndef NDEBUG
-    debug_putv(fields.types, "InMemoryFileParser.update_types types");
+    TOILET_DEBUGV(fields.types, "InMemoryFileParser.update_types types");
 #endif
 
     fields.size  = field_n;
@@ -181,7 +176,7 @@ std::vector<Column *> FormatOne::deserealize(std::fstream &file,
                                  ") is not equal to columns.size (" +
                                  std::to_string(columns.size) + ")";
 
-        throw std::logic_error(failstring);
+        throw ParsingError(failstring);
     }
 
     for (size_t i = 0; i < columns.size; ++i) {
@@ -207,9 +202,8 @@ std::vector<Column *> FormatOne::deserealize(std::fstream &file,
     // First line is magic, second is types.
     size_t line = 3;
     size_t pos  = 1;
-#ifndef NDEBUG
+
     bool debug_crlf = false;
-#endif
     int c = file.get();
 
     while (c != EOF) {
@@ -219,7 +213,7 @@ std::vector<Column *> FormatOne::deserealize(std::fstream &file,
                                      std::to_string(line) + ":" +
                                      std::to_string(pos);
 
-            throw std::logic_error(failstring);
+            throw ParsingError(failstring);
         }
         else {
             c = file.get();
@@ -231,13 +225,12 @@ std::vector<Column *> FormatOne::deserealize(std::fstream &file,
 
         while (c != '\n') {
             if (c == '\r') {
-#ifndef NDEBUG
                 if (!debug_crlf) {
-                    debug_puts("CRLF detected",
+                    TOILET_DEBUGS("CRLF detected",
                                "InMemoryFileParser.deserialize");
                     debug_crlf = true;
                 }
-#endif
+
                 c = file.get();
                 continue;
             }
@@ -248,7 +241,7 @@ std::vector<Column *> FormatOne::deserealize(std::fstream &file,
                                          std::to_string(line) + ":" +
                                          std::to_string(pos + 1);
 
-                throw std::logic_error(failstring);
+                throw ParsingError(failstring);
             }
 
             if (c == '|') {
@@ -272,11 +265,11 @@ std::vector<Column *> FormatOne::deserealize(std::fstream &file,
                 std::to_string(field) + ") at line " + std::to_string(line) +
                 ":" + std::to_string(pos);
 
-            throw std::logic_error(failstring);
+            throw ParsingError(failstring);
         }
 
 #ifndef NDEBUG
-        debug_putv(fields, "InMemoryFileParser.deserealize");
+        TOILET_DEBUGV(fields, "InMemoryFileParser.deserealize");
 #endif
 
         for (size_t i = 0; i < columns.size; ++i) {
@@ -289,11 +282,11 @@ std::vector<Column *> FormatOne::deserealize(std::fstream &file,
                                              std::to_string(line) + ", field " +
                                              std::to_string(i + 1);
 
-                    throw std::logic_error(failstring);
+                    throw ParsingError(failstring);
                 }
             }
             if (columns.types[i] & T_INT) {
-                size_t num = cm_parsei(fields[i]);
+                size_t num = parse_int(fields[i]);
 
                 if (num == TDB_INVALID_I) {
                     std::string failstring =
@@ -303,14 +296,14 @@ std::vector<Column *> FormatOne::deserealize(std::fstream &file,
                         std::to_string(line) + ", field " +
                         std::to_string(i + 1);
 
-                    throw std::logic_error(failstring);
+                    throw ParsingError(failstring);
                 }
 
                 static_cast<std::vector<int> *>(parsed_columns[i]->get_data())
                     ->push_back(num);
             }
             else if (columns.types[i] & T_B_INT) {
-                size_t num = cm_parsell(fields[i]);
+                size_t num = parse_long_long(fields[i]);
 
                 if (num == TDB_INVALID_ULL) {
                     std::string failstring =
@@ -320,7 +313,7 @@ std::vector<Column *> FormatOne::deserealize(std::fstream &file,
                         std::to_string(line) + ", field " +
                         std::to_string(i + 1);
 
-                    throw std::logic_error(failstring);
+                    throw ParsingError(failstring);
                 }
 
                 static_cast<std::vector<unsigned long long> *>(
@@ -382,9 +375,7 @@ void FormatOne::write_header(std::fstream &file,
     }
     header += '|';
 
-#ifndef NDEBUG
-    debug_puts(header, "InMemoryFileParser.write_header");
-#endif
+    TOILET_DEBUGS(header, "InMemoryFileParser.write_header");
 
     file << header << std::endl;
 }
@@ -396,8 +387,7 @@ void FormatOne::serialize(std::fstream &file, const std::vector<Column *> &data)
     size_t column_count = data.size();
 
     if (!data[0]) {
-        std::logic_error(
-            "In FormatOne.serialize(), there is no elements in data");
+        ParsingError("In FormatOne.serialize(), there is no elements in data");
     }
 
     size_t row_count = data[0]->size();
@@ -431,9 +421,7 @@ void FormatOne::serialize(std::fstream &file, const std::vector<Column *> &data)
         }
         file << "|\n";
     }
-#ifndef NDEBUG
-    debug_puts(row_count, "InMemoryFileParser.serialize rows saved");
-#endif
+    TOILET_DEBUGS(row_count, "InMemoryFileParser.serialize rows saved");
 }
 
 } // namespace toiletdb

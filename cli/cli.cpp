@@ -1,13 +1,4 @@
-#include <cctype>
-#include <cstring>
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <sstream>
-#include <vector>
-
 #include "cli.hpp"
-#include "toiletdb.hpp"
 
 using namespace toiletdb;
 
@@ -34,27 +25,6 @@ enum CLI_COMMAND_KIND
     COMMIT,
     REVERT,
 };
-
-#ifndef NDEBUG
-
-template <typename T, typename A>
-void debugv(const std::vector<T, A> &v, const char *name)
-{
-    std::cout << "*** " << name << ": [\n";
-    for (const T &s : v) {
-        std::cout << "\t'" << s << "',\n";
-    }
-    std::cout << "]\n";
-    fflush(stdout);
-};
-
-template <typename T> void debugs(const T &s, const char *name)
-{
-    std::cout << "*** " << name << ": '" << s << "'\n";
-    fflush(stdout);
-};
-
-#endif
 
 // Extracts filename from file path.
 static std::string cli_extract_filename(const std::string &path)
@@ -117,9 +87,7 @@ static std::vector<std::string> cli_split_args(const std::string &s)
         result.push_back(temp);
     }
 
-#ifndef NDEBUG
-    debugv(result, "cli_splitstring");
-#endif
+    TOILET_DEBUGV(result, "cli_splitstring");
 
     return result;
 }
@@ -570,7 +538,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
             // If column specified has modifier 'id', use binary search.
             if (model.get_column_types()[model.search_column_index(args[1])] &
                 T_ID) {
-                size_t value = cm_parsell(query);
+                size_t value = parse_long_long(query);
 
                 if (value == TDB_INVALID_ULL) {
                     std::cout << "ERROR: ID is not a number." << std::endl;
@@ -647,9 +615,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
                 return;
             }
 
-#ifndef NDEBUG
-            debugv(args, "add() args");
-#endif
+            TOILET_DEBUGV(args, "add() args");
 
             int err = model.add(args);
 
@@ -678,7 +644,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
                 return;
             }
 
-            size_t n = cm_parsell(args[1]);
+            size_t n = parse_long_long(args[1]);
 
             if (n == TDB_INVALID_ULL) {
                 std::cout << "ERROR: Invalid ID." << std::endl;
@@ -721,7 +687,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
                 return;
             }
 
-            size_t n = cm_parsell(args[1]);
+            size_t n = parse_long_long(args[1]);
 
             if (n == TDB_INVALID_ULL) {
                 std::cout << "ERROR: ID is not a number." << std::endl;
@@ -739,6 +705,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
 
             if (column_index == TDB_NOT_FOUND) {
                 std::cout << "Invalid field '" << args[2] << "'" << std::endl;
+                return;
             }
 
             std::string value = cli_concat_args(args, 3);
@@ -762,7 +729,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
 
             switch (types[column_index] & TDB_TMASK) {
                 case T_INT: {
-                    int number = cm_parsei(value);
+                    int number = parse_int(value);
 
                     if (n == TDB_INVALID_I) {
                         std::cout << "ERROR: Value is not a number."
@@ -774,7 +741,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
                 } break;
 
                 case T_B_INT: {
-                    unsigned long long number = cm_parsell(value);
+                    unsigned long long number = parse_long_long(value);
 
                     if (n == TDB_INVALID_ULL) {
                         std::cout << "ERROR: Value is not a number."
@@ -840,8 +807,7 @@ void cli_loop(const char *filepath)
                   << std::endl;
         std::exit(1);
     }
-    // Logic errors while opening should be parsing errors.
-    catch (std::logic_error &e) {
+    catch (ParsingError &e) {
         std::cout << filepath << ": Parsing error: " << e.what()
                   << "\n"
                      "Try '--help-format' to see help for database format."
@@ -849,9 +815,7 @@ void cli_loop(const char *filepath)
         exit(1);
     }
     catch (std::runtime_error &e) {
-#ifndef NDEBUG
-        debugs(e.what(), "cli_loop");
-#endif
+        TOILET_DEBUGS(e.what(), "cli_loop");
         std::cout << filepath << ": File does not exist."
                   << "\n"
                      "You need to create database file first.\n"

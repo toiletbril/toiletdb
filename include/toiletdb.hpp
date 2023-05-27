@@ -13,17 +13,13 @@
 #include <string>
 #include <vector>
 
-#define TOILETDB_VERSION "1.0.1"
+#define TOILETDB_VERSION "1.0.2"
+#define TOILETDB_PARSER_FORMAT_VERSION 1
 
 #define TDB_NOT_FOUND (size_t)(-1)
 
 #define TDB_INVALID_ULL (size_t)(-1)
 #define TDB_INVALID_I 2147483647
-
-#define TOILET_TYPES_H_
-
-#define TOILETDB_PARSER_VERSION 1
-#define TOILETDB_MAGIC "tdb"
 
 /// @brief Type mask for ToiletType
 #define TDB_TMASK 0b00000111
@@ -39,30 +35,49 @@
  */
 #define TDB_TYPE(type) (type & TDB_TMASK)
 
+#ifndef NDEBUG
+    #define TOILET_DEBUGV(v, name) toilet_debug_putv(v, name)
+    #define TOILET_DEBUGS(s, name) toilet_debug_puts(s, name)
+#else
+    #define TOILET_DEBUGV(v, name)
+    #define TOILET_DEBUGS(s, name)
+#endif
+
 namespace toiletdb {
+
+#ifndef NDEBUG
+template <typename T, typename A>
+void toilet_debug_putv(const std::vector<T, A> &v, const char *name)
+{
+    std::cout << "*** " << name << ": [\n";
+    for (const T &s : v) {
+        std::cout << "\t'" << s << "',\n";
+    }
+    std::cout << "]\n";
+    fflush(stdout);
+};
+
+template <typename T> void toilet_debug_puts(const T &s, const char *name)
+{
+    std::cout << "*** " << name << ": '" << s << "'\n";
+    fflush(stdout);
+}
+#endif
 
 /// @brief Parse unsigned long long.
 /// @return TDB_INVALID_ULL if string cannot be parsed.
-size_t cm_parsell(std::string &str);
+size_t parse_long_long(const std::string &str);
 
 /// @brief Parse signed int.
 /// @return TDB_INVALID_I if string cannot be parsed.
-int cm_parsei(std::string &str);
+int parse_int(const std::string &str);
 
 /// @brief Returns copy of a string with all characters lowercased.
-std::string cm_str_tolower(std::string &str);
-
-/// @brief Replaces all characters in a string with their lowercase variants.
-void cm_pstr_tolower(std::string &str);
-
-template <typename T, typename A>
-void debug_putv(const std::vector<T, A> &v, const char *name);
-
-template <typename T> void debug_puts(const T &s, const char *name);
+std::string to_lower_string(const std::string &str);
 
 /**
  * @brief One bit in 32 bit integer that meeans either a type or a modifier.
- * A column can have only one type and any amount of modifiers.
+ *        A column can have only one type and any amount of modifiers.
  * @see TDB_TYPE
  */
 enum ToiletType
@@ -81,15 +96,13 @@ enum ToiletType
 };
 
 /**
- * @brief Structure used in InMemoryParser
- * to store information about columns.
+ * @class ParsingError
+ * @brief Is thrown when internal parser encounters errors.
  */
-struct TableInfo
+class ParsingError : public std::logic_error
 {
-    size_t size;
-    size_t id_field_index;
-    std::vector<std::string> names;
-    std::vector<int> types;
+public:
+    ParsingError(std::string const &msg);
 };
 
 /**
@@ -105,8 +118,8 @@ public:
     virtual void erase(size_t pos)       = 0;
     virtual void clear()                 = 0;
     /// @brief Appends an element to in-memory vector.
-    /// Type will be casted back in method body.
-    /// NOTE: I couldn't figure out how to make this more convenient.
+    ///        Type will be casted back in method body.
+    /// @details I couldn't figure out how to make this more convenient.
     virtual void add(void *data) = 0;
     /// @brief Void pointer to a vector member at 'pos'
     virtual void *get(size_t pos) = 0;
@@ -114,119 +127,31 @@ public:
     virtual void *get_data() = 0;
 };
 
-class ColumnInt : public Column
-{
-    std::vector<int> *data;
-    std::string name;
-    int type;
-
-public:
-    ColumnInt(std::string name, int type);
-    ~ColumnInt();
-    int get_type() const override;
-    std::string get_name() const override;
-    size_t size() const override;
-    void erase(size_t pos) override;
-    void clear() override;
-    void add(void *data) override;
-    void *get(size_t pos) override;
-    void *get_data() override;
-};
-
-class ColumnB_Int : public Column
-{
-    std::vector<unsigned long long> *data;
-    std::string name;
-    int type;
-
-public:
-    ColumnB_Int(const std::string name, int type);
-    ~ColumnB_Int();
-    int get_type() const override;
-    std::string get_name() const override;
-    size_t size() const override;
-    void erase(size_t pos) override;
-    void clear() override;
-    void add(void *data) override;
-    void *get(size_t pos) override;
-    void *get_data() override;
-};
-
-class ColumnStr : public Column
-{
-    std::vector<std::string> *data;
-    std::string name;
-    int type;
-
-public:
-    ColumnStr(std::string name, int type);
-    ~ColumnStr();
-    int get_type() const override;
-    std::string get_name() const override;
-    size_t size() const override;
-    void erase(size_t pos) override;
-    void clear() override;
-    void add(void *data) override;
-    void *get(size_t pos) override;
-    void *get_data() override;
-};
-
-struct FormatOne
-{
-    static size_t read_version(std::fstream &file);
-    static TableInfo read_types(std::fstream &file);
-    static std::vector<Column *> deserealize(std::fstream &file,
-                                             TableInfo &columns,
-                                             std::vector<std::string> &names);
-    static void write_header(std::fstream &file,
-                             const std::vector<Column *> &data);
-    static void serialize(std::fstream &file,
-                          const std::vector<Column *> &data);
-};
-
-class InMemoryFileParser
-{
-private:
-    const char *const &filename;
-    size_t format_version;
-    TableInfo columns;
-    struct Private;
-
-public:
-    InMemoryFileParser(const char *const &filename);
-    ~InMemoryFileParser();
-    size_t get_version() const;
-    size_t get_id_column_index() const;
-    bool exists() const;
-    bool exists_or_create() const;
-    std::vector<Column *> read_file();
-    void write_file(const std::vector<Column *> &columns) const;
-};
-
 /**
  * @class InMemoryTable
  * @brief Medium level abstraction representing one table.
- * Each table represents one file.
+ *        Each table represents one file.
  */
 class InMemoryTable
 {
 private:
-    std::vector<unsigned long long> index;
-    std::vector<Column *> columns;
-    InMemoryFileParser *parser;
-
     struct Private;
 
 public:
-    /// @brief Opens up a file and loads up into memory.
+    /// @brief Opens up a file and loads it up into memory.
     /// @warning Does not create a file. Will throw an error.
-    InMemoryTable(const char *const &filename);
+    /// @throws std::ios::failure when file is not found,
+    /// or file cannot be opened.
+    /// @throws ParsingError when parsing error is encountered.
+    InMemoryTable(const std::string &filename);
     ~InMemoryTable();
     const std::vector<Column *> &get_all() const;
     /// @brief Discards all changes made to in-memory vector, and reads file
     /// again.
+    /// @throws std::runtime_error when table file was deleted or moved.
     void reread_file();
     /// @brief Writes data stored in memory back to the file.
+    /// @throws std::runtime_error when table file was deleted or moved.
     void write_file() const;
     /// @brief Search in-memory vector by ID.
     /// O(log n)
@@ -238,14 +163,20 @@ public:
     std::vector<size_t> search(const std::string &name,
                                std::string &query) const;
     /// @brief Get one row from vector.
-    /// One row means a value from each column.
+    ///        One row means a value from each column.
     /// @warning You will need to get types and cast them yourself.
     /// @see get_column_types()
     /// @see get_column_type()
     std::vector<void *> get_row(const size_t &pos);
-    /// @brief Adds row from
-    /// One row means a value from each column.
-    /// @warning You will need to get types and cast them yourself.
+    /// @brief Adds one row. Converts strings to appropriate types.
+    ///        One row means a value from each column.
+    /// @returns
+    /// Returns 0 on success.
+    /// 1 - Args vector is too big/small.
+    /// 2 - Argument of type 'int' is found to be
+    ///     not convertible to int.
+    /// 3 - Argument of type 'b_int' is found to be
+    ///     not convertible to unsigned long long.
     /// @see get_column_types()
     /// @see get_column_type()
     int add(std::vector<std::string> &args);

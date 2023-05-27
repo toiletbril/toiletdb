@@ -28,12 +28,10 @@ struct InMemoryFileParser::Private
 
         file.open(self->filename, mode);
 
-#ifndef NDEBUG
-        debug_puts(self->filename, "InMemoryFileParser.open");
-#endif
+        TOILET_DEBUGS(self->filename, "InMemoryFileParser.open");
 
         if (!file.is_open()) {
-            throw std::ios::failure("Could not open file");
+            throw std::ios::failure("In ToiletDB, In InMemoryFileParser.open(), could not open file");
         }
 
         return file;
@@ -42,48 +40,14 @@ struct InMemoryFileParser::Private
     // Reads first line of a file and updates InMemoryFileParser format version
     static void update_version(InMemoryFileParser *self, std::fstream &file)
     {
-        // Check first line of the file.
-        std::string temp;
-        std::getline(file, temp);
+        switch (self->format_version) {
+            case 1: {
+                self->format_version = FormatOne::read_version(file);
+            } break;
 
-        // Check for magic string
-        for (int i = 0; i < 3; ++i) {
-            if (temp[i] != MAGIC[i]) {
-                std::string failstring = "Database file format is not "
-                                         "correct: File is not a tdb database";
-
-                throw std::logic_error(failstring);
-            }
+            default:
+                throw ParsingError("In ToiletDB, InMemoryFileParser.read_version(), invalid format version");
         }
-
-        // Check version
-        int len = temp.size();
-        std::string version_string;
-
-        for (int i = 3; i < len; ++i) {
-            if (temp[i] == '\r') {
-                continue;
-            }
-            version_string += temp[i];
-        }
-
-        size_t version = cm_parsell(version_string);
-
-        if (version == TDB_INVALID_ULL) {
-            throw std::logic_error("Database format is not "
-                                   "correct: Invalid version number");
-        }
-
-        if (version > TDB_INVALID_I) {
-            throw std::logic_error("Database format is not "
-                                   "supported: Version is too new");
-        };
-
-#ifdef DEBUG
-        debug_puts(version, "InMemoryFileParser.update_version");
-#endif
-
-        self->format_version = version;
     }
 
     // Should parse second line of the database file.
@@ -98,7 +62,7 @@ struct InMemoryFileParser::Private
             } break;
 
             default:
-                throw std::logic_error("Unreachable");
+                throw ParsingError("In ToiletDB, InMemoryFileParser.read_types(), invalid format version");
         }
     }
 
@@ -113,7 +77,7 @@ struct InMemoryFileParser::Private
             } break;
 
             default:
-                throw std::logic_error("Unreachable");
+                throw ParsingError("In ToiletDB, InMemoryFileParser.deserialize(), invalid format version");
         }
     }
 
@@ -127,21 +91,19 @@ struct InMemoryFileParser::Private
             } break;
 
             default:
-                throw std::logic_error("Unreachable");
+                throw ParsingError("In ToiletDB, InMemoryFileParser.serialize(), invalid format version");
         }
     }
 };
 
-InMemoryFileParser::InMemoryFileParser(const char *const &filename) :
+InMemoryFileParser::InMemoryFileParser(const std::string &filename) :
     filename(filename)
 {
-    this->format_version = TOILETDB_PARSER_VERSION;
+    this->format_version = TOILETDB_PARSER_FORMAT_VERSION;
 }
 
 InMemoryFileParser::~InMemoryFileParser()
-{
-    delete this->filename;
-}
+{}
 
 size_t InMemoryFileParser::get_version() const
 {
@@ -160,11 +122,9 @@ bool InMemoryFileParser::exists() const
 
     file.open(this->filename);
 
-#ifndef NDEBUG
-    debug_puts(file.good(), "InMemoryFileParser.exists");
-#endif
+    TOILET_DEBUGS(file.good(), "InMemoryFileParser.exists");
 
-    return file.good();
+    return file.is_open();
 }
 
 // Return true if file exists, false if it doesn't.
@@ -176,7 +136,7 @@ bool InMemoryFileParser::exists_or_create() const
         file.open(this->filename, std::ios::out);
 
         if (!file.good()) {
-            throw std::ios::failure("Could not create file");
+            throw std::ios::failure("In ToiletDB, InMemoryFileParser.exists_or_create(), could not create a file");
         }
 
         // FormatOne::write_header(file);
@@ -207,7 +167,7 @@ std::vector<Column *> InMemoryFileParser::read_file()
 void InMemoryFileParser::write_file(const std::vector<Column *> &columns) const
 {
     if (!this->exists()) {
-        throw std::runtime_error("File does not exist");
+        throw std::runtime_error("In ToiletDB, InMemoryFileParser.write_file(), file does not exist");
     }
 
     std::fstream file =

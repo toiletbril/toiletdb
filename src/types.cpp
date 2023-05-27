@@ -1,4 +1,3 @@
-#define TOILETDB_PARSER_VERSION 1
 #define TOILETDB_MAGIC "tdb"
 
 #define TDB_TMASK 0b00000111
