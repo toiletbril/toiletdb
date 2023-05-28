@@ -68,7 +68,6 @@ make release
 ```
 
 Copy include header from [`include/toiletdb.hpp`](include/toiletdb.hpp), static library from `build/toiletdb.lib` and do whatever.
-When building your project, put `toiletdb.lib` along your source file names.
 
 #### CLI
 

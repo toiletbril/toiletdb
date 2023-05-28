@@ -60,26 +60,25 @@ static std::vector<std::string> cli_split_args(const std::string &s)
     std::string temp;
 
     bool in_quotes = false;
-    bool escaped = false;
+    bool escaped   = false;
 
     for (size_t i = 0; i < len; ++i) {
         char c = s.at(i);
 
-        if (escaped)
-        {
+        if (escaped) {
             temp += c;
             escaped = false;
         }
 
-        else if (c == '\\')
-        {
+        else if (c == '\\') {
             escaped = true;
         }
 
         else if (in_quotes) {
             if (c == '"') {
                 in_quotes = false;
-            } else {
+            }
+            else {
                 temp += c;
             }
         }
@@ -554,10 +553,15 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
             }
 
             std::string query = cli_concat_args(args, 2);
+            size_t pos        = model.search_column_index(args[1]);
+
+            if (pos == TDB_NOT_FOUND) {
+                std::cout << "ERROR: Unknown column '" << args[1] << "'." << std::endl;
+                return;
+            }
 
             // If column specified has modifier 'id', use binary search.
-            if (model.get_column_type(model.search_column_index(args[1])) &
-                T_ID) {
+            if (model.get_column_type(pos) & T_ID) {
                 size_t value = parse_long_long(query);
 
                 if (value == TDB_INVALID_ULL) {
@@ -581,6 +585,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
             std::vector<size_t> positions = model.search(args[1], query);
 
             cli_put_table_header(model);
+
             for (const size_t &pos : positions) {
                 cli_put_row(model, pos);
             }
@@ -674,7 +679,8 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
             size_t pos = model.search(n);
 
             if (pos == TDB_NOT_FOUND) {
-                std::cout << "ERROR: Could not find row with specified ID." << std::endl;
+                std::cout << "ERROR: Could not find row with specified ID."
+                          << std::endl;
                 return;
             }
 
