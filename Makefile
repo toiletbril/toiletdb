@@ -1,3 +1,5 @@
+# This should support both Windows with MinGW/Clang and Linux :3
+
 .PHONY: clean
 
 CXX:=$(CXX)

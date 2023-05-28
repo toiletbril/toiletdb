@@ -47,35 +47,39 @@ Modifiers:
 
 ## Building from source
 
-### Prerequisites
+#### Windows
 
-- C++ compiler
-- GNU make
+Static library and CLI (launch this from MSVC-enabled console):
+```console
+> ./build_msvc.bat
+```
 
-Windows
+Look for binaries in `build/`.
+
+Alternatively, you can use `make` targets from below with:
 
 - `g++`/`clang` (CXX variable in [`Makefile`](./Makefile))
 - `make`, `ar` (You can get those with MinGW32)
     - `mingw32-make.exe`
     - `x86_64-w64-mingw32-ar.exe`
 
-### Build
+#### POSIX
 
-#### Static library
+Static library:
 
 ```console
-make release
+$ make release
 ```
 
 Copy include header from [`include/toiletdb.hpp`](include/toiletdb.hpp), static library from `build/toiletdb.lib` and do whatever.
 
-#### CLI
+CLI:
 
 ```console
-make cli
+$ make cli
 ```
 
-Look for binaries in `build/`
+Look for binaries in `build/`.
 
 ## CLI
 
