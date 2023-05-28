@@ -107,11 +107,13 @@ InMemoryFileParser::~InMemoryFileParser()
 
 const size_t &InMemoryFileParser::get_version() const
 {
+    TOILET_DEBUGS(this->columns.id_field_index, "InMemoryFileParser.get_version");
     return this->format_version;
 }
 
 const size_t &InMemoryFileParser::get_id_column_index() const
 {
+    TOILET_DEBUGS(this->columns.id_field_index, "InMemoryFileParser.get_id_column_index");
     return this->columns.id_field_index;
 }
 
@@ -122,7 +124,7 @@ bool InMemoryFileParser::exists() const
 
     file.open(this->filename);
 
-    TOILET_DEBUGS(file.good(), "InMemoryFileParser.exists");
+    TOILET_DEBUGS(file.is_open(), "InMemoryFileParser.exists");
 
     return file.is_open();
 }
@@ -138,8 +140,6 @@ bool InMemoryFileParser::exists_or_create() const
         if (!file.good()) {
             throw std::ios::failure("In ToiletDB, InMemoryFileParser.exists_or_create(), could not create a file");
         }
-
-        // FormatOne::write_header(file);
 
         return false;
     }
@@ -161,6 +161,7 @@ std::vector<Column *> InMemoryFileParser::read_file()
     std::vector<Column *> columns = Private::deserealize(this, file, names);
 
     file.close();
+
     return columns;
 }
 
@@ -174,6 +175,7 @@ void InMemoryFileParser::write_file(const std::vector<Column *> &columns) const
         Private::open(this, std::ios::out | std::ios::trunc | std::ios::binary);
 
     Private::serialize(this, file, columns);
+
     file.close();
 }
 

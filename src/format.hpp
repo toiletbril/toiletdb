@@ -3,9 +3,10 @@
 
 #include <vector>
 
+#include "debug.hpp"
+
 #include "errors.hpp"
 #include "types.hpp"
-#include "debug.hpp"
 
 namespace toiletdb {
 

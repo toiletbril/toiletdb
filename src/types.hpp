@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include "debug.hpp"
+
 #include "common.hpp"
 
 #define TOILETDB_PARSER_FORMAT_VERSION 1
@@ -77,7 +79,7 @@ public:
     /// @see ToiletType
     virtual const int &get_type() const         = 0;
     virtual const std::string &get_name() const = 0;
-    virtual size_t size() const          = 0;
+    virtual size_t size() const                 = 0;
     virtual void erase(size_t pos)              = 0;
     virtual void clear()                        = 0;
     /// @brief Appends an element to in-memory vector.

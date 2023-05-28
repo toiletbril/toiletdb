@@ -218,6 +218,8 @@ public:
     int add(std::vector<std::string> &args);
     /// @brief Erases element with ID.
     bool erase_id(const size_t &id);
+    /// @brief Erases element at pos.
+    bool erase(const size_t &pos);
     /// @brief Clears all columns.
     void clear();
     size_t get_column_count() const;

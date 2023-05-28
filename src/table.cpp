@@ -8,16 +8,6 @@ struct InMemoryTable::Private
     std::vector<Column *> columns;
     std::unique_ptr<InMemoryFileParser> parser;
 
-    void erase(const size_t pos)
-    {
-        size_t len = this->columns.size();
-
-        // Erase data from all columns in one row
-        for (size_t i = 0; i < len; ++i) {
-            this->columns[i]->erase(pos);
-        }
-    }
-
     // Reads column marked as 'id',
     // updates index with a sorted list that maps position to ID.
     void update_index()
@@ -48,6 +38,8 @@ InMemoryTable::InMemoryTable(const std::string &filename)
     // TODO: This does not create a file.
     // IDs from loaded file will be indexed to be used for binary search.
 
+    TOILET_DEBUGS(filename, "InMemoryTable filename");
+
     this->private_ = std::make_unique<Private>();
 
     this->private_->parser = std::make_unique<InMemoryFileParser>(filename);
@@ -56,6 +48,8 @@ InMemoryTable::InMemoryTable(const std::string &filename)
         throw std::runtime_error(
             "In InMemoryTable constructor, there is no such file.");
     }
+
+    TOILET_DEBUGS("", "InMemoryTable, parser is constructed");
 
     this->private_->columns = this->private_->parser->read_file();
 
@@ -93,9 +87,6 @@ size_t InMemoryTable::search(const size_t &id) const
     std::vector<unsigned long long> id_column = TDB_GET_DATA(
         unsigned long long,
         this->private_->columns[this->private_->parser->get_id_column_index()]);
-
-    TOILET_DEBUGV(id_column, "ids");
-    TOILET_DEBUGV(this->private_->index, "index");
 
     while (L <= R) {
         m = (L + R) / 2;
@@ -271,12 +262,28 @@ int InMemoryTable::add(std::vector<std::string> &args)
     return 0;
 }
 
+bool InMemoryTable::erase(const size_t &pos)
+{
+    size_t len = this->private_->columns.size();
+
+    if (pos >= this->get_row_count()) {
+        return false;
+    }
+
+    // Erase data from all columns in one row
+    for (size_t i = 0; i < len; ++i) {
+        this->private_->columns[i]->erase(pos);
+    }
+
+    return true;
+}
+
 bool InMemoryTable::erase_id(const size_t &id)
 {
     size_t result = this->search(id);
 
     if (result != TDB_NOT_FOUND) {
-        this->private_->erase(result);
+        this->erase(result);
         return true;
     }
 

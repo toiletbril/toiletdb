@@ -671,13 +671,17 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
                 return;
             }
 
-            bool success = model.erase_id(n);
+            size_t pos = model.search(n);
 
-            if (success)
-                std::cout << "Row removed successfully." << std::endl;
-            else
-                std::cout << "Could not find row with specified ID."
-                          << std::endl;
+            if (pos == TDB_NOT_FOUND) {
+                std::cout << "ERROR: Could not find row with specified ID." << std::endl;
+                return;
+            }
+
+            cli_put_table_header(model);
+            cli_put_row(model, pos);
+
+            model.erase(pos);
         } break;
 
         case EDIT: {

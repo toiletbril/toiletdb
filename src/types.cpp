@@ -17,6 +17,9 @@ class Column;
 
 ColumnInt::ColumnInt(std::string name, int type)
 {
+    TOILET_DEBUGS(name, "ColumnInt name");
+    TOILET_DEBUGS(type, "ColumnInt type");
+
     this->name = name;
     this->type = type;
     this->data = new std::vector<int>;
@@ -74,6 +77,9 @@ void *ColumnInt::get_data()
 
 ColumnB_Int::ColumnB_Int(const std::string name, int type)
 {
+    TOILET_DEBUGS(name, "ColumnB_Int name");
+    TOILET_DEBUGS(type, "ColumnB_Int type");
+
     this->name = name;
     this->type = type;
     this->data = new std::vector<unsigned long long>;
@@ -131,6 +137,9 @@ void *ColumnB_Int::get_data()
 
 ColumnStr::ColumnStr(std::string name, int type)
 {
+    TOILET_DEBUGS(name, "ColumnStr name");
+    TOILET_DEBUGS(type, "ColumnStr type");
+
     this->name = name;
     this->type = type;
     this->data = new std::vector<std::string>;

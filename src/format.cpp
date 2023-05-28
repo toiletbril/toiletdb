@@ -151,9 +151,7 @@ TableInfo FormatOne::read_types(std::fstream &file)
         ++pos;
     }
 
-#ifndef NDEBUG
     TOILET_DEBUGV(fields.types, "InMemoryFileParser.update_types types");
-#endif
 
     fields.size  = field_n;
     fields.names = names;
@@ -268,9 +266,7 @@ std::vector<Column *> FormatOne::deserealize(std::fstream &file,
             throw ParsingError(failstring);
         }
 
-#ifndef NDEBUG
         TOILET_DEBUGV(fields, "InMemoryFileParser.deserealize");
-#endif
 
         for (size_t i = 0; i < columns.size; ++i) {
             if (columns.types[i] & T_ID) {
@@ -421,6 +417,7 @@ void FormatOne::serialize(std::fstream &file, const std::vector<Column *> &data)
         }
         file << "|\n";
     }
+
     TOILET_DEBUGS(row_count, "InMemoryFileParser.serialize rows saved");
 }
 
