@@ -47,26 +47,36 @@ Modifiers:
 - `const` Marks column as not editable through code (you can still edit it manually :3)
 - `id`    Marks column to be used for indexing (only for `b_int`)
 
-## Building
+## Building from source
 
-### POSIX
+### Prerequisites
+#### POSIX
 
-`build/libtoiletdb.a` (static library)
+- GCC/Clang
+- `make`
+- `ar`
+
+#### Windows
+
+- GCC/Clang
+- MinGW32
+	- `mingw32-make.exe`
+	- `x86_64-w64-mingw32-ar.exe`
+
+### Build
+
+`build/toiletdb.lib` (static library)
 ```console
 make release
 ```
 
-Copy include header from [`include/toiletdb.hpp`](include/toiletdb.hpp), static library from `build/libtoiletdb.a` and do whatever.
-When building, link your binary with `-ltoiletdb`.
+Copy include header from [`include/toiletdb.hpp`](include/toiletdb.hpp), static library from `build/toiletdb.lib` and do whatever.
+When building your project, put `toiletdb.lib` along your source file names.
 
 `build/toiletdb` (CLI)
 ```console
 make cli
 ```
-
-### Windows
-
-> TODO
 
 ## CLI
 

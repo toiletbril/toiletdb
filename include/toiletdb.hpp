@@ -40,10 +40,10 @@
 #define TOILETDB_VERSION "1.0.4"
 #define TOILETDB_PARSER_FORMAT_VERSION 1
 
-#define TDB_NOT_FOUND (size_t)(-1)
-
 #define TDB_INVALID_ULL (size_t)(-1)
 #define TDB_INVALID_I 2147483647
+
+#define TDB_NOT_FOUND TDB_INVALID_ULL
 
 /// @brief Type mask for ToiletType
 #define TDB_TMASK 0b00000111

@@ -182,16 +182,18 @@ static void cli_put_table_header(InMemoryTable &model)
             padding = CLI_INTW;
             name << std::left << std::setw(CLI_INTW) << names[i];
         }
+
         else if (types[i] & T_B_INT) {
             padding = CLI_B_INTW;
             name << std::left << std::setw(CLI_B_INTW) << names[i];
         }
+
         else if (types[i] & T_STR) {
             padding = CLI_STRW;
             name << std::left << std::setw(CLI_STRW) << names[i];
         }
 
-        // Modifiers
+        // Output modifiers
 
         std::string temp;
 
@@ -208,14 +210,16 @@ static void cli_put_table_header(InMemoryTable &model)
 
         temp.clear();
 
-        // Types
+        // Output types
 
         if (types[i] & T_INT) {
             temp = "[int]";
         }
+
         else if (types[i] & T_B_INT) {
             temp = "[b_int]";
         }
+
         else if (types[i] & T_STR) {
             temp = "[str]";
         }
