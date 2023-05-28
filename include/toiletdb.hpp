@@ -183,18 +183,18 @@ public:
     ~InMemoryTable();
     const std::vector<Column *> &get_all() const;
     /// @brief Discards all changes made to in-memory vector, and reads file
-    /// again.
+    ///        again.
     /// @throws std::runtime_error when table file was deleted or moved.
     void reread_file();
     /// @brief Writes data stored in memory back to the file.
     /// @throws std::runtime_error when table file was deleted or moved.
     void write_file() const;
     /// @brief Search in-memory vector by ID.
-    /// O(log n)
+    ///        O(log n)
     /// @return TDB_NOT_FOUND if element is not found.
     size_t search(const size_t &id) const;
     /// @brief Search in-memory vector by comparing values as std::string.
-    /// O(n)
+    ///        O(n)
     /// @return TDB_NOT_FOUND if element is not found.
     std::vector<size_t> search(const std::string &name,
                                std::string &query) const;

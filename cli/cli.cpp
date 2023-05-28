@@ -51,6 +51,7 @@ static std::string cli_concat_args(std::vector<std::string> &args, size_t pos)
 }
 
 // Splits strings by spaces, treats "quoted sentences" as a single argument.
+// Supports escaping, i. e. "Gorlock \"The Destroyer\""
 static std::vector<std::string> cli_split_args(const std::string &s)
 {
     size_t len = s.length();
@@ -59,26 +60,41 @@ static std::vector<std::string> cli_split_args(const std::string &s)
     std::string temp;
 
     bool in_quotes = false;
+    bool escaped = false;
 
     for (size_t i = 0; i < len; ++i) {
         char c = s.at(i);
 
-        if (in_quotes) {
+        if (escaped)
+        {
+            temp += c;
+            escaped = false;
+        }
+
+        else if (c == '\\')
+        {
+            escaped = true;
+        }
+
+        else if (in_quotes) {
             if (c == '"') {
                 in_quotes = false;
-                continue;
+            } else {
+                temp += c;
             }
-            temp += c;
         }
+
         else if (c == '"') {
             in_quotes = true;
         }
+
         else if (c == ' ') {
             if (!temp.empty()) {
                 result.push_back(temp);
             }
             temp.clear();
         }
+
         else {
             temp += c;
         }

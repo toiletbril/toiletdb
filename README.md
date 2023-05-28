@@ -27,6 +27,7 @@ The actual task was too easy, so I decided to implement a whole database instead
 ### File format
 
 Database files look like this:
+
 ```
 tdb<format version>
 |[modifier] <column type> <column name>| ...

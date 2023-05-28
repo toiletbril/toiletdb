@@ -1,9 +1,7 @@
 # TODO:
-- Important:
-    - Windows building script.
-    - Documentation.
-    - Tests.
-- Not important:
-    - Class for table creation.
-    - Dynamic ID uniqueness checking.
-    - CLI: When there is no file, open up a table creator.
+- Dynamic ID uniqueness checking.
+- Class for table creation.
+- Windows building script.
+- Table creator for CLI.
+- Documentation.
+- Tests.

@@ -62,13 +62,12 @@ public:
     std::vector<void *> get_row(const size_t &pos);
     /// @brief Adds one row. Converts strings to appropriate types.
     ///        One row means a value from each column.
-    /// @returns
-    /// Returns 0 on success.
-    /// 1 - Args vector is too big/small.
-    /// 2 - Argument of type 'int' is found to be
-    ///     not convertible to int.
-    /// 3 - Argument of type 'b_int' is found to be
-    ///     not convertible to unsigned long long.
+    /// @returns Returns 0 on success.
+    ///          1 - Args vector is too big/small.
+    ///          2 - Argument of type 'int' is found to be
+    ///              not convertible to int.
+    ///          3 - Argument of type 'b_int' is found to be
+    ///              not convertible to unsigned long long.
     /// @see get_column_types()
     /// @see get_column_type()
     int add(std::vector<std::string> &args);
@@ -81,7 +80,7 @@ public:
     const std::string &get_column_name(const size_t &pos) const;
     /// @brief Searches for column with specified name in a table.
     /// @returns Position of column in the table. TDB_NOT_FOUND if element
-    /// is not found.
+    ///          is not found.
     size_t search_column_index(const std::string &name) const;
     /// @see ToiletType
     const std::vector<int> &get_column_types() const;
