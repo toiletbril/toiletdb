@@ -75,11 +75,11 @@ class Column
 {
 public:
     /// @see ToiletType
-    virtual int get_type() const         = 0;
-    virtual std::string get_name() const = 0;
+    virtual const int &get_type() const         = 0;
+    virtual const std::string &get_name() const = 0;
     virtual size_t size() const          = 0;
-    virtual void erase(size_t pos)       = 0;
-    virtual void clear()                 = 0;
+    virtual void erase(size_t pos)              = 0;
+    virtual void clear()                        = 0;
     /// @brief Appends an element to in-memory vector.
     ///        Type will be casted back in method body.
     /// @details I couldn't figure out how to make this more convenient.
@@ -99,8 +99,8 @@ class ColumnInt : public Column
 public:
     ColumnInt(std::string name, int type);
     ~ColumnInt();
-    int get_type() const override;
-    std::string get_name() const override;
+    const int &get_type() const override;
+    const std::string &get_name() const override;
     size_t size() const override;
     void erase(size_t pos) override;
     void clear() override;
@@ -118,8 +118,8 @@ class ColumnB_Int : public Column
 public:
     ColumnB_Int(const std::string name, int type);
     ~ColumnB_Int();
-    int get_type() const override;
-    std::string get_name() const override;
+    const int &get_type() const override;
+    const std::string &get_name() const override;
     size_t size() const override;
     void erase(size_t pos) override;
     void clear() override;
@@ -137,8 +137,8 @@ class ColumnStr : public Column
 public:
     ColumnStr(std::string name, int type);
     ~ColumnStr();
-    int get_type() const override;
-    std::string get_name() const override;
+    const int &get_type() const override;
+    const std::string &get_name() const override;
     size_t size() const override;
     void erase(size_t pos) override;
     void clear() override;

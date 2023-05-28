@@ -32,8 +32,8 @@ private:
 public:
     /// @brief Opens up a file and loads it up into memory.
     /// @warning Does not create a file. Will throw an error.
-    /// @throws std::ios::failure when file is not found,
-    /// or file cannot be opened.
+    /// @throws std::ios::failure when file cannot be opened.
+    /// @throws std::runtime_error when file does not exist.
     /// @throws ParsingError when parsing error is encountered.
     InMemoryTable(const std::string &filename);
     ~InMemoryTable();
@@ -77,14 +77,18 @@ public:
     /// @brief Clears all columns.
     void clear();
     size_t get_column_count() const;
-    const std::vector<std::string> get_column_names() const;
+    const std::vector<std::string> &get_column_names() const;
+    const std::string &get_column_name(const size_t &pos) const;
     /// @brief Searches for column with specified name in a table.
     /// @returns Position of column in the table. TDB_NOT_FOUND if element
     /// is not found.
     size_t search_column_index(const std::string &name) const;
     /// @see ToiletType
-    const std::vector<int> get_column_types() const;
-    size_t total_rows() const;
+    const std::vector<int> &get_column_types() const;
+    /// @see ToiletType
+    const int &get_column_type(const size_t &pos) const;
+    size_t get_row_count() const;
+    /// @return Suitable ID for a new element.
     size_t get_next_id() const;
 };
 

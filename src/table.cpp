@@ -10,9 +10,9 @@ struct InMemoryTable::Private
 
     void erase(const size_t pos)
     {
-        // Erase data in all columns
         size_t len = this->columns.size();
 
+        // Erase data from all columns in one row
         for (size_t i = 0; i < len; ++i) {
             this->columns[i]->erase(pos);
         }
@@ -43,10 +43,11 @@ struct InMemoryTable::Private
     }
 };
 
-// TODO: This does not create a file.
-// IDs from loaded file will be indexed to be used for binary search.
 InMemoryTable::InMemoryTable(const std::string &filename)
 {
+    // TODO: This does not create a file.
+    // IDs from loaded file will be indexed to be used for binary search.
+
     this->private_ = std::make_unique<Private>();
 
     this->private_->parser = std::make_unique<InMemoryFileParser>(filename);
@@ -78,20 +79,20 @@ void InMemoryTable::write_file() const
     this->private_->parser->write_file(this->private_->columns);
 }
 
-// Search methods return index of the element in the vector.
-// If element is not found, return TDB_NOT_FOUND.
-
-// Binary search by id.
 size_t InMemoryTable::search(const size_t &id) const
 {
+    // Search methods return index of the element in the vector.
+    // If element is not found, return TDB_NOT_FOUND.
+    // Binary search by id.
+
     // NOTE: Long instead of size_t.
     long L = 0;
     long R = this->private_->index.size();
     long m;
 
-    std::vector<unsigned long long> id_column =
-            TDB_GET_DATA(unsigned long long,
-                         this->private_->columns[this->private_->parser->get_id_column_index()]);
+    std::vector<unsigned long long> id_column = TDB_GET_DATA(
+        unsigned long long,
+        this->private_->columns[this->private_->parser->get_id_column_index()]);
 
     TOILET_DEBUGV(id_column, "ids");
     TOILET_DEBUGV(this->private_->index, "index");
@@ -115,10 +116,10 @@ size_t InMemoryTable::search(const size_t &id) const
     return TDB_NOT_FOUND;
 }
 
-// Naive search any column by comparing strings.
 std::vector<size_t> InMemoryTable::search(const std::string &name,
                                           std::string &query) const
 {
+    // Naive search any column by comparing strings.
     size_t pos = 0;
     std::vector<size_t> result;
 
@@ -135,7 +136,7 @@ std::vector<size_t> InMemoryTable::search(const std::string &name,
 
     void *data = this->private_->columns[column_index]->get_data();
 
-    for (size_t i = 0; i < this->total_rows(); ++i) {
+    for (size_t i = 0; i < this->get_row_count(); ++i) {
         std::string value;
         switch (TDB_TYPE(type)) {
             case T_INT: {
@@ -162,13 +163,14 @@ std::vector<size_t> InMemoryTable::search(const std::string &name,
     return result;
 }
 
-// To get types, use column_types().
-// This returns void pointers to values from every column on a single row.
 std::vector<void *> InMemoryTable::get_row(const size_t &pos)
 {
+    // To get types, use column_types().
+    // This returns void pointers to values from every column on a single row.
+
     std::vector<void *> result;
 
-    if (pos > this->total_rows()) {
+    if (pos > this->get_row_count()) {
         throw std::logic_error("In ToiletDB, In InMemoryTable.get_row(), pos "
                                "is larger than data size");
     }
@@ -195,15 +197,16 @@ std::vector<void *> InMemoryTable::get_row(const size_t &pos)
     return result;
 }
 
-// Returns 0 on success.
-// Errors numbers:
-// 1 - Args vector is too big/small.
-// 2 - Argument of type 'int' is found to be
-//     not convertible to int.
-// 3 - Argument of type 'b_int' is found to be
-//     not convertible to unsigned long long.
 int InMemoryTable::add(std::vector<std::string> &args)
 {
+    // Returns 0 on success.
+    // Errors numbers:
+    // 1 - Args vector is too big/small.
+    // 2 - Argument of type 'int' is found to be
+    //     not convertible to int.
+    // 3 - Argument of type 'b_int' is found to be
+    //     not convertible to unsigned long long.
+
     std::vector<int> types = this->get_column_types();
 
     // Column count, ignoring ID.
@@ -292,15 +295,20 @@ size_t InMemoryTable::get_column_count() const
     return this->private_->columns.size();
 }
 
-const std::vector<std::string> InMemoryTable::get_column_names() const
+const std::vector<std::string> &InMemoryTable::get_column_names() const
 {
-    std::vector<std::string> names;
+    return this->private_->parser->names();
+}
 
-    for (Column *c : this->private_->columns) {
-        names.push_back(c->get_name());
+const std::string &InMemoryTable::get_column_name(const size_t &pos) const
+{
+    if (pos > this->get_column_count()) {
+        throw std::logic_error(
+            "In ToiletDB, In InMemoryTable.get_column_name(), pos "
+            "is larger than column count");
     }
 
-    return names;
+    return this->private_->parser->names()[pos];
 }
 
 size_t InMemoryTable::search_column_index(const std::string &name) const
@@ -325,18 +333,23 @@ size_t InMemoryTable::search_column_index(const std::string &name) const
     return column_index;
 }
 
-const std::vector<int> InMemoryTable::get_column_types() const
+const std::vector<int> &InMemoryTable::get_column_types() const
 {
-    std::vector<int> types;
-    for (Column *c : this->private_->columns) {
-        types.push_back(c->get_type());
-    }
-
-    return types;
+    return this->private_->parser->types();
 }
 
-// Returns total amount of rows.
-size_t InMemoryTable::total_rows() const
+const int &InMemoryTable::get_column_type(const size_t &pos) const
+{
+    if (pos > this->get_column_count()) {
+        throw std::logic_error(
+            "In ToiletDB, In InMemoryTable.get_column_type(), pos "
+            "is larger than column count");
+    }
+
+    return this->private_->parser->types()[pos];
+}
+
+size_t InMemoryTable::get_row_count() const
 {
     if (!this->private_->columns[0]) {
         throw std::logic_error(
@@ -349,9 +362,9 @@ size_t InMemoryTable::total_rows() const
 size_t InMemoryTable::get_next_id() const
 {
     while (true) {
-        size_t next_id = this->total_rows();
+        size_t next_id = this->get_row_count();
         if (this->search(next_id) == TDB_NOT_FOUND) {
-            return this->total_rows();
+            return this->get_row_count();
         }
     }
 }

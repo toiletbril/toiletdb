@@ -27,12 +27,12 @@ ColumnInt::~ColumnInt()
     delete this->data;
 }
 
-int ColumnInt::get_type() const
+const int &ColumnInt::get_type() const
 {
     return this->type;
 }
 
-std::string ColumnInt::get_name() const
+const std::string &ColumnInt::get_name() const
 {
     return this->name;
 }
@@ -84,12 +84,12 @@ ColumnB_Int::~ColumnB_Int()
     delete this->data;
 }
 
-int ColumnB_Int::get_type() const
+const int &ColumnB_Int::get_type() const
 {
     return this->type;
 }
 
-std::string ColumnB_Int::get_name() const
+const std::string &ColumnB_Int::get_name() const
 {
     return this->name;
 }
@@ -141,12 +141,12 @@ ColumnStr::~ColumnStr()
     delete this->data;
 }
 
-int ColumnStr::get_type() const
+const int &ColumnStr::get_type() const
 {
     return this->type;
 }
 
-std::string ColumnStr::get_name() const
+const std::string &ColumnStr::get_name() const
 {
     return this->name;
 }

@@ -483,7 +483,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
         } break;
 
         case LIST: {
-            size_t len = model.total_rows();
+            size_t len = model.get_row_count();
 
             if (len > 1000) {
                 std::cout << "Database has over 1 000 entries (" << len
@@ -536,7 +536,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
             std::string query = cli_concat_args(args, 2);
 
             // If column specified has modifier 'id', use binary search.
-            if (model.get_column_types()[model.search_column_index(args[1])] &
+            if (model.get_column_type(model.search_column_index(args[1])) &
                 T_ID) {
                 size_t value = parse_long_long(query);
 
@@ -569,7 +569,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
         } break;
 
         case DBSIZE: {
-            std::cout << "There are " << model.total_rows()
+            std::cout << "There are " << model.get_row_count()
                       << " rows in database." << std::endl;
         } break;
 
@@ -621,7 +621,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
 
             if (!err) {
                 cli_put_table_header(model);
-                cli_put_row(model, model.total_rows() - 1);
+                cli_put_row(model, model.get_row_count() - 1);
             }
             else {
                 std::cout << "ERROR: ";
@@ -723,7 +723,6 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
             if (TDB_IS(types[column_index], T_CONST)) {
                 std::cout << "ERROR: Can not edit value with 'const' modifier."
                           << std::endl;
-
                 return;
             }
 
@@ -737,7 +736,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
                         return;
                     }
 
-                    *static_cast<int *>(data) = number;
+                    TDB_GET(int, data) = number;
                 } break;
 
                 case T_B_INT: {
@@ -748,6 +747,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
                                   << std::endl;
                         return;
                     }
+
                     TDB_GET(unsigned long long, data) = number;
                 } break;
 
@@ -827,7 +827,7 @@ void cli_loop(const char *filepath)
 
     std::cout << "\nWelcome to toiletdb " << TOILETDB_VERSION << '.'
               << std::endl;
-    std::cout << "Loaded " << model->total_rows()
+    std::cout << "Loaded " << model->get_row_count()
               << " rows.\n"
                  "Try 'help' to see available commands."
               << std::endl;

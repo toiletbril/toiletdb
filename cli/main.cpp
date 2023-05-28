@@ -6,8 +6,8 @@
 #include <cstring>
 #include <iostream>
 
-#include "toiletdb.hpp"
 #include "cli.hpp"
+#include "toiletdb.hpp"
 
 static bool help        = false;
 static bool help_format = false;
@@ -97,10 +97,8 @@ int main(int argc, char **argv)
         std::cout << "ERROR: Not enough arguments.\n"
                   << "USAGE: " << TOILETDB_NAME
                   << " <database file>\n"
-                     "To get more help, try '--help'.\n"
-                     "\n"
-                  << "v" TOILETDB_VERSION << " (c) toiletbril "
-                  << TOILETDB_GITHUB << std::endl;
+                     "To get more help, try '--help'."
+                  << std::endl;
         std::exit(0);
     }
 

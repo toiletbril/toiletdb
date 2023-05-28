@@ -105,12 +105,12 @@ InMemoryFileParser::InMemoryFileParser(const std::string &filename) :
 InMemoryFileParser::~InMemoryFileParser()
 {}
 
-size_t InMemoryFileParser::get_version() const
+const size_t &InMemoryFileParser::get_version() const
 {
     return this->format_version;
 }
 
-size_t InMemoryFileParser::get_id_column_index() const
+const size_t &InMemoryFileParser::get_id_column_index() const
 {
     return this->columns.id_field_index;
 }
@@ -175,6 +175,16 @@ void InMemoryFileParser::write_file(const std::vector<Column *> &columns) const
 
     Private::serialize(this, file, columns);
     file.close();
+}
+
+const std::vector<int> &InMemoryFileParser::types() const
+{
+    return this->columns.types;
+}
+
+const std::vector<std::string> &InMemoryFileParser::names() const
+{
+    return this->columns.names;
 }
 
 } // namespace toiletdb
