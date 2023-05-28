@@ -12,8 +12,8 @@ includes = set()
 
 in_header = False
 
+# move all non-local includes to the top
 for f in files:
-    # move all includes to the top
     with open(f, "r") as file:
         for line in file:
             if line.startswith("#include \""):
@@ -23,8 +23,8 @@ for f in files:
 
 header += "".join(includes)
 
+# make header
 for f in files:
-    # make header
     with open(f, "r") as file:
         header += "\n/**\n * File:" + file.name + "\n */\n\n"
         for line in file:
@@ -37,7 +37,7 @@ for f in files:
 blank = False
 actual_header = ""
 
-# remove two and more blank lines
+# remove two and more consecutive blank lines
 for line in header.splitlines():
     if not line:
         if blank:
