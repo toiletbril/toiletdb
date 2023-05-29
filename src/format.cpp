@@ -46,7 +46,7 @@ size_t FormatOne::read_version(std::fstream &file)
                            "supported: Version is too new");
     };
 
-    TOILET_DEBUGS(version, "InMemoryFileParser.read_version");
+    TDB_DEBUGS(version, "InMemoryFileParser.read_version");
 
     return version;
 }
@@ -162,7 +162,7 @@ TableInfo FormatOne::read_types(std::fstream &file)
         ++pos;
     }
 
-    TOILET_DEBUGV(fields.types, "InMemoryFileParser.update_types types");
+    TDB_DEBUGV(fields.types, "InMemoryFileParser.update_types types");
 
     fields.size  = field_n;
     fields.names = names;
@@ -235,7 +235,7 @@ std::vector<Column *> FormatOne::deserealize(std::fstream &file,
         while (c != '\n') {
             if (c == '\r') {
                 if (!debug_crlf) {
-                    TOILET_DEBUGS("CRLF detected",
+                    TDB_DEBUGS("CRLF detected",
                                   "InMemoryFileParser.deserialize");
                     debug_crlf = true;
                 }
@@ -277,7 +277,7 @@ std::vector<Column *> FormatOne::deserealize(std::fstream &file,
             throw ParsingError(failstring);
         }
 
-        TOILET_DEBUGV(fields, "InMemoryFileParser.deserealize");
+        TDB_DEBUGV(fields, "InMemoryFileParser.deserealize");
 
         for (size_t i = 0; i < columns.size; ++i) {
             if (columns.types[i] & T_ID) {
@@ -323,7 +323,7 @@ std::vector<Column *> FormatOne::deserealize(std::fstream &file,
                     throw ParsingError(failstring);
                 }
 
-                static_cast<std::vector<unsigned long long> *>(
+                static_cast<std::vector<size_t> *>(
                     parsed_columns[i]->get_data())
                     ->push_back(num);
             }
@@ -382,7 +382,7 @@ void FormatOne::write_header(std::fstream &file,
     }
     header += '|';
 
-    TOILET_DEBUGS(header, "InMemoryFileParser.write_header");
+    TDB_DEBUGS(header, "InMemoryFileParser.write_header");
 
     file << header << std::endl;
 }
@@ -418,7 +418,7 @@ void FormatOne::serialize(std::fstream &file, const std::vector<Column *> &data)
                 } break;
 
                 case T_B_INT: {
-                    file << *(static_cast<unsigned long long *>(item));
+                    file << *(static_cast<size_t *>(item));
                 } break;
 
                 case T_STR: {
@@ -429,7 +429,7 @@ void FormatOne::serialize(std::fstream &file, const std::vector<Column *> &data)
         file << "|\n";
     }
 
-    TOILET_DEBUGS(row_count, "InMemoryFileParser.serialize rows saved");
+    TDB_DEBUGS(row_count, "InMemoryFileParser.serialize rows saved");
 }
 
 } // namespace toiletdb

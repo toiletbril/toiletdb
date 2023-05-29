@@ -36,8 +36,8 @@ tdb<format version>
 
 Available column types are:
 
-- `int`   32 bit signed integer
-- `b_int` 64 bit unsigned integer
+- `int`   Signed integer
+- `b_int` Unsigned integer
 - `str`   Array of 8 bit characters
 
 Modifiers:

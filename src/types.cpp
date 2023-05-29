@@ -15,8 +15,8 @@ class Column;
 
 ColumnInt::ColumnInt(std::string name, int type)
 {
-    TOILET_DEBUGS(name, "ColumnInt name");
-    TOILET_DEBUGS(type, "ColumnInt type");
+    TDB_DEBUGS(name, "ColumnInt name");
+    TDB_DEBUGS(type, "ColumnInt type");
 
     this->name = name;
     this->type = type;
@@ -75,12 +75,12 @@ void *ColumnInt::get_data()
 
 ColumnB_Int::ColumnB_Int(const std::string name, int type)
 {
-    TOILET_DEBUGS(name, "ColumnB_Int name");
-    TOILET_DEBUGS(type, "ColumnB_Int type");
+    TDB_DEBUGS(name, "ColumnB_Int name");
+    TDB_DEBUGS(type, "ColumnB_Int type");
 
     this->name = name;
     this->type = type;
-    this->data = new std::vector<unsigned long long>;
+    this->data = new std::vector<size_t>;
 }
 
 ColumnB_Int::~ColumnB_Int()
@@ -115,7 +115,7 @@ void ColumnB_Int::clear()
 
 void ColumnB_Int::add(void *data)
 {
-    unsigned long long number = *static_cast<unsigned long long *>(data);
+    size_t number = *static_cast<size_t *>(data);
     this->data->push_back(number);
 }
 
@@ -135,8 +135,8 @@ void *ColumnB_Int::get_data()
 
 ColumnStr::ColumnStr(std::string name, int type)
 {
-    TOILET_DEBUGS(name, "ColumnStr name");
-    TOILET_DEBUGS(type, "ColumnStr type");
+    TDB_DEBUGS(name, "ColumnStr name");
+    TDB_DEBUGS(type, "ColumnStr type");
 
     this->name = name;
     this->type = type;

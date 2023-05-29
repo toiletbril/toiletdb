@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <string>
 
-#define TOILETDB_VERSION "1.0.6"
+#define TOILETDB_VERSION "1.0.7"
 
 #define TDB_NOT_FOUND (size_t)(-1)
 
@@ -15,7 +15,7 @@
 
 namespace toiletdb {
 
-/// @brief Parse unsigned long long.
+/// @brief Parse size_t.
 /// @return TDB_INVALID_ULL if string cannot be parsed.
 size_t parse_long_long(const std::string &str);
 /// @brief Parse signed int.

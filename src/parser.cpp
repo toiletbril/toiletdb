@@ -12,7 +12,7 @@
 // 2    |[modifier] <type> <name>|...
 //
 // Modifiers: ID (id), constant (const)
-// Types: Number (int), big unsigned number (b_int), string (str)
+// Types: Number (int), Unsigned number (b_int), string (str)
 //
 // There should be at least one field with 'id' modifier.
 // Only one field should have 'id' modifier.
@@ -28,7 +28,7 @@ struct InMemoryFileParser::Private
 
         file.open(self->filename, mode);
 
-        TOILET_DEBUGS(self->filename, "InMemoryFileParser.open");
+        TDB_DEBUGS(self->filename, "InMemoryFileParser.open");
 
         if (!file.is_open()) {
             throw std::ios::failure("In ToiletDB, In InMemoryFileParser.open(), could not open file");
@@ -107,13 +107,13 @@ InMemoryFileParser::~InMemoryFileParser()
 
 const size_t &InMemoryFileParser::get_version() const
 {
-    TOILET_DEBUGS(this->columns.id_field_index, "InMemoryFileParser.get_version");
+    TDB_DEBUGS(this->columns.id_field_index, "InMemoryFileParser.get_version");
     return this->format_version;
 }
 
 const size_t &InMemoryFileParser::get_id_column_index() const
 {
-    TOILET_DEBUGS(this->columns.id_field_index, "InMemoryFileParser.get_id_column_index");
+    TDB_DEBUGS(this->columns.id_field_index, "InMemoryFileParser.get_id_column_index");
     return this->columns.id_field_index;
 }
 
@@ -124,7 +124,7 @@ bool InMemoryFileParser::exists() const
 
     file.open(this->filename);
 
-    TOILET_DEBUGS(file.is_open(), "InMemoryFileParser.exists");
+    TDB_DEBUGS(file.is_open(), "InMemoryFileParser.exists");
 
     return file.is_open();
 }

@@ -69,7 +69,7 @@ public:
     ///          2 - Argument of type 'int' is found to be
     ///              not convertible to int.
     ///          3 - Argument of type 'b_int' is found to be
-    ///              not convertible to unsigned long long.
+    ///              not convertible to size_t.
     /// @see get_column_types()
     /// @see get_column_type()
     int add(std::vector<std::string> &args);

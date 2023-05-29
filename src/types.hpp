@@ -46,9 +46,9 @@ namespace toiletdb {
  */
 enum ToiletType
 {
-    /// @brief 32 bit signed integer.
+    /// @brief Signed integer.
     T_INT = 1 << 0,
-    /// @brief 64 bit unsigned integer.
+    /// @brief Unsigned integer.
     T_B_INT = 1 << 1,
     /// @brief std::string.
     T_STR = 1 << 2,
@@ -113,7 +113,7 @@ public:
 
 class ColumnB_Int : public Column
 {
-    std::vector<unsigned long long> *data;
+    std::vector<size_t> *data;
     std::string name;
     int type;
 

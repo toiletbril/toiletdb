@@ -4,7 +4,7 @@ namespace toiletdb {
 
 struct InMemoryTable::Private
 {
-    std::vector<unsigned long long> index;
+    std::vector<size_t> index;
     std::vector<Column *> columns;
     std::unique_ptr<InMemoryFileParser> parser;
 
@@ -12,11 +12,11 @@ struct InMemoryTable::Private
     // updates index with a sorted list that maps position to ID.
     void update_index()
     {
-        std::vector<unsigned long long> id_column =
-            TDB_GET_DATA(unsigned long long,
+        std::vector<size_t> id_column =
+            TDB_GET_DATA(size_t,
                          this->columns[this->parser->get_id_column_index()]);
 
-        std::vector<unsigned long long> index;
+        std::vector<size_t> index;
         index.resize(id_column.size());
 
         std::iota(index.begin(), index.end(), 0);
@@ -26,8 +26,8 @@ struct InMemoryTable::Private
                              return id_column[a] < id_column[b];
                          });
 
-        TOILET_DEBUGV(id_column, "ids");
-        TOILET_DEBUGV(index, "index");
+        TDB_DEBUGV(id_column, "ids");
+        TDB_DEBUGV(index, "index");
 
         this->index = index;
     }
@@ -37,7 +37,7 @@ InMemoryTable::InMemoryTable(const std::string &filename)
 {
     // TODO: This does not create a file.
 
-    TOILET_DEBUGS(filename, "InMemoryTable filename");
+    TDB_DEBUGS(filename, "InMemoryTable filename");
 
     this->private_ = std::make_unique<Private>();
 
@@ -82,8 +82,8 @@ size_t InMemoryTable::search(const size_t &id) const
     long R = this->private_->index.size();
     long m;
 
-    std::vector<unsigned long long> id_column = TDB_GET_DATA(
-        unsigned long long,
+    std::vector<size_t> id_column = TDB_GET_DATA(
+        size_t,
         this->private_->columns[this->private_->parser->get_id_column_index()]);
 
     while (L <= R) {
@@ -134,7 +134,7 @@ std::vector<size_t> InMemoryTable::search(const std::string &name,
             } break;
             case T_B_INT: {
                 value = std::to_string((*(
-                    static_cast<std::vector<unsigned long long> *>(data)))[i]);
+                    static_cast<std::vector<size_t> *>(data)))[i]);
                 break;
             }
             case T_STR: {
@@ -173,7 +173,7 @@ std::vector<void *> InMemoryTable::get_row(const size_t &pos)
 
             case T_B_INT: {
                 result.push_back(static_cast<void *>(
-                    &(TDB_GET_DATA(unsigned long long, c))[pos]));
+                    &(TDB_GET_DATA(size_t, c))[pos]));
             } break;
 
             case T_STR: {
@@ -196,7 +196,7 @@ int InMemoryTable::add(std::vector<std::string> &args)
     // 2 - Argument of type 'int' is found to be
     //     not convertible to int.
     // 3 - Argument of type 'b_int' is found to be
-    //     not convertible to unsigned long long.
+    //     not convertible to size_t.
 
     std::vector<int> types = this->get_column_types();
 
@@ -258,7 +258,7 @@ int InMemoryTable::add(std::vector<std::string> &args)
         }
 
         else if (TDB_IS(types[i], T_B_INT)) {
-            unsigned long long value = parse_long_long(*it++);
+            size_t value = parse_long_long(*it++);
             this->private_->columns[i]->add(static_cast<void *>(&value));
         }
 
@@ -381,7 +381,7 @@ size_t InMemoryTable::get_next_id() const
     while (true) {
         size_t next_id = this->get_row_count() + i;
         if (this->search(next_id) == TDB_NOT_FOUND) {
-            TOILET_DEBUGS(next_id, "InMemoryTable.get_next_id");
+            TDB_DEBUGS(next_id, "InMemoryTable.get_next_id");
             return next_id;
         }
         ++i;

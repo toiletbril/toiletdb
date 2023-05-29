@@ -102,7 +102,7 @@ static std::vector<std::string> cli_split_args(const std::string &s)
         result.push_back(temp);
     }
 
-    TOILET_DEBUGV(result, "cli_splitstring");
+    TDB_DEBUGV(result, "cli_splitstring");
 
     return result;
 }
@@ -255,7 +255,7 @@ static void cli_put_row(InMemoryTable &model, const size_t &pos)
             } break;
 
             case T_B_INT: {
-                if (*static_cast<unsigned long long *>(row[i]) >=
+                if (*static_cast<size_t *>(row[i]) >=
                     100000000000) {
                     should_wrap = true;
                     break;
@@ -285,7 +285,7 @@ static void cli_put_row(InMemoryTable &model, const size_t &pos)
 
                 case T_B_INT: {
                     std::cout << std::left << std::setw(CLI_B_INTW)
-                              << *static_cast<unsigned long long *>(row[i]);
+                              << *static_cast<size_t *>(row[i]);
                 } break;
 
                 case T_STR: {
@@ -319,8 +319,8 @@ static void cli_put_row(InMemoryTable &model, const size_t &pos)
                 } break;
 
                 case T_B_INT: {
-                    unsigned long long n =
-                        *static_cast<unsigned long long *>(row[i]);
+                    size_t n =
+                        *static_cast<size_t *>(row[i]);
 
                     std::string s = std::to_string(n);
 
@@ -428,7 +428,7 @@ static void cli_put_row(InMemoryTable &model, const size_t &pos)
     }
 }
 
-static CLI_COMMAND_KIND cli_getcommand(std::string &s)
+static CLI_COMMAND_KIND cli_get_command(std::string &s)
 {
     if (s == "help" || s == "?")
         return HELP;
@@ -462,7 +462,7 @@ static CLI_COMMAND_KIND cli_getcommand(std::string &s)
 
 static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
 {
-    CLI_COMMAND_KIND c = cli_getcommand(args[0]);
+    CLI_COMMAND_KIND c = cli_get_command(args[0]);
 
     switch (c) {
         case UNKNOWN: {
@@ -640,7 +640,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
                 return;
             }
 
-            TOILET_DEBUGV(args, "add() args");
+            TDB_DEBUGV(args, "add() args");
 
             int err = model.add(args);
 
@@ -771,7 +771,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
                 } break;
 
                 case T_B_INT: {
-                    unsigned long long number = parse_long_long(value);
+                    size_t number = parse_long_long(value);
 
                     if (n == TDB_INVALID_ULL) {
                         std::cout << "ERROR: Value is not a number."
@@ -779,7 +779,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
                         return;
                     }
 
-                    TDB_GET(unsigned long long, data) = number;
+                    TDB_GET(size_t, data) = number;
                 } break;
 
                 case T_STR: {
@@ -845,7 +845,7 @@ void cli_loop(const char *filepath)
         exit(1);
     }
     catch (std::runtime_error &e) {
-        TOILET_DEBUGS(e.what(), "cli_loop");
+        TDB_DEBUGS(e.what(), "cli_loop");
         std::cout << filepath << ": File does not exist."
                   << "\n"
                      "You need to create database file first.\n"

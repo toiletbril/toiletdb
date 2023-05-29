@@ -5,11 +5,11 @@
 #include <vector>
 
 #ifndef NDEBUG
-    #define TOILET_DEBUGV(v, name) toilet_debug_putv(v, name)
-    #define TOILET_DEBUGS(s, name) toilet_debug_puts(s, name)
+    #define TDB_DEBUGV(v, name) toilet_debug_putv(v, name)
+    #define TDB_DEBUGS(s, name) toilet_debug_puts(s, name)
 #else
-    #define TOILET_DEBUGV(v, name)
-    #define TOILET_DEBUGS(s, name)
+    #define TDB_DEBUGV(v, name)
+    #define TDB_DEBUGS(s, name)
 #endif
 
 namespace toiletdb {

@@ -37,13 +37,12 @@
 #include <string>
 #include <vector>
 
-#define TOILETDB_VERSION "1.0.6"
+#define TOILETDB_VERSION "1.0.7"
 #define TOILETDB_PARSER_FORMAT_VERSION 1
 
 #define TDB_INVALID_ULL (size_t)(-1)
+#define TDB_NOT_FOUND (size_t)(-1)
 #define TDB_INVALID_I 2147483647
-
-#define TDB_NOT_FOUND TDB_INVALID_ULL
 
 /// @brief Type mask for ToiletType
 #define TDB_TMASK 0b00000111
@@ -72,11 +71,11 @@
     (*(static_cast<std::vector<of_type> *>((*pcolumn).get_data())))
 
 #ifndef NDEBUG
-    #define TOILET_DEBUGV(v, name) toilet_debug_putv(v, name)
-    #define TOILET_DEBUGS(s, name) toilet_debug_puts(s, name)
+    #define TDB_DEBUGV(v, name) toilet_debug_putv(v, name)
+    #define TDB_DEBUGS(s, name) toilet_debug_puts(s, name)
 #else
-    #define TOILET_DEBUGV(v, name)
-    #define TOILET_DEBUGS(s, name)
+    #define TDB_DEBUGV(v, name)
+    #define TDB_DEBUGS(s, name)
 #endif
 
 namespace toiletdb {
@@ -100,14 +99,12 @@ template <typename T> void toilet_debug_puts(const T &s, const char *name)
 }
 #endif
 
-/// @brief Parse unsigned long long.
+/// @brief Parse size_t.
 /// @return TDB_INVALID_ULL if string cannot be parsed.
 size_t parse_long_long(const std::string &str);
-
 /// @brief Parse signed int.
 /// @return TDB_INVALID_I if string cannot be parsed.
 int parse_int(const std::string &str);
-
 /// @brief Returns copy of a string with all characters lowercased.
 std::string to_lower_string(const std::string &str);
 
@@ -118,9 +115,9 @@ std::string to_lower_string(const std::string &str);
  */
 enum ToiletType
 {
-    /// @brief 32 bit signed integer.
+    /// @brief Signed integer.
     T_INT = 1 << 0,
-    /// @brief 64 bit unsigned integer.
+    /// @brief Unsigned integer.
     T_B_INT = 1 << 1,
     /// @brief std::string.
     T_STR = 1 << 2,
@@ -213,7 +210,7 @@ public:
     ///          2 - Argument of type 'int' is found to be
     ///              not convertible to int.
     ///          3 - Argument of type 'b_int' is found to be
-    ///              not convertible to unsigned long long.
+    ///              not convertible to size_t.
     /// @see get_column_types()
     /// @see get_column_type()
     int add(std::vector<std::string> &args);
