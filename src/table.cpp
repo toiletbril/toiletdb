@@ -36,7 +36,6 @@ struct InMemoryTable::Private
 InMemoryTable::InMemoryTable(const std::string &filename)
 {
     // TODO: This does not create a file.
-    // IDs from loaded file will be indexed to be used for binary search.
 
     TOILET_DEBUGS(filename, "InMemoryTable filename");
 
@@ -53,6 +52,7 @@ InMemoryTable::InMemoryTable(const std::string &filename)
 
     this->private_->columns = this->private_->parser->read_file();
 
+    // IDs from loaded file will be indexed here to be used for binary search.
     this->private_->update_index();
 }
 
@@ -190,6 +190,8 @@ std::vector<void *> InMemoryTable::get_row(const size_t &pos)
 
 int InMemoryTable::add(std::vector<std::string> &args)
 {
+    // NOTE: Do not pass ID column here.
+
     // Returns 0 on success.
     // Errors numbers:
     // 1 - Args vector is too big/small.
@@ -211,6 +213,8 @@ int InMemoryTable::add(std::vector<std::string> &args)
     // This is just typechecking.
     // Surely this can be compressed (Clueless)
     for (size_t i = 1; i < this->get_column_count(); ++i) {
+
+        // Skip the ID column.
         if (TDB_IS(types[i], T_ID)) {
             continue;
         }
@@ -241,19 +245,25 @@ int InMemoryTable::add(std::vector<std::string> &args)
     it = args.begin();
 
     // TODO: Doesn't look like a transaction to me
+    // TODO: Removing rows that don't have a value in all columns?
     for (size_t i = 0; i < this->get_column_count(); ++i) {
+
+        // NOTE: ID handling depends on get_next_id().
         if (TDB_IS(types[i], T_ID)) {
             size_t new_id = this->get_next_id();
             this->private_->columns[i]->add(static_cast<void *>(&new_id));
         }
+
         else if (TDB_IS(types[i], T_INT)) {
             int value = parse_int(*it++);
             this->private_->columns[i]->add(static_cast<void *>(&value));
         }
+
         else if (TDB_IS(types[i], T_B_INT)) {
             unsigned long long value = parse_long_long(*it++);
             this->private_->columns[i]->add(static_cast<void *>(&value));
         }
+
         else if (TDB_IS(types[i], T_STR)) {
             this->private_->columns[i]->add(static_cast<void *>(&(*it++)));
         }
@@ -270,7 +280,7 @@ bool InMemoryTable::erase(const size_t &pos)
         return false;
     }
 
-    // Erase data from all columns in one row
+    // Erase data from all columns in one row.
     for (size_t i = 0; i < len; ++i) {
         this->private_->columns[i]->erase(pos);
     }

@@ -61,7 +61,9 @@ public:
     /// @see get_column_type()
     std::vector<void *> get_row(const size_t &pos);
     /// @brief Adds one row. Converts strings to appropriate types.
-    ///        One row means a value from each column.
+    ///        One row means a value from each column *EXCEPT* ID.
+    /// @warning ID row for new entry will be set automatically.
+    ///          When passing values, just skip the ID column.
     /// @returns Returns 0 on success.
     ///          1 - Args vector is too big/small.
     ///          2 - Argument of type 'int' is found to be

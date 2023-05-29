@@ -30,4 +30,4 @@ lib.exe /OUT:"%BINDIR%\%LIB%" /nologo %OBJECTS%
 
 echo %OBJECTS%
 
-cl.exe %CFLAGS% %INCLUDES% /Fe%BINDIR%\%EXE% cli\main.cpp /link %BINDIR%\%LIB% -SUBSYSTEM:windows
+cl.exe %CFLAGS% %INCLUDES% /Fe%BINDIR%\%EXE% cli\main.cpp cli\cli.cpp /link %BINDIR%\%LIB% -SUBSYSTEM:windows

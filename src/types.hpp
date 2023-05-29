@@ -40,7 +40,7 @@
 namespace toiletdb {
 
 /**
- * @brief One bit in 32 bit integer that meeans either a type or a modifier.
+ * @brief One bit in 32 bit integer that means either a type or a modifier.
  *        A column can have only one type and any amount of modifiers.
  * @see TDB_TYPE
  */
@@ -56,7 +56,7 @@ enum ToiletType
     /// Can only be used on type 'b_int'.
     T_ID = 1 << 3,
     /// @brief Marks column to be constant.
-    T_CONST = 1 << 4, // const
+    T_CONST = 1 << 4,
 };
 
 /**
@@ -76,6 +76,7 @@ struct TableInfo
 class Column
 {
 public:
+    virtual ~Column() = 0;
     /// @see ToiletType
     virtual const int &get_type() const         = 0;
     virtual const std::string &get_name() const = 0;
@@ -84,11 +85,11 @@ public:
     virtual void clear()                        = 0;
     /// @brief Appends an element to in-memory vector.
     ///        Type will be casted back in method body.
-    /// @details I couldn't figure out how to make this more convenient.
+    ///        I couldn't figure out how to make this more convenient.
     virtual void add(void *data) = 0;
     /// @brief Void pointer to a vector member at 'pos'
     virtual void *get(size_t pos) = 0;
-    /// @brief Void pointer to a in-memory vector.
+    /// @brief Void pointer to the internal vector.
     virtual void *get_data() = 0;
 };
 

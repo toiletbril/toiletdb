@@ -553,15 +553,15 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
             }
 
             std::string query = cli_concat_args(args, 2);
-            size_t pos        = model.search_column_index(args[1]);
+            size_t column_pos        = model.search_column_index(args[1]);
 
-            if (pos == TDB_NOT_FOUND) {
+            if (column_pos == TDB_NOT_FOUND) {
                 std::cout << "ERROR: Unknown column '" << args[1] << "'." << std::endl;
                 return;
             }
 
             // If column specified has modifier 'id', use binary search.
-            if (model.get_column_type(pos) & T_ID) {
+            if (model.get_column_type(column_pos) & T_ID) {
                 size_t value = parse_long_long(query);
 
                 if (value == TDB_INVALID_ULL) {
@@ -727,7 +727,8 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
             size_t pos = model.search(n);
 
             if (pos == TDB_NOT_FOUND) {
-                std::cout << "ERROR: Invalid ID." << std::endl;
+                std::cout << "ERROR: Could not find row with specified ID."
+                          << std::endl;
                 return;
             }
 

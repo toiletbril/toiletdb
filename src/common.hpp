@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <string>
 
-#define TOILETDB_VERSION "1.0.4"
+#define TOILETDB_VERSION "1.0.5"
 
 #define TDB_NOT_FOUND (size_t)(-1)
 

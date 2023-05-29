@@ -7,8 +7,6 @@
 
 namespace toiletdb {
 
-enum ToiletType;
-
 struct TableInfo;
 
 // TODO: what the fuck is this ??

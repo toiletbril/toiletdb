@@ -28,10 +28,10 @@ OBJS=$(FILES:.cpp=.o)
 OBJS_OUT=$(addprefix $(OBJDIR)/, $(OBJS))
 
 cli: dirs release bundle
-	$(CXX) -o $(BINDIR)/$(EXE) $(CXXFLAGS) -DNDEBUG -Iinclude -Isrc cli/main.cpp cli/cli.cpp $(BINDIR)/$(LIB)
+	$(CXX) -o $(BINDIR)/$(EXE) $(CXXFLAGS) -DNDEBUG -Iinclude cli/main.cpp cli/cli.cpp $(BINDIR)/$(LIB)
 
 cli-debug: dirs debug bundle
-	$(CXX) -o $(BINDIR)/$(EXE) $(CXXFLAGS) -DDEBUG -g -Iinclude -Isrc cli/main.cpp cli/cli.cpp $(BINDIR)/$(LIB)
+	$(CXX) -o $(BINDIR)/$(EXE) $(CXXFLAGS) -DDEBUG -g -Iinclude cli/main.cpp cli/cli.cpp $(BINDIR)/$(LIB)
 
 debug: CXXFLAGS += -DDEBUG
 debug: CXXFLAGS += -g

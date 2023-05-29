@@ -37,7 +37,7 @@
 #include <string>
 #include <vector>
 
-#define TOILETDB_VERSION "1.0.4"
+#define TOILETDB_VERSION "1.0.5"
 #define TOILETDB_PARSER_FORMAT_VERSION 1
 
 #define TDB_INVALID_ULL (size_t)(-1)
@@ -112,7 +112,7 @@ int parse_int(const std::string &str);
 std::string to_lower_string(const std::string &str);
 
 /**
- * @brief One bit in 32 bit integer that meeans either a type or a modifier.
+ * @brief One bit in 32 bit integer that means either a type or a modifier.
  *        A column can have only one type and any amount of modifiers.
  * @see TDB_TYPE
  */
@@ -128,7 +128,7 @@ enum ToiletType
     /// Can only be used on type 'b_int'.
     T_ID = 1 << 3,
     /// @brief Marks column to be constant.
-    T_CONST = 1 << 4, // const
+    T_CONST = 1 << 4,
 };
 
 /**
@@ -147,25 +147,26 @@ public:
 class Column
 {
 public:
+    virtual ~Column() = 0;
     /// @see ToiletType
-    virtual int get_type() const         = 0;
-    virtual std::string get_name() const = 0;
-    virtual size_t size() const          = 0;
-    virtual void erase(size_t pos)       = 0;
-    virtual void clear()                 = 0;
+    virtual const int &get_type() const         = 0;
+    virtual const std::string &get_name() const = 0;
+    virtual size_t size() const                 = 0;
+    virtual void erase(size_t pos)              = 0;
+    virtual void clear()                        = 0;
     /// @brief Appends an element to in-memory vector.
     ///        Type will be casted back in method body.
-    /// @details I couldn't figure out how to make this more convenient.
+    ///        I couldn't figure out how to make this more convenient.
     virtual void add(void *data) = 0;
     /// @brief Void pointer to a vector member at 'pos'
     virtual void *get(size_t pos) = 0;
-    /// @brief Void pointer to a in-memory vector.
+    /// @brief Void pointer to the internal vector.
     virtual void *get_data() = 0;
 };
 
 /**
  * @class InMemoryTable
- * @brief Medium level abstraction representing one table.
+ * @brief Represents one table.
  *        Each table represents one file.
  */
 class InMemoryTable
@@ -205,14 +206,15 @@ public:
     /// @see get_column_type()
     std::vector<void *> get_row(const size_t &pos);
     /// @brief Adds one row. Converts strings to appropriate types.
-    ///        One row means a value from each column.
-    /// @returns
-    /// Returns 0 on success.
-    /// 1 - Args vector is too big/small.
-    /// 2 - Argument of type 'int' is found to be
-    ///     not convertible to int.
-    /// 3 - Argument of type 'b_int' is found to be
-    ///     not convertible to unsigned long long.
+    ///        One row means a value from each column *EXCEPT* ID.
+    /// @warning ID row for new entry will be set automatically.
+    ///          When passing values, just skip the ID column.
+    /// @returns Returns 0 on success.
+    ///          1 - Args vector is too big/small.
+    ///          2 - Argument of type 'int' is found to be
+    ///              not convertible to int.
+    ///          3 - Argument of type 'b_int' is found to be
+    ///              not convertible to unsigned long long.
     /// @see get_column_types()
     /// @see get_column_type()
     int add(std::vector<std::string> &args);
