@@ -93,6 +93,10 @@ int main(int argc, char **argv)
     SetConsoleOutputCP(1251);
 #endif
 
+#ifndef NDEBUG
+    std::cout << "*** Debug is enabled.\n";
+#endif
+
     if (argc < 2) {
         std::cout << "ERROR: Not enough arguments.\n"
                   << "USAGE: " << TOILETDB_NAME
@@ -113,10 +117,6 @@ int main(int argc, char **argv)
     if (help_format) {
         show_help_format();
     }
-
-#ifndef NDEBUG
-    std::cout << "*** Debug is enabled.\n";
-#endif
 
     cli_loop(argv[1]);
     return 0;

@@ -1,8 +1,8 @@
 #include <fstream>
 #include <vector>
 
-#include "format.hpp"
 #include "debug.hpp"
+#include "format.hpp"
 
 namespace toiletdb {
 
@@ -139,6 +139,17 @@ TableInfo FormatOne::read_types(std::fstream &file)
             std::string failstring = "Format error: No column name at "
                                      "2:" +
                                      std::to_string(pos);
+
+            throw ParsingError(failstring);
+        }
+
+        // Allow T_ID only for T_B_INT
+        if (TDB_IS(type, T_ID) && !TDB_IS(type, T_B_INT)) {
+            std::string failstring =
+                "Format error: ID column is not of type 'b_int' at "
+                "2:" +
+                std::to_string(pos);
+
             throw ParsingError(failstring);
         }
 
@@ -202,7 +213,7 @@ std::vector<Column *> FormatOne::deserealize(std::fstream &file,
     size_t pos  = 1;
 
     bool debug_crlf = false;
-    int c = file.get();
+    int c           = file.get();
 
     while (c != EOF) {
         if (c != '|') {
@@ -225,7 +236,7 @@ std::vector<Column *> FormatOne::deserealize(std::fstream &file,
             if (c == '\r') {
                 if (!debug_crlf) {
                     TOILET_DEBUGS("CRLF detected",
-                               "InMemoryFileParser.deserialize");
+                                  "InMemoryFileParser.deserialize");
                     debug_crlf = true;
                 }
 

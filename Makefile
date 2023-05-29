@@ -1,4 +1,4 @@
-# This should support both Windows with MinGW/Clang and Linux :3
+# This should support both Windows/Clang and Linux :3
 
 .PHONY: clean
 
@@ -48,8 +48,8 @@ ifeq ($(OS),Windows_NT)
 	-cmd /c mkdir $(OBJDIR)
 	-cmd /c mkdir $(BINDIR)
 else
-	mkdir $(OBJDIR)
-	mkdir $(BINDIR)
+	mkdir -p $(OBJDIR)
+	mkdir -p $(BINDIR)
 endif
 
 clean:

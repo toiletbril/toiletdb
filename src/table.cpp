@@ -48,8 +48,6 @@ InMemoryTable::InMemoryTable(const std::string &filename)
             "In InMemoryTable constructor, there is no such file.");
     }
 
-    TOILET_DEBUGS("", "InMemoryTable, parser is constructed");
-
     this->private_->columns = this->private_->parser->read_file();
 
     // IDs from loaded file will be indexed here to be used for binary search.
@@ -378,11 +376,15 @@ size_t InMemoryTable::get_row_count() const
 
 size_t InMemoryTable::get_next_id() const
 {
+    size_t i = 0;
+
     while (true) {
-        size_t next_id = this->get_row_count();
+        size_t next_id = this->get_row_count() + i;
         if (this->search(next_id) == TDB_NOT_FOUND) {
-            return this->get_row_count();
+            TOILET_DEBUGS(next_id, "InMemoryTable.get_next_id");
+            return next_id;
         }
+        ++i;
     }
 }
 

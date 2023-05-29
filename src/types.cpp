@@ -9,7 +9,7 @@ namespace toiletdb {
 
 struct TableInfo;
 
-// TODO: what the fuck is this ??
+// TODO: Are void pointers faster ??
 
 class Column;
 
