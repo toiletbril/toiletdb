@@ -147,7 +147,6 @@ public:
 class Column
 {
 public:
-    virtual ~Column() = 0;
     /// @see ToiletType
     virtual const int &get_type() const         = 0;
     virtual const std::string &get_name() const = 0;
