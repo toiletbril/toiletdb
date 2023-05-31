@@ -1,7 +1,15 @@
-@echo off
-rem Launch this from MSVC-enabled console
+@echo on
 
 setlocal enabledelayedexpansion enableextensions
+
+set BT2022="C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
+set BT2019="C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
+set VS2022="C:\Program Files (x86)\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
+set VS2019="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
+
+if not defined VS (
+  if exist %VS2022% (call %VS2022%) else if exist %VS2019% (call %VS2019%) else if exist %BT2022% (call %BT2022%) else if exist %BT2019% (call %BT2019%)
+)
 
 set CFLAGS=/W4 /std:c++17 /FC /TP /EHsc /nologo
 set INCLUDES=/I "include"
@@ -28,6 +36,4 @@ set OBJECTS=%OBJECTS:~1%
 
 lib.exe /OUT:"%BINDIR%\%LIB%" /nologo %OBJECTS%
 
-echo %OBJECTS%
-
-cl.exe %CFLAGS% %INCLUDES% /Fe%BINDIR%\%EXE% cli\main.cpp cli\cli.cpp /link %BINDIR%\%LIB% -SUBSYSTEM:windows
+cl.exe %CFLAGS% %INCLUDES% /Fe%BINDIR%\%EXE% cli\main.cpp cli\cli.cpp /link %BINDIR%\%LIB% /subsystem:windows

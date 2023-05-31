@@ -2,10 +2,10 @@
 
 **THIS SOFTWARE IS UNFINISHED, UNSAFE, AND IS NOT SUITABLE FOR PRODUCTION. USE IT AT YOUR OWN RISK.**
 
-In-memory database with an ability to serialize into readable files and a CLI for it.
+In-memory database with an ability to serialize into readable files.
 
 I got this idea from my friends' course project.
-The actual task was too easy, so I decided to implement a whole database instead :3c.
+The actual task was too easy, so I decided to implement a whole database :3c.
 
 ## Table of contents
 
@@ -53,8 +53,6 @@ Static library and CLI (launch this from MSVC-enabled console):
 ```console
 > ./build_msvc.bat
 ```
-
-Look for binaries in `build/`.
 
 Alternatively, you can use `make` targets from below with:
 
@@ -106,7 +104,7 @@ Available commands:
         revert  reverse         Revert uncommited changes.
 ```
 
-For testing purposes, you can generate student database file with:
+For testing purposes, you can generate mock student database file with:
 
 ```console
 $ python3 scripts/make_db.py <count of entries> <filename> [name complexity, number from 1 to 5]

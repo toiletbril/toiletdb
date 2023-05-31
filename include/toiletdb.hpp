@@ -1,5 +1,4 @@
 /*
- * Export header for toiletdb library.
  * Copyright (c) 2023 toiletbril <https://github.com/toiletbril>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
