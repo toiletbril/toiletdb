@@ -42,10 +42,13 @@
 #define TDB_INVALID_ULL (size_t)(-1)
 #define TDB_NOT_FOUND (size_t)(-1)
 #define TDB_INVALID_I 2147483647
-
-/// @brief Type mask for ToiletType
+/**
+ *  @brief Type mask for ToiletType
+ */
 #define TDB_TMASK 0b00000111
-/// @brief Modifier mask for ToiletType
+/**
+ *  @brief Modifier mask for ToiletType
+ */
 #define TDB_MMASK 0b00111000
 
 /**
@@ -98,13 +101,19 @@ template <typename T> void toilet_debug_puts(const T &s, const char *name)
 }
 #endif
 
-/// @brief Parse size_t.
-/// @return TDB_INVALID_ULL if string cannot be parsed.
+/**
+ *  @brief Parse size_t.
+ *  @return TDB_INVALID_ULL if string cannot be parsed.i
+ */
 size_t parse_long_long(const std::string &str);
-/// @brief Parse signed int.
-/// @return TDB_INVALID_I if string cannot be parsed.
+/**
+ *  @brief Parse signed int.
+ *  return TDB_INVALID_I if string cannot be parsed.
+ */
 int parse_int(const std::string &str);
-/// @brief Returns copy of a string with all characters lowercased.
+/**
+ *  @brief Returns copy of a string with all characters lowercased.
+ */
 std::string to_lower_string(const std::string &str);
 
 /**

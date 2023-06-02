@@ -12,9 +12,8 @@ struct InMemoryTable::Private
     // updates index with a sorted list that maps position to ID.
     void update_index()
     {
-        std::vector<size_t> id_column =
-            TDB_GET_DATA(size_t,
-                         this->columns[this->parser->get_id_column_index()]);
+        std::vector<size_t> id_column = TDB_GET_DATA(
+            size_t, this->columns[this->parser->get_id_column_index()]);
 
         std::vector<size_t> index;
         index.resize(id_column.size());
@@ -35,8 +34,6 @@ struct InMemoryTable::Private
 
 InMemoryTable::InMemoryTable(const std::string &filename)
 {
-    // TODO: This does not create a file.
-
     TDB_DEBUGS(filename, "InMemoryTable filename");
 
     this->private_ = std::make_unique<Private>();
@@ -54,7 +51,13 @@ InMemoryTable::InMemoryTable(const std::string &filename)
     this->private_->update_index();
 }
 
-InMemoryTable::~InMemoryTable() {}
+InMemoryTable::~InMemoryTable()
+{
+    // Deallocate all columns on destruction.
+    for (size_t i = 0; i < this->private_->columns.size(); ++i) {
+        delete this->private_->columns[i];
+    }
+}
 
 const std::vector<Column *> &InMemoryTable::get_all() const
 {
@@ -133,8 +136,8 @@ std::vector<size_t> InMemoryTable::search(const std::string &name,
                     (*(static_cast<std::vector<int> *>(data)))[i]);
             } break;
             case T_B_INT: {
-                value = std::to_string((*(
-                    static_cast<std::vector<size_t> *>(data)))[i]);
+                value = std::to_string(
+                    (*(static_cast<std::vector<size_t> *>(data)))[i]);
                 break;
             }
             case T_STR: {
@@ -172,8 +175,8 @@ std::vector<void *> InMemoryTable::get_row(const size_t &pos)
             } break;
 
             case T_B_INT: {
-                result.push_back(static_cast<void *>(
-                    &(TDB_GET_DATA(size_t, c))[pos]));
+                result.push_back(
+                    static_cast<void *>(&(TDB_GET_DATA(size_t, c))[pos]));
             } break;
 
             case T_STR: {
