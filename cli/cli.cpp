@@ -12,6 +12,7 @@ enum CLI_COMMAND_KIND
 {
     UNKNOWN = 0,
     HELP,
+    VERSION,
     EXIT,
     EXIT_NO_SAVE,
     QUERY,
@@ -255,8 +256,7 @@ static void cli_put_row(InMemoryTable &model, const size_t &pos)
             } break;
 
             case T_UINT: {
-                if (*static_cast<size_t *>(row[i]) >=
-                    100000000000) {
+                if (*static_cast<size_t *>(row[i]) >= 100000000000) {
                     should_wrap = true;
                     break;
                 }
@@ -319,8 +319,7 @@ static void cli_put_row(InMemoryTable &model, const size_t &pos)
                 } break;
 
                 case T_UINT: {
-                    size_t n =
-                        *static_cast<size_t *>(row[i]);
+                    size_t n = *static_cast<size_t *>(row[i]);
 
                     std::string s = std::to_string(n);
 
@@ -432,6 +431,8 @@ static CLI_COMMAND_KIND cli_get_command(std::string &s)
 {
     if (s == "help" || s == "?")
         return HELP;
+    if (s == "version" || s == "ver" || s == "v")
+        return VERSION;
     if (s == "exit" || s == "quit" || s == "q")
         return EXIT;
     if (s == "exit!" || s == "quit!" || s == "q!")
@@ -474,6 +475,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
         case HELP: {
             std::cout << "Available commands:\n"
                          "\thelp  \t?\t\tSee this message.\n"
+                         "\tversion\tv, ver\t\tDisplay version.\n"
                          "\texit  \tq, quit\t\tSave and quit. "
                          "Append '!' to the end to skip saving.\n"
                          "\tsearch\ts\t\tSearch the database.\n"
@@ -487,6 +489,12 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
                          "\tcommit\tsave\t\tSave changes to the file.\n"
                          "\trevert\treverse\t\tRevert uncommited changes."
                       << std::endl;
+        } break;
+
+        case VERSION: {
+            std::cout << "toiletdb " << TOILETDB_VERSION
+                      << "\nsupported format versions: <= "
+                      << TOILETDB_PARSER_FORMAT_VERSION << std::endl;
         } break;
 
         case EXIT: {
@@ -553,10 +561,11 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
             }
 
             std::string query = cli_concat_args(args, 2);
-            size_t column_pos        = model.search_column_index(args[1]);
+            size_t column_pos = model.search_column_index(args[1]);
 
             if (column_pos == TDB_NOT_FOUND) {
-                std::cout << "ERROR: Unknown column '" << args[1] << "'." << std::endl;
+                std::cout << "ERROR: Unknown column '" << args[1] << "'."
+                          << std::endl;
                 return;
             }
 
