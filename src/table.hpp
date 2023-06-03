@@ -68,7 +68,7 @@ public:
     ///          1 - Args vector is too big/small.
     ///          2 - Argument of type 'int' is found to be
     ///              not convertible to int.
-    ///          3 - Argument of type 'b_int' is found to be
+    ///          3 - Argument of type 'uint' is found to be
     ///              not convertible to size_t.
     /// @see get_column_types()
     /// @see get_column_type()

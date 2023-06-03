@@ -12,7 +12,7 @@
 // 2    |[modifier] <type> <name>|...
 //
 // Modifiers: ID (id), constant (const)
-// Types: Number (int), Unsigned number (b_int), string (str)
+// Types: Number (int), Unsigned number (uint), string (str)
 //
 // There should be at least one field with 'id' modifier.
 // Only one field should have 'id' modifier.

@@ -182,7 +182,7 @@ static void cli_put_table_header(InMemoryTable &model)
             name << std::left << std::setw(CLI_INTW) << names[i];
         }
 
-        else if (types[i] & T_B_INT) {
+        else if (types[i] & T_UINT) {
             padding = CLI_B_INTW;
             name << std::left << std::setw(CLI_B_INTW) << names[i];
         }
@@ -215,8 +215,8 @@ static void cli_put_table_header(InMemoryTable &model)
             temp = "[int]";
         }
 
-        else if (types[i] & T_B_INT) {
-            temp = "[b_int]";
+        else if (types[i] & T_UINT) {
+            temp = "[uint]";
         }
 
         else if (types[i] & T_STR) {
@@ -254,7 +254,7 @@ static void cli_put_row(InMemoryTable &model, const size_t &pos)
                 continue;
             } break;
 
-            case T_B_INT: {
+            case T_UINT: {
                 if (*static_cast<size_t *>(row[i]) >=
                     100000000000) {
                     should_wrap = true;
@@ -283,7 +283,7 @@ static void cli_put_row(InMemoryTable &model, const size_t &pos)
                               << *static_cast<int *>(row[i]);
                 } break;
 
-                case T_B_INT: {
+                case T_UINT: {
                     std::cout << std::left << std::setw(CLI_B_INTW)
                               << *static_cast<size_t *>(row[i]);
                 } break;
@@ -318,7 +318,7 @@ static void cli_put_row(InMemoryTable &model, const size_t &pos)
                     lengths.push_back(s.size());
                 } break;
 
-                case T_B_INT: {
+                case T_UINT: {
                     size_t n =
                         *static_cast<size_t *>(row[i]);
 
@@ -354,7 +354,7 @@ static void cli_put_row(InMemoryTable &model, const size_t &pos)
                         wrap_buf << std::left << std::setw(CLI_INTW) << ' ';
                     } break;
 
-                    case T_B_INT: {
+                    case T_UINT: {
                         wrap_buf << std::left << std::setw(CLI_B_INTW)
                                  << (lengths[i] > (CLI_B_INTW - CLI_MARGIN)
                                          ? cols[i].substr(
@@ -388,7 +388,7 @@ static void cli_put_row(InMemoryTable &model, const size_t &pos)
                         continue;
                     } break;
 
-                    case T_B_INT: {
+                    case T_UINT: {
                         should_wrap =
                             should_wrap || lengths[i] > CLI_B_INTW - CLI_MARGIN;
                     } break;
@@ -409,7 +409,7 @@ static void cli_put_row(InMemoryTable &model, const size_t &pos)
                     std::cout << std::left << std::setw(CLI_INTW) << cols[i];
                 } break;
 
-                case T_B_INT: {
+                case T_UINT: {
                     std::cout << std::left << std::setw(CLI_B_INTW)
                               << cols[i].substr(0, CLI_B_INTW - CLI_MARGIN);
                 } break;
@@ -770,7 +770,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
                     TDB_GET(int, data) = number;
                 } break;
 
-                case T_B_INT: {
+                case T_UINT: {
                     size_t number = parse_long_long(value);
 
                     if (n == TDB_INVALID_ULL) {

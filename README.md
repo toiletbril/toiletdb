@@ -37,13 +37,13 @@ tdb<format version>
 Available column types are:
 
 - `int`   Signed integer
-- `b_int` Unsigned integer
-- `str`   Array of 8 bit characters
+- `uint`  Unsigned integer
+- `str`   Character string
 
 Modifiers:
 
 - `const` Marks column as not editable through code (you can still edit it manually :3)
-- `id`    Marks column to be used for indexing (only for `b_int`)
+- `id`    Marks column to be used for indexing (only for `const uint`)
 
 ## Building from source
 
@@ -56,7 +56,7 @@ Static library and CLI (launch this from MSVC-enabled console):
 
 Alternatively, you can use `make` targets from below with:
 
-- `g++`/`clang` (CXX variable in [`Makefile`](./Makefile))
+- `g++`/`clang++` (CXX variable in [`Makefile`](./Makefile))
 - `make`, `ar` (You can get those with MinGW32)
     - `mingw32-make.exe`
     - `x86_64-w64-mingw32-ar.exe`

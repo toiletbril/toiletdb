@@ -73,7 +73,7 @@ void *ColumnInt::get_data()
     return static_cast<void *>(this->data);
 }
 
-ColumnB_Int::ColumnB_Int(const std::string name, int type)
+ColumnUint::ColumnUint(const std::string name, int type)
 {
     TDB_DEBUGS(name, "ColumnB_Int name");
     TDB_DEBUGS(type, "ColumnB_Int type");
@@ -83,43 +83,43 @@ ColumnB_Int::ColumnB_Int(const std::string name, int type)
     this->data = new std::vector<size_t>;
 }
 
-ColumnB_Int::~ColumnB_Int()
+ColumnUint::~ColumnUint()
 {
     delete this->data;
 }
 
-const int &ColumnB_Int::get_type() const
+const int &ColumnUint::get_type() const
 {
     return this->type;
 }
 
-const std::string &ColumnB_Int::get_name() const
+const std::string &ColumnUint::get_name() const
 {
     return this->name;
 }
 
-size_t ColumnB_Int::size() const
+size_t ColumnUint::size() const
 {
     return this->data->size();
 }
 
-void ColumnB_Int::erase(size_t pos)
+void ColumnUint::erase(size_t pos)
 {
     this->data->erase(this->data->begin() + pos);
 }
 
-void ColumnB_Int::clear()
+void ColumnUint::clear()
 {
     this->data->clear();
 }
 
-void ColumnB_Int::add(void *data)
+void ColumnUint::add(void *data)
 {
     size_t number = *static_cast<size_t *>(data);
     this->data->push_back(number);
 }
 
-void *ColumnB_Int::get(size_t pos)
+void *ColumnUint::get(size_t pos)
 {
     if (pos >= this->size()) {
         throw std::logic_error("In ToiletDB, In Column, pos > size of vector");
@@ -128,7 +128,7 @@ void *ColumnB_Int::get(size_t pos)
     return static_cast<void *>(&(*(this->data))[pos]);
 }
 
-void *ColumnB_Int::get_data()
+void *ColumnUint::get_data()
 {
     return static_cast<void *>(this->data);
 }

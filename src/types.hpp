@@ -49,11 +49,11 @@ enum ToiletType
     /// @brief Signed integer.
     T_INT = 1 << 0,
     /// @brief Unsigned integer.
-    T_B_INT = 1 << 1,
+    T_UINT = 1 << 1,
     /// @brief std::string.
     T_STR = 1 << 2,
     /// @brief Marks column to be used for indexing.
-    /// Can only be used on type 'b_int'.
+    /// Can only be used on type 'uint'.
     T_ID = 1 << 3,
     /// @brief Marks column to be constant.
     T_CONST = 1 << 4,
@@ -112,15 +112,15 @@ public:
     void *get_data() override;
 };
 
-class ColumnB_Int : public Column
+class ColumnUint : public Column
 {
     std::vector<size_t> *data;
     std::string name;
     int type;
 
 public:
-    ColumnB_Int(const std::string name, int type);
-    ~ColumnB_Int() override;
+    ColumnUint(const std::string name, int type);
+    ~ColumnUint() override;
     const int &get_type() const override;
     const std::string &get_name() const override;
     size_t size() const override;

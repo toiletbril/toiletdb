@@ -126,11 +126,11 @@ enum ToiletType
     /// @brief Signed integer.
     T_INT = 1 << 0,
     /// @brief Unsigned integer.
-    T_B_INT = 1 << 1,
+    T_UINT = 1 << 1,
     /// @brief std::string.
     T_STR = 1 << 2,
     /// @brief Marks column to be used for indexing.
-    /// Can only be used on type 'b_int'.
+    /// Can only be used on type 'uint'.
     T_ID = 1 << 3,
     /// @brief Marks column to be constant.
     T_CONST = 1 << 4,
@@ -218,7 +218,7 @@ public:
     ///          1 - Args vector is too big/small.
     ///          2 - Argument of type 'int' is found to be
     ///              not convertible to int.
-    ///          3 - Argument of type 'b_int' is found to be
+    ///          3 - Argument of type 'uint' is found to be
     ///              not convertible to size_t.
     /// @see get_column_types()
     /// @see get_column_type()

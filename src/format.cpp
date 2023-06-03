@@ -89,8 +89,8 @@ TableInfo FormatOne::read_types(std::fstream &file)
                     type |= (int)T_INT;
                     set_type = true;
                 }
-                else if (buf == "b_int" && !set_type) {
-                    type |= (int)T_B_INT;
+                else if (buf == "uint" && !set_type) {
+                    type |= (int)T_UINT;
                     set_type = true;
                 }
                 else if (buf == "str" && !set_type) {
@@ -119,7 +119,7 @@ TableInfo FormatOne::read_types(std::fstream &file)
                 }
                 else if (!set_type) {
                     std::string failstring =
-                        "Format error: Unknown type modifier at 2:" +
+                        "Format error: Unknown type modifier '" + buf + "' at 2:" +
                         std::to_string(pos);
                     throw ParsingError(failstring);
                 }
@@ -144,9 +144,9 @@ TableInfo FormatOne::read_types(std::fstream &file)
         }
 
         // Allow T_ID only for T_B_INT
-        if (TDB_IS(type, T_ID) && !TDB_IS(type, T_B_INT)) {
+        if (TDB_IS(type, T_ID) && !TDB_IS(type, T_UINT)) {
             std::string failstring =
-                "Format error: ID column is not of type 'b_int' at "
+                "Format error: ID column is not of type 'uint' at "
                 "2:" +
                 std::to_string(pos);
 
@@ -195,8 +195,8 @@ std::vector<Column *> FormatOne::deserealize(std::fstream &file,
             Column *v = new ColumnInt(names[i], type);
             parsed_columns.push_back(v);
         }
-        else if (type & T_B_INT) {
-            Column *v = new ColumnB_Int(names[i], type);
+        else if (type & T_UINT) {
+            Column *v = new ColumnUint(names[i], type);
             parsed_columns.push_back(v);
         }
         else if (type & T_STR) {
@@ -236,7 +236,7 @@ std::vector<Column *> FormatOne::deserealize(std::fstream &file,
             if (c == '\r') {
                 if (!debug_crlf) {
                     TDB_DEBUGS("CRLF detected",
-                                  "InMemoryFileParser.deserialize");
+                               "InMemoryFileParser.deserialize");
                     debug_crlf = true;
                 }
 
@@ -281,10 +281,22 @@ std::vector<Column *> FormatOne::deserealize(std::fstream &file,
 
         for (size_t i = 0; i < columns.size; ++i) {
             if (columns.types[i] & T_ID) {
-                if (!(columns.types[i] & T_B_INT)) {
+                if (!(columns.types[i] & T_UINT)) {
                     std::string failstring = "Database file format is not "
                                              "correct: Field with modifier "
-                                             "'id' is not of type 'b_int', "
+                                             "'id' is not of type 'uint', "
+                                             "line " +
+                                             std::to_string(line) + ", field " +
+                                             std::to_string(i + 1);
+
+                    throw ParsingError(failstring);
+                }
+
+                // TODO: Reindex when editing ID
+                if (!(columns.types[i] & T_CONST)) {
+                    std::string failstring = "Database file format is not "
+                                             "correct: Field with modifier "
+                                             "'id' is not constant, "
                                              "line " +
                                              std::to_string(line) + ", field " +
                                              std::to_string(i + 1);
@@ -309,13 +321,13 @@ std::vector<Column *> FormatOne::deserealize(std::fstream &file,
                 static_cast<std::vector<int> *>(parsed_columns[i]->get_data())
                     ->push_back(num);
             }
-            else if (columns.types[i] & T_B_INT) {
+            else if (columns.types[i] & T_UINT) {
                 size_t num = parse_long_long(fields[i]);
 
                 if (num == TDB_INVALID_ULL) {
                     std::string failstring =
                         "Database file format is not "
-                        "correct: Field of type 'b_int' is not a number, "
+                        "correct: Field of type 'uint' is not a number, "
                         "line " +
                         std::to_string(line) + ", field " +
                         std::to_string(i + 1);
@@ -368,8 +380,8 @@ void FormatOne::write_header(std::fstream &file,
                 header += "int ";
             } break;
 
-            case T_B_INT: {
-                header += "b_int ";
+            case T_UINT: {
+                header += "uint ";
             } break;
 
             case T_STR: {
@@ -417,7 +429,7 @@ void FormatOne::serialize(std::fstream &file, const std::vector<Column *> &data)
                     file << *(static_cast<int *>(item));
                 } break;
 
-                case T_B_INT: {
+                case T_UINT: {
                     file << *(static_cast<size_t *>(item));
                 } break;
 

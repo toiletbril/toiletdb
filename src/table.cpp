@@ -135,7 +135,7 @@ std::vector<size_t> InMemoryTable::search(const std::string &name,
                 value = std::to_string(
                     (*(static_cast<std::vector<int> *>(data)))[i]);
             } break;
-            case T_B_INT: {
+            case T_UINT: {
                 value = std::to_string(
                     (*(static_cast<std::vector<size_t> *>(data)))[i]);
                 break;
@@ -174,7 +174,7 @@ std::vector<void *> InMemoryTable::get_row(const size_t &pos)
                     static_cast<void *>(&(TDB_GET_DATA(int, c))[pos]));
             } break;
 
-            case T_B_INT: {
+            case T_UINT: {
                 result.push_back(
                     static_cast<void *>(&(TDB_GET_DATA(size_t, c))[pos]));
             } break;
@@ -198,7 +198,7 @@ int InMemoryTable::add(std::vector<std::string> &args)
     // 1 - Args vector is too big/small.
     // 2 - Argument of type 'int' is found to be
     //     not convertible to int.
-    // 3 - Argument of type 'b_int' is found to be
+    // 3 - Argument of type 'uint' is found to be
     //     not convertible to size_t.
 
     std::vector<int> types = this->get_column_types();
@@ -229,7 +229,7 @@ int InMemoryTable::add(std::vector<std::string> &args)
                 }
             } break;
 
-            case T_B_INT: {
+            case T_UINT: {
                 size_t value = parse_long_long(*it++);
 
                 if (value == TDB_INVALID_ULL) {
@@ -260,7 +260,7 @@ int InMemoryTable::add(std::vector<std::string> &args)
             this->private_->columns[i]->add(static_cast<void *>(&value));
         }
 
-        else if (TDB_IS(types[i], T_B_INT)) {
+        else if (TDB_IS(types[i], T_UINT)) {
             size_t value = parse_long_long(*it++);
             this->private_->columns[i]->add(static_cast<void *>(&value));
         }
