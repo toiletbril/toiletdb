@@ -91,6 +91,7 @@ $ toiletdb <database file>
 test# help
 Available commands:
         help    ?               See this message.
+        version v, ver          Display version.
         exit    q, quit         Save and quit. Append '!' to the end to skip saving.
         search  s               Search the database.
         list    ls              Show all rows.
