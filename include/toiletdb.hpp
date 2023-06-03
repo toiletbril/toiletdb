@@ -36,7 +36,7 @@
 #include <string>
 #include <vector>
 
-#define TOILETDB_VERSION "1.0.7"
+#define TOILETDB_VERSION "1.0.8"
 #define TOILETDB_PARSER_FORMAT_VERSION 1
 
 #define TDB_INVALID_ULL (size_t)(-1)
@@ -152,6 +152,7 @@ public:
 class Column
 {
 public:
+    virtual ~Column() = 0;
     /// @see ToiletType
     virtual const int &get_type() const         = 0;
     virtual const std::string &get_name() const = 0;

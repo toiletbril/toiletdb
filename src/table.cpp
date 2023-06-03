@@ -334,14 +334,14 @@ size_t InMemoryTable::search_column_index(const std::string &name) const
     std::vector<size_t> result;
 
     size_t column_index = TDB_INVALID_ULL;
-    size_t j            = 0;
+    size_t i            = 0;
 
     for (const Column *col : this->private_->columns) {
         if (col->get_name() == name) {
-            column_index = j;
+            column_index = i;
             break;
         }
-        ++j;
+        ++i;
     }
 
     if (column_index == TDB_INVALID_ULL) {
@@ -379,6 +379,9 @@ size_t InMemoryTable::get_row_count() const
 
 size_t InMemoryTable::get_next_id() const
 {
+    // This should return valid and unique ID for a new row.
+    // add() uses this.
+
     size_t i = 0;
 
     while (true) {

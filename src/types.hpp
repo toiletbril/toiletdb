@@ -76,6 +76,7 @@ struct TableInfo
 class Column
 {
 public:
+    virtual ~Column(){};
     /// @see ToiletType
     virtual const int &get_type() const         = 0;
     virtual const std::string &get_name() const = 0;
@@ -100,7 +101,7 @@ class ColumnInt : public Column
 
 public:
     ColumnInt(std::string name, int type);
-    ~ColumnInt();
+    ~ColumnInt() override;
     const int &get_type() const override;
     const std::string &get_name() const override;
     size_t size() const override;
@@ -119,7 +120,7 @@ class ColumnB_Int : public Column
 
 public:
     ColumnB_Int(const std::string name, int type);
-    ~ColumnB_Int();
+    ~ColumnB_Int() override;
     const int &get_type() const override;
     const std::string &get_name() const override;
     size_t size() const override;
@@ -138,7 +139,7 @@ class ColumnStr : public Column
 
 public:
     ColumnStr(std::string name, int type);
-    ~ColumnStr();
+    ~ColumnStr() override;
     const int &get_type() const override;
     const std::string &get_name() const override;
     size_t size() const override;
