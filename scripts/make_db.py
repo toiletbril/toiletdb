@@ -5,18 +5,8 @@ from sys import argv
 from random import choice, randint
 
 name_one = ["Kamil", "Olivia", "Arnold", "Nicholas", "Alex", "Xiao", "Carl", "Ignat", "Jensen", "Emma", "Tyler", "Ash", "Jeff", "Bob", "Pip", "Maryk", "Oleg", "Ivan", "John", "Mahmoud", "Maria", "Max", "Joe", "Ronald"]
-
 name_two = ["berg", "onson", "onen", "ski", "unts", "fitz", "lu", "war", "zu", "eanu", "ent", "idis", "kan", "jan", "lang", "wolf", "gang", "min", "tz"]
-
-groups = [
-    "Testers",
-    "Windows",
-    "Vacuum cleaners",
-    "Gamers",
-    "Boylikers",
-    "Vegeterians",
-    "Pilers"
-]
+groups   = [ "Testers", "Windows", "Vacuum cleaners", "Gamers", "Boylikers", "Vegeterians", "Pilers", "Dudes" ]
 
 def _generate_name(suffixes: int) -> str:
     return choice(name_one) + "".join([ choice(name_two) for _ in range(suffixes) ])

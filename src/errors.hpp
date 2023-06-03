@@ -17,4 +17,4 @@ public:
 
 } // namespace toiletdb
 
-#endif
+#endif // TOILET_ERRORS_H_

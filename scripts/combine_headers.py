@@ -1,50 +1,108 @@
 #!/usr/bin/env python3
 
-# this compresses all .hpp files into one
+# combine headers means:
+# 0. look up every .hpp file recursively;
+# 1. merge all .hpp files into one;
+# 2. remove all local includes;
+# 3. move non-local includes to the top;
+# optional: wrap resulting header with your guard.
+# (c) toiletbril
 
-import glob
+# strip old guards.
+remove_header_guards = True
 
-files = glob.glob("./src/*.hpp")
-files_no_path = [file.split("/")[-1] for file in files]
+# resulting header will be wrapped with this definition.
+# for no guard, leave this blank.
+header_guard = "HEADER_H"
 
-header = f"/**\n * This header was automatically generated.\n * \n * Files included:\n * {', '.join(files_no_path)} \n */\n\n"
-includes = set()
+from os import path
+from glob import glob
+from sys import argv
+from re import compile
 
-in_header = False
+def merge_hpp_files(directory_path):
+    hpp_files = glob(path.join(directory_path, "**/*.hpp"), recursive=True)
+    hpp_files += glob(path.join(directory_path, "**/*.h"), recursive=True)
 
-# move all non-local includes to the top
-for f in files:
-    with open(f, "r") as file:
-        for line in file:
-            if line.startswith("#include \""):
+    includes = set()
+
+    # move non-local includes to the top
+    for file_path in hpp_files:
+        with open(file_path, "r") as file:
+            for line in file:
+                if line.startswith("#include \""):
+                    continue
+                if line.startswith("#include <"):
+                    includes.add(line)
+
+    file_contents = []
+
+    for file_path in hpp_files:
+        with open(file_path, "r") as file:
+
+            content = file.readlines()
+            content = [ line for line in content if not line.startswith("#include") ]
+
+            # remove pattern: #ifndef <macro>_H and related lines
+            pattern = compile(r"^#(define|ifndef) *.*_H_{0,}")
+            scope = -1
+            cleaned_content = []
+
+            if remove_header_guards:
+                for line in content:
+                    if pattern.match(line):
+                        scope = 0
+                    elif line.startswith("#if"):
+                        scope += 1
+                        cleaned_content.append(line)
+                    elif line.startswith("#endif"):
+                        if scope == 0:
+                            continue
+                        else:
+                            scope -= 1
+                            cleaned_content.append(line)
+                    else:
+                        cleaned_content.append(line)
+            else:
+                cleaned_content = content
+
+            file_contents.append((file_path, cleaned_content))
+
+    non_local_includes = sorted(list([ line.strip() for line in includes ]))
+
+    merged_content: list[str] = []
+
+    merged_content.append("/**\n * This header was automatically generated.\n *\n * Following files were merged:\n * " + ",\n * ".join(hpp_files) + "\n */\n")
+
+    if header_guard:
+        merged_content.append(f"\n#ifndef {header_guard}\n#define {header_guard}\n")
+    merged_content.append("\n")
+    merged_content.append("\n".join(non_local_includes) + "\n\n")
+
+    for file_path, content in file_contents:
+        merged_content.append(f"/*\n * Filename: {path.basename(file_path)}\n */\n")
+        merged_content.extend(content)
+        merged_content.append("\n")
+
+    if header_guard:
+        merged_content.append(f"#endif // {header_guard}")
+
+    # remove two and more consecutive blank lines and print to stdout
+    blank = False
+    for line in merged_content:
+        if line == "\n":
+            if blank:
                 continue
-            if line.startswith("#include <"):
-                includes.add(line)
+            blank = True
+        else:
+            blank = False
 
-header += "".join(includes)
+        print(line, end="")
 
-# make header
-for f in files:
-    with open(f, "r") as file:
-        header += "\n/**\n * File:" + file.name + "\n */\n\n"
-        for line in file:
-            # skip includes
-            if line.startswith("#include"):
-                continue
-            header += line
-    header += "\n"
+if __name__ == "__main__":
+    if len(argv) != 2:
+        print("USAGE: python3 combine_headers.py <directory>")
+        exit(1)
 
-blank = False
-actual_header = ""
-
-# remove two and more consecutive blank lines
-for line in header.splitlines():
-    if not line:
-        if blank:
-            continue
-        blank = True
-    else:
-        blank = False
-    actual_header += line + "\n"
-
-print(actual_header)
+    directory_path = argv[1]
+    merge_hpp_files(directory_path)
