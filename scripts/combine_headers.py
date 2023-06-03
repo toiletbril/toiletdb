@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
 # combine headers means:
-# 0. look up every .hpp file recursively;
-# 1. merge all .hpp files into one;
+# 0. look up every header file recursively;
+# 1. merge all header files into one;
 # 2. remove all local includes;
 # 3. move non-local includes to the top;
 # optional: wrap resulting header with your guard.
