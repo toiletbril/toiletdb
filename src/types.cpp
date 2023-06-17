@@ -11,6 +11,7 @@ struct TableInfo;
 
 // TODO: Are void pointers faster ??
 
+template<typename T>
 class Column;
 
 ColumnInt::ColumnInt(std::string name, int type)
@@ -53,24 +54,23 @@ void ColumnInt::clear()
     this->data->clear();
 }
 
-void ColumnInt::add(void *data)
+void ColumnInt::add(int data)
 {
-    int number = *static_cast<int *>(data);
-    this->data->push_back(number);
+    this->data->push_back(data);
 }
 
-void *ColumnInt::get(size_t pos)
+int &ColumnInt::get(size_t pos)
 {
     if (pos >= this->size()) {
         throw std::logic_error("In ToiletDB, In Column, pos > size of vector");
     }
 
-    return static_cast<void *>(&(*(this->data))[pos]);
+    return (*(this->data))[pos];
 }
 
-void *ColumnInt::get_data()
+std::vector<int> &ColumnInt::get_data()
 {
-    return static_cast<void *>(this->data);
+    return *(this->data);
 }
 
 ColumnUint::ColumnUint(const std::string name, int type)
@@ -113,24 +113,23 @@ void ColumnUint::clear()
     this->data->clear();
 }
 
-void ColumnUint::add(void *data)
+void ColumnUint::add(size_t data)
 {
-    size_t number = *static_cast<size_t *>(data);
-    this->data->push_back(number);
+    this->data->push_back(data);
 }
 
-void *ColumnUint::get(size_t pos)
+size_t &ColumnUint::get(size_t pos)
 {
     if (pos >= this->size()) {
         throw std::logic_error("In ToiletDB, In Column, pos > size of vector");
     }
 
-    return static_cast<void *>(&(*(this->data))[pos]);
+    return (*(this->data))[pos];
 }
 
-void *ColumnUint::get_data()
+std::vector<size_t> &ColumnUint::get_data()
 {
-    return static_cast<void *>(this->data);
+    return *(this->data);
 }
 
 ColumnStr::ColumnStr(std::string name, int type)
@@ -173,24 +172,23 @@ void ColumnStr::clear()
     this->data->clear();
 }
 
-void ColumnStr::add(void *data)
+void ColumnStr::add(std::string data)
 {
-    std::string string = *static_cast<std::string *>(data);
-    this->data->push_back(string);
+    this->data->push_back(data);
 }
 
-void *ColumnStr::get(size_t pos)
+std::string &ColumnStr::get(size_t pos)
 {
     if (pos >= this->size()) {
         throw std::logic_error("In ToiletDB, In Column, pos > size of vector");
     }
 
-    return static_cast<void *>(&(*(this->data))[pos]);
+    return (*(this->data))[pos];
 }
 
-void *ColumnStr::get_data()
+std::vector<std::string> &ColumnStr::get_data()
 {
-    return static_cast<void *>(this->data);
+    return *(this->data);
 }
 
 } // namespace toiletdb

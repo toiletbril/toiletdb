@@ -17,12 +17,12 @@ static bool help_format = false;
 
 void show_help()
 {
-    std::cout << "USAGE: " << TOILETDB_NAME << " <database file>\n"
+    std::cout << "USAGE: " << TOILETDB_NAME << " [-options] <database file>\n"
               << "CLI for manipulating toiletdb files.\n"
                  "\n"
-                 "FLAGS:\n"
-                 "\t-?, --help\t\tSee this menu.\n"
-                 "\t    --help-format\tShow help for database file format.\n"
+                 "OPTIONS:\n"
+                 "  -?, --help       \tSee this menu.\n"
+                 "      --help-format\tShow help for database file format.\n"
                  "\n"
                  "v"
               << TOILETDB_VERSION << " (c) toiletbril " << TOILETDB_GITHUB
@@ -34,11 +34,11 @@ void show_help_format()
 {
     std::cout << "Database files look like this:\n"
                  "```\n"
-                 "\ttdb<format version>\n"
-                 "\t|[modifier] <column type> <column name>| ...\n"
-                 "\t|<value of column type>| ...\n"
-                 "\t|<another value of column type>| ...\n"
-                 "\t...\n"
+                 "tdb<format version>\n"
+                 "|[modifier] <column type> <column name>| ...\n"
+                 "|<value of column type>| ...\n"
+                 "|<another value of column type>| ...\n"
+                 "...\n"
                  "```\n"
                  "\n"
                  "Available types are:\n"
@@ -51,8 +51,8 @@ void show_help_format()
                  "- `id`    Marks column to be used for indexing "
                  "(available only for `const uint`)\n"
                  "\n"
-                 "Supported format versions: 1\n"
-                 "\n"
+                 "supported format versions: <="
+              << TOILETDB_PARSER_FORMAT_VERSION << "\n"
               << TOILETDB_VERSION << " (c) toiletbril " << TOILETDB_GITHUB
               << std::endl;
     exit(0);
@@ -99,8 +99,6 @@ int main(int argc, char **argv)
 
     if (argc < 2) {
         std::cout << "ERROR: Not enough arguments.\n"
-                  << "USAGE: " << TOILETDB_NAME
-                  << " <database file>\n"
                      "To get more help, try '--help'."
                   << std::endl;
         std::exit(0);

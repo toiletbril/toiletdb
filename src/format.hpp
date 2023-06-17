@@ -2,6 +2,7 @@
 #define TOILET_FORMAT_H_
 
 #include <vector>
+#include <typeinfo>
 
 #include "debug.hpp"
 
@@ -14,13 +15,13 @@ struct FormatOne
 {
     static size_t read_version(std::fstream &file);
     static TableInfo read_types(std::fstream &file);
-    static std::vector<Column *> deserealize(std::fstream &file,
+    static std::vector<ColumnBase *> deserealize(std::fstream &file,
                                              TableInfo &columns,
                                              std::vector<std::string> &names);
     static void write_header(std::fstream &file,
-                             const std::vector<Column *> &data);
+                             const std::vector<ColumnBase *> &data);
     static void serialize(std::fstream &file,
-                          const std::vector<Column *> &data);
+                          const std::vector<ColumnBase *> &data);
 };
 
 } // namespace toiletdb

@@ -1,6 +1,6 @@
 # TODO:
 - Dynamic ID uniqueness checking.
-- Templates for column classes?
+- Make add_row() and get_row() type safe or replace it all with strings.
 - Class for table creation.
 - Remove private struct from parser class.
 - Non in-memory version. (this would become actually useful and it will be cool if I build something else using this library)

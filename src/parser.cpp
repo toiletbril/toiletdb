@@ -67,7 +67,7 @@ struct InMemoryFileParser::Private
     }
 
     // Read file from disk into memory.
-    static std::vector<Column *> deserealize(InMemoryFileParser *self,
+    static std::vector<ColumnBase *> deserealize(InMemoryFileParser *self,
                                              std::fstream &file,
                                              std::vector<std::string> &names)
     {
@@ -83,7 +83,7 @@ struct InMemoryFileParser::Private
 
     static void serialize(const InMemoryFileParser *self,
                           std::fstream &file,
-                          const std::vector<Column *> &columns)
+                          const std::vector<ColumnBase *> &columns)
     {
         switch (self->format_version) {
             case 1: {
@@ -111,9 +111,9 @@ const size_t &InMemoryFileParser::get_version() const
     return this->format_version;
 }
 
-const size_t &InMemoryFileParser::get_id_column_index() const
+const size_t &InMemoryFileParser::id_column_index() const
 {
-    TDB_DEBUGS(this->columns.id_field_index, "InMemoryFileParser.get_id_column_index");
+    TDB_DEBUGS(this->columns.id_field_index, "InMemoryFileParser.id_column_index");
     return this->columns.id_field_index;
 }
 
@@ -147,7 +147,7 @@ bool InMemoryFileParser::exists_or_create() const
     return true;
 }
 
-std::vector<Column *> InMemoryFileParser::read_file()
+std::vector<ColumnBase *> InMemoryFileParser::read_file()
 {
     std::fstream file;
 
@@ -158,14 +158,14 @@ std::vector<Column *> InMemoryFileParser::read_file()
 
     std::vector<std::string> names = this->columns.names;
 
-    std::vector<Column *> columns = Private::deserealize(this, file, names);
+    std::vector<ColumnBase *> columns = Private::deserealize(this, file, names);
 
     file.close();
 
     return columns;
 }
 
-void InMemoryFileParser::write_file(const std::vector<Column *> &columns) const
+void InMemoryFileParser::write_file(const std::vector<ColumnBase *> &columns) const
 {
     if (!this->exists()) {
         throw std::runtime_error("In ToiletDB, InMemoryFileParser.write_file(), file does not exist");

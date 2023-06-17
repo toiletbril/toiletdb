@@ -27,11 +27,11 @@ public:
     InMemoryFileParser(const std::string &filename);
     ~InMemoryFileParser();
     const size_t &get_version() const;
-    const size_t &get_id_column_index() const;
+    const size_t &id_column_index() const;
     bool exists() const;
     bool exists_or_create() const;
-    std::vector<Column *> read_file();
-    void write_file(const std::vector<Column *> &columns) const;
+    std::vector<ColumnBase *> read_file();
+    void write_file(const std::vector<ColumnBase *> &columns) const;
     const std::vector<int> &types() const;
     const std::vector<std::string> &names() const;
 };

@@ -445,7 +445,7 @@ static CLI_COMMAND_KIND cli_get_command(std::string &s)
         return LIST_TYPES;
     if (s == "size")
         return DBSIZE;
-    if (s == "add")
+    if (s == "add_row")
         return ADD;
     if (s == "remove" || s == "rm")
         return REMOVE;
@@ -628,7 +628,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
                     << "ERROR: Invalid number of arguments. "
                     << "(" << len - 1 << " needed, actual " << args.size() - 1
                     << ")\n"
-                    << "Usage: add " << fields
+                    << "Usage: add_row " << fields
                     << "\n"
                        "You can put quotes around fields.\n"
                        "EXAMPLE: Vasiliy \"Ivanov Petrov\" \"Very "
@@ -649,9 +649,9 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
                 return;
             }
 
-            TDB_DEBUGV(args, "add() args");
+            TDB_DEBUGV(args, "add_row() args");
 
-            int err = model.add(args);
+            int err = model.add_row(args);
 
             if (!err) {
                 cli_put_table_header(model);

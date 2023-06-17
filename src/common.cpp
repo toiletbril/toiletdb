@@ -41,9 +41,11 @@ int parse_int(const std::string &str)
 std::string to_lower_string(const std::string &str)
 {
     std::string result;
+
     for (const char &c : str) {
         result += std::tolower(c);
     }
+
     return result;
 }
 

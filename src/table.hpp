@@ -37,7 +37,7 @@ public:
     /// @throws ParsingError when parsing error is encountered.
     InMemoryTable(const std::string &filename);
     ~InMemoryTable();
-    const std::vector<Column *> &get_all() const;
+    const std::vector<ColumnBase *> &get_all() const;
     /// @brief Discards all changes made to in-memory vector, and reads file
     /// again.
     /// @throws std::runtime_error when table file was deleted or moved.
@@ -72,7 +72,7 @@ public:
     ///              not convertible to size_t.
     /// @see get_column_types()
     /// @see get_column_type()
-    int add(std::vector<std::string> &args);
+    int add_row(std::vector<std::string> &args);
     /// @brief Erases element with ID.
     bool erase_id(const size_t &id);
     /// @brief Erases element at pos.

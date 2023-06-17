@@ -73,27 +73,31 @@ struct TableInfo
 /**
  * @brief Base class for columns in InMemoryTable table.
  */
-class Column
+class ColumnBase
 {
 public:
-    virtual ~Column(){};
+    virtual ~ColumnBase(){};
     /// @see ToiletType
     virtual const int &get_type() const         = 0;
     virtual const std::string &get_name() const = 0;
     virtual size_t size() const                 = 0;
-    virtual void erase(size_t pos)              = 0;
     virtual void clear()                        = 0;
-    /// @brief Appends an element to in-memory vector.
-    ///        Type will be casted back in method body.
-    ///        I couldn't figure out how to make this more convenient.
-    virtual void add(void *data) = 0;
-    /// @brief Void pointer to a vector member at 'pos'
-    virtual void *get(size_t pos) = 0;
-    /// @brief Void pointer to the internal vector.
-    virtual void *get_data() = 0;
+    virtual void erase(size_t pos)              = 0;
 };
 
-class ColumnInt : public Column
+template<typename T>
+class Column : public ColumnBase
+{
+public:
+    /// @brief Appends an element to in-memory vector.
+    virtual void add(T data) = 0;
+    /// @brief Void pointer to a vector member at 'pos'
+    virtual T &get(size_t pos) = 0;
+    /// @brief Void pointer to the internal vector.
+    virtual std::vector<T> &get_data() = 0;
+};
+
+class ColumnInt : public Column<int>
 {
     std::vector<int> *data;
     std::string name;
@@ -107,12 +111,12 @@ public:
     size_t size() const override;
     void erase(size_t pos) override;
     void clear() override;
-    void add(void *data) override;
-    void *get(size_t pos) override;
-    void *get_data() override;
+    void add(int data) override;
+    int &get(size_t pos) override;
+    std::vector<int> &get_data() override;
 };
 
-class ColumnUint : public Column
+class ColumnUint : public Column<size_t>
 {
     std::vector<size_t> *data;
     std::string name;
@@ -126,12 +130,12 @@ public:
     size_t size() const override;
     void erase(size_t pos) override;
     void clear() override;
-    void add(void *data) override;
-    void *get(size_t pos) override;
-    void *get_data() override;
+    void add(size_t data) override;
+    size_t &get(size_t pos) override;
+    std::vector<size_t> &get_data() override;
 };
 
-class ColumnStr : public Column
+class ColumnStr : public Column<std::string>
 {
     std::vector<std::string> *data;
     std::string name;
@@ -145,9 +149,9 @@ public:
     size_t size() const override;
     void erase(size_t pos) override;
     void clear() override;
-    void add(void *data) override;
-    void *get(size_t pos) override;
-    void *get_data() override;
+    void add(std::string data) override;
+    std::string &get(size_t pos) override;
+    std::vector<std::string> &get_data() override;
 };
 
 } // namespace toiletdb

@@ -65,12 +65,6 @@
  * Cast a void pointer and get it's value.
  */
 #define TDB_GET(type, prow_value) (*(static_cast<type *>(prow_value)))
-/**
- * Cast Column.get_data() to appropriate vector type
- * and get pointer's value.
- */
-#define TDB_GET_DATA(of_type, pcolumn)                                         \
-    (*(static_cast<std::vector<of_type> *>((*pcolumn).get_data())))
 
 #ifndef NDEBUG
     #define TDB_DEBUGV(v, name) toilet_debug_putv(v, name)
@@ -149,24 +143,31 @@ public:
 /**
  * @brief Base class for columns in InMemoryTable table.
  */
-class Column
+/**
+ * @brief Base class for columns in InMemoryTable table.
+ */
+class ColumnBase
 {
 public:
-    virtual ~Column() = 0;
+    virtual ~ColumnBase(){};
     /// @see ToiletType
     virtual const int &get_type() const         = 0;
     virtual const std::string &get_name() const = 0;
     virtual size_t size() const                 = 0;
-    virtual void erase(size_t pos)              = 0;
     virtual void clear()                        = 0;
+    virtual void erase(size_t pos)              = 0;
+};
+
+template<typename T>
+class Column : public ColumnBase
+{
+public:
     /// @brief Appends an element to in-memory vector.
-    ///        Type will be casted back in method body.
-    ///        I couldn't figure out how to make this more convenient.
-    virtual void add(void *data) = 0;
+    virtual void add(T data) = 0;
     /// @brief Void pointer to a vector member at 'pos'
-    virtual void *get(size_t pos) = 0;
+    virtual T &get(size_t pos) = 0;
     /// @brief Void pointer to the internal vector.
-    virtual void *get_data() = 0;
+    virtual std::vector<T> &get_data() = 0;
 };
 
 /**
@@ -187,7 +188,7 @@ public:
     /// @throws ParsingError when parsing error is encountered.
     InMemoryTable(const std::string &filename);
     ~InMemoryTable();
-    const std::vector<Column *> &get_all() const;
+    const std::vector<ColumnBase *> &get_all() const;
     /// @brief Discards all changes made to in-memory vector, and reads file
     ///        again.
     /// @throws std::runtime_error when table file was deleted or moved.
@@ -222,7 +223,7 @@ public:
     ///              not convertible to size_t.
     /// @see get_column_types()
     /// @see get_column_type()
-    int add(std::vector<std::string> &args);
+    int add_row(std::vector<std::string> &args);
     /// @brief Erases element with ID.
     bool erase_id(const size_t &id);
     /// @brief Erases element at pos.
