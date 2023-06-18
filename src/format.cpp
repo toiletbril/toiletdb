@@ -175,8 +175,8 @@ TableInfo FormatOne::read_types(std::fstream &file)
 }
 
 std::vector<std::shared_ptr<ColumnBase>> FormatOne::deserealize(std::fstream &file,
-                                                 TableInfo &columns,
-                                                 std::vector<std::string> &names)
+                                                                TableInfo &columns,
+                                                                std::vector<std::string> &names)
 {
     // Allocate memory for each field.
 

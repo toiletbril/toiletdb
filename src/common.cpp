@@ -57,10 +57,10 @@ void to_lower_pstring(std::string &str)
     }
 }
 
-template<class T>
+template <class T>
 std::vector<std::shared_ptr<T>> vector_raw_into_shared(std::vector<T *> &v);
 
-template<class T>
+template <class T>
 std::vector<T *> vector_shared_into_raw(std::vector<std::shared_ptr<T>> &v);
 
 } // namespace toiletdb

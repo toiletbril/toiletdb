@@ -11,7 +11,7 @@ struct TableInfo;
 
 class ColumnBase;
 
-template<typename T>
+template <typename T>
 class Column;
 
 ColumnInt::ColumnInt(std::string name, int type)

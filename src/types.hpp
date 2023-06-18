@@ -82,7 +82,7 @@ public:
 
 /**
  * @brief Internal column type to derive from.
-*/
+ */
 template <typename T>
 class Column : public ColumnBase
 {

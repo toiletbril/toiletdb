@@ -65,7 +65,7 @@ void InMemoryFileParser::read_types(std::fstream &file)
 
 // Read file from disk into memory.
 std::vector<std::shared_ptr<ColumnBase>> InMemoryFileParser::deserealize(std::fstream &file,
-                                                          std::vector<std::string> &names)
+                                                                         std::vector<std::string> &names)
 {
     switch (this->format_version) {
         case 1: {

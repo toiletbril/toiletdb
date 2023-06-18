@@ -4,8 +4,8 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
-#include <vector>
 #include <memory>
+#include <vector>
 
 #include "debug.hpp"
 

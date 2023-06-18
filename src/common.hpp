@@ -3,10 +3,10 @@
 
 #include <cctype>
 #include <climits>
-#include <stdexcept>
-#include <vector>
 #include <memory>
+#include <stdexcept>
 #include <string>
+#include <vector>
 
 #define TOILETDB_VERSION "1.2.0"
 
@@ -35,7 +35,7 @@ std::string to_lower_string(const std::string &str);
  */
 void to_lower_pstring(std::string &str);
 
-template<class T>
+template <class T>
 std::vector<std::shared_ptr<T>> vector_raw_into_shared(std::vector<T *> &v)
 {
     std::vector<std::shared_ptr<T>> result;
@@ -47,7 +47,7 @@ std::vector<std::shared_ptr<T>> vector_raw_into_shared(std::vector<T *> &v)
     return result;
 }
 
-template<class T>
+template <class T>
 std::vector<T *> vector_shared_into_raw(std::vector<std::shared_ptr<T>> &v)
 {
     std::vector<T *> result;
