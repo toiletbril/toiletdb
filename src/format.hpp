@@ -1,8 +1,8 @@
 #ifndef TOILET_FORMAT_H_
 #define TOILET_FORMAT_H_
 
+#include <memory>
 #include <vector>
-#include <typeinfo>
 
 #include "debug.hpp"
 
@@ -15,13 +15,13 @@ struct FormatOne
 {
     static size_t read_version(std::fstream &file);
     static TableInfo read_types(std::fstream &file);
-    static std::vector<ColumnBase *> deserealize(std::fstream &file,
-                                             TableInfo &columns,
-                                             std::vector<std::string> &names);
+    static std::vector<std::shared_ptr<ColumnBase>> deserealize(std::fstream &file,
+                                                 TableInfo &columns,
+                                                 std::vector<std::string> &names);
     static void write_header(std::fstream &file,
-                             const std::vector<ColumnBase *> &data);
+                             const std::vector<std::shared_ptr<ColumnBase>> &data);
     static void serialize(std::fstream &file,
-                          const std::vector<ColumnBase *> &data);
+                          const std::vector<std::shared_ptr<ColumnBase>> &data);
 };
 
 } // namespace toiletdb

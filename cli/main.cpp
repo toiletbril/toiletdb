@@ -25,8 +25,6 @@ static bool flag_version = false;
                  "  -?, --help       \tDisplay this menu.\n"
                  "      --help-format\tDisplay help for database file format.\n"
                  "      --version    \tDisplay version."
-                 "\n"
-                 "v"
               << std::endl;
     exit(0);
 }

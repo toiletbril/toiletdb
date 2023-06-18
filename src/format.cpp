@@ -174,13 +174,13 @@ TableInfo FormatOne::read_types(std::fstream &file)
     return fields;
 }
 
-std::vector<ColumnBase *> FormatOne::deserealize(std::fstream &file,
+std::vector<std::shared_ptr<ColumnBase>> FormatOne::deserealize(std::fstream &file,
                                                  TableInfo &columns,
                                                  std::vector<std::string> &names)
 {
     // Allocate memory for each field.
 
-    std::vector<ColumnBase *> parsed_columns;
+    std::vector<std::shared_ptr<ColumnBase>> parsed_columns;
     parsed_columns.reserve(columns.size);
 
     if (names.size() != columns.size) {
@@ -196,15 +196,15 @@ std::vector<ColumnBase *> FormatOne::deserealize(std::fstream &file,
         int type = columns.types[i];
 
         if (type & TT_INT) {
-            ColumnBase *v = new ColumnInt(names[i], type);
+            std::shared_ptr<ColumnBase> v = std::make_shared<ColumnInt>(names[i], type);
             parsed_columns.push_back(v);
         }
         else if (type & TT_UINT) {
-            ColumnBase *v = new ColumnUint(names[i], type);
+            std::shared_ptr<ColumnBase> v = std::make_shared<ColumnUint>(names[i], type);
             parsed_columns.push_back(v);
         }
         else if (type & TT_STR) {
-            ColumnBase *v = new ColumnStr(names[i], type);
+            std::shared_ptr<ColumnBase> v = std::make_shared<ColumnStr>(names[i], type);
             parsed_columns.push_back(v);
         }
     }
@@ -326,7 +326,7 @@ std::vector<ColumnBase *> FormatOne::deserealize(std::fstream &file,
                     throw ParsingError(failstring);
                 }
 
-                static_cast<ColumnInt *>(parsed_columns[i])->get_data().push_back(num);
+                std::static_pointer_cast<ColumnInt>(parsed_columns[i])->get_data().push_back(num);
             }
             else if (columns.types[i] & TT_UINT) {
                 size_t num = parse_long_long(fields[i]);
@@ -342,11 +342,11 @@ std::vector<ColumnBase *> FormatOne::deserealize(std::fstream &file,
                     throw ParsingError(failstring);
                 }
 
-                (static_cast<ColumnUint *>(parsed_columns[i]))->get_data().push_back(num);
+                (std::static_pointer_cast<ColumnUint>(parsed_columns[i]))->get_data().push_back(num);
             }
 
             else if (columns.types[i] & TT_STR) {
-                (static_cast<ColumnStr *>(parsed_columns[i]))->get_data().push_back(fields[i]);
+                (std::static_pointer_cast<ColumnStr>(parsed_columns[i]))->get_data().push_back(fields[i]);
             }
         }
 
@@ -359,11 +359,11 @@ std::vector<ColumnBase *> FormatOne::deserealize(std::fstream &file,
 }
 
 void FormatOne::write_header(std::fstream &file,
-                             const std::vector<ColumnBase *> &data)
+                             const std::vector<std::shared_ptr<ColumnBase>> &data)
 {
     std::string header = "tdb1\n";
 
-    for (const ColumnBase *c : data) {
+    for (const std::shared_ptr<ColumnBase> &c : data) {
         header += '|';
 
         int modifiers = c->get_type();
@@ -402,7 +402,7 @@ void FormatOne::write_header(std::fstream &file,
     file << header << std::endl;
 }
 
-void FormatOne::serialize(std::fstream &file, const std::vector<ColumnBase *> &data)
+void FormatOne::serialize(std::fstream &file, const std::vector<std::shared_ptr<ColumnBase>> &data)
 {
     FormatOne::write_header(file, data);
 
@@ -417,26 +417,26 @@ void FormatOne::serialize(std::fstream &file, const std::vector<ColumnBase *> &d
     std::vector<int> types;
     types.reserve(column_count);
 
-    for (const ColumnBase *c : data) {
+    for (const std::shared_ptr<ColumnBase> &c : data) {
         types.push_back(c->get_type());
     }
 
     for (size_t row = 0; row < row_count; ++row) {
         for (size_t col = 0; col < column_count; ++col) {
             file << '|';
-            ColumnBase *c = data[col];
+            std::shared_ptr<ColumnBase> c = data[col];
 
             switch (c->get_type() & TDB_TMASK) {
                 case TT_INT: {
-                    file << (static_cast<ColumnInt *>(c))->get(row);
+                    file << (static_cast<ColumnInt *>(c.get()))->get(row);
                 } break;
 
                 case TT_UINT: {
-                    file << (static_cast<ColumnUint *>(c))->get(row);
+                    file << (static_cast<ColumnUint *>(c.get()))->get(row);
                 } break;
 
                 case TT_STR: {
-                    file << (static_cast<ColumnStr *>(c))->get(row);
+                    file << (static_cast<ColumnStr *>(c.get()))->get(row);
                 } break;
             }
         }

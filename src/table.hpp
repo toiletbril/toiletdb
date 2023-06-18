@@ -27,7 +27,7 @@ class InMemoryTable
 {
 private:
     struct Private;
-    std::unique_ptr<Private> private_;
+    std::unique_ptr<Private> _private;
 
 public:
     /// @brief Opens up a file and loads it up into memory.
@@ -37,7 +37,6 @@ public:
     /// @throws ParsingError when parsing error is encountered.
     InMemoryTable(const std::string &filename);
     ~InMemoryTable();
-    const std::vector<ColumnBase *> &get_all() const;
     /// @brief Discards all changes made to in-memory vector, and reads file
     /// again.
     /// @throws std::runtime_error when table file was deleted or moved.
@@ -60,7 +59,7 @@ public:
     /// @brief Get one row from vector.
     ///        One row means a value from each column.
     /// @warning You will need to get types and cast them yourself.
-    /// @see get_column_types()
+    /// @see get_types()
     /// @see get_column_type()
     std::vector<void *> unsafe_get_mut_row(const size_t &pos);
     /// @brief Adds one row. Converts strings to appropriate types.
@@ -73,7 +72,7 @@ public:
     ///              not convertible to int.
     ///          3 - Argument of type 'uint' is found to be
     ///              not convertible to size_t.
-    /// @see get_column_types()
+    /// @see get_types()
     /// @see get_column_type()
     int add_row(std::vector<std::string> &args);
     /// @brief Erases element with ID.
@@ -90,7 +89,7 @@ public:
     ///          is not found.
     size_t search_column_index(const std::string &name) const;
     /// @see ToiletType
-    const std::vector<int> &get_column_types() const;
+    const std::vector<int> &get_types() const;
     /// @see ToiletType
     const int &get_column_type(const size_t &pos) const;
     size_t get_row_count() const;

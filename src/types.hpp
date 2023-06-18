@@ -27,7 +27,7 @@
  */
 #define TDB_IS(type, is_type) (type & is_type)
 /**
- * Cast a void pointer and get it's value.
+ * Cast a void pointer and dereference it.
  */
 #define TDB_CAST(type, prow_value) (*(static_cast<type *>(prow_value)))
 
@@ -66,6 +66,7 @@ struct TableInfo
 
 /**
  * @brief Base class for columns in InMemoryTable table.
+ *        This should be casted to appropriate column type.
  */
 class ColumnBase
 {
@@ -79,6 +80,9 @@ public:
     virtual void erase(size_t pos)              = 0;
 };
 
+/**
+ * @brief Internal column type to derive from.
+*/
 template <typename T>
 class Column : public ColumnBase
 {

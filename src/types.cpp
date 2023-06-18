@@ -9,7 +9,7 @@ namespace toiletdb {
 
 struct TableInfo;
 
-// TODO: Are void pointers faster ??
+class ColumnBase;
 
 template<typename T>
 class Column;

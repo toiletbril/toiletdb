@@ -143,9 +143,7 @@ public:
 
 /**
  * @brief Base class for columns in InMemoryTable table.
- */
-/**
- * @brief Base class for columns in InMemoryTable table.
+ *        This should be casted to appropriate column type.
  */
 class ColumnBase
 {
@@ -157,18 +155,6 @@ public:
     virtual size_t size() const                 = 0;
     virtual void clear()                        = 0;
     virtual void erase(size_t pos)              = 0;
-};
-
-template <typename T>
-class Column : public ColumnBase
-{
-public:
-    /// @brief Appends an element to in-memory vector.
-    virtual void add(T data) = 0;
-    /// @brief Void pointer to a vector member at 'pos'
-    virtual T &get(size_t pos) = 0;
-    /// @brief Void pointer to the internal vector.
-    virtual std::vector<T> &get_data() = 0;
 };
 
 /**
@@ -212,7 +198,7 @@ public:
     /// @brief Get one row from vector.
     ///        One row means a value from each column.
     /// @warning You will need to get types and cast them yourself.
-    /// @see get_column_types()
+    /// @see get_types()
     /// @see get_column_type()
     std::vector<void *> unsafe_get_mut_row(const size_t &pos);
     /// @brief Adds one row. Converts strings to appropriate types.
@@ -225,7 +211,7 @@ public:
     ///              not convertible to int.
     ///          3 - Argument of type 'uint' is found to be
     ///              not convertible to size_t.
-    /// @see get_column_types()
+    /// @see get_types()
     /// @see get_column_type()
     int add_row(std::vector<std::string> &args);
     /// @brief Erases element with ID.
@@ -242,7 +228,7 @@ public:
     /// is not found.
     size_t search_column_index(const std::string &name) const;
     /// @see ToiletType
-    const std::vector<int> &get_column_types() const;
+    const std::vector<int> &get_types() const;
     /// @see ToiletType
     const int &get_column_type(const size_t &pos) const;
     size_t get_row_count() const;

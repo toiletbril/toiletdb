@@ -167,7 +167,7 @@ static char cli_forbiddenchar(std::string &arg)
 static void cli_put_table_header(InMemoryTable &model)
 {
     std::vector<std::string> names = model.get_column_names();
-    std::vector<int> types         = model.get_column_types();
+    std::vector<int> types         = model.get_types();
 
     size_t len = names.size();
 
@@ -243,7 +243,7 @@ static void cli_put_row(InMemoryTable &model, const size_t &pos)
 
     size_t line = 1;
 
-    std::vector<int> types  = model.get_column_types();
+    std::vector<int> types  = model.get_types();
     std::vector<void *> row = model.unsafe_get_mut_row(pos);
 
     size_t len = types.size();
@@ -445,7 +445,7 @@ static CLI_COMMAND_KIND cli_get_command(std::string &s)
         return LIST_TYPES;
     if (s == "size")
         return DBSIZE;
-    if (s == "add_row")
+    if (s == "add")
         return ADD;
     if (s == "remove" || s == "rm")
         return REMOVE;
@@ -611,7 +611,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
 
         case ADD: {
             size_t len             = model.get_column_count();
-            std::vector<int> types = model.get_column_types();
+            std::vector<int> types = model.get_types();
 
             if (args.size() - 1 != model.get_column_count() - 1) {
                 std::string fields;
@@ -702,7 +702,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
         } break;
 
         case EDIT: {
-            std::vector<int> types = model.get_column_types();
+            std::vector<int> types = model.get_types();
 
             if (args.size() < 4) {
                 std::string fields;

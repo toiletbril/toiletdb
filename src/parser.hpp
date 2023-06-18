@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <memory>
 
 #include "debug.hpp"
 
@@ -25,8 +26,8 @@ private:
     std::fstream open(const std::ios_base::openmode mode);
     void update_version(std::fstream &file);
     void read_types(std::fstream &file);
-    std::vector<ColumnBase *> deserealize(std::fstream &file, std::vector<std::string> &names);
-    void serialize(std::fstream &file, const std::vector<ColumnBase *> &columns);
+    std::vector<std::shared_ptr<ColumnBase>> deserealize(std::fstream &file, std::vector<std::string> &names);
+    void serialize(std::fstream &file, const std::vector<std::shared_ptr<ColumnBase>> &columns);
 
 public:
     InMemoryFileParser(const std::string &filename);
@@ -35,8 +36,8 @@ public:
     const size_t &id_column_index() const;
     bool exists() const;
     bool exists_or_create() const;
-    std::vector<ColumnBase *> read_file();
-    void write_file(const std::vector<ColumnBase *> &columns);
+    std::vector<std::shared_ptr<ColumnBase>> read_file();
+    void write_file(const std::vector<std::shared_ptr<ColumnBase>> &columns);
     const std::vector<int> &types() const;
     const std::vector<std::string> &names() const;
 };

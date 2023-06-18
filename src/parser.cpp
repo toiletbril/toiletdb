@@ -64,7 +64,7 @@ void InMemoryFileParser::read_types(std::fstream &file)
 }
 
 // Read file from disk into memory.
-std::vector<ColumnBase *> InMemoryFileParser::deserealize(std::fstream &file,
+std::vector<std::shared_ptr<ColumnBase>> InMemoryFileParser::deserealize(std::fstream &file,
                                                           std::vector<std::string> &names)
 {
     switch (this->format_version) {
@@ -78,7 +78,7 @@ std::vector<ColumnBase *> InMemoryFileParser::deserealize(std::fstream &file,
 }
 
 void InMemoryFileParser::serialize(std::fstream &file,
-                                   const std::vector<ColumnBase *> &columns)
+                                   const std::vector<std::shared_ptr<ColumnBase>> &columns)
 {
     switch (this->format_version) {
         case 1: {
@@ -141,7 +141,7 @@ bool InMemoryFileParser::exists_or_create() const
     return true;
 }
 
-std::vector<ColumnBase *> InMemoryFileParser::read_file()
+std::vector<std::shared_ptr<ColumnBase>> InMemoryFileParser::read_file()
 {
     std::fstream file;
 
@@ -152,14 +152,14 @@ std::vector<ColumnBase *> InMemoryFileParser::read_file()
 
     std::vector<std::string> names = this->columns.names;
 
-    std::vector<ColumnBase *> columns = this->deserealize(file, names);
+    std::vector<std::shared_ptr<ColumnBase>> columns = this->deserealize(file, names);
 
     file.close();
 
     return columns;
 }
 
-void InMemoryFileParser::write_file(const std::vector<ColumnBase *> &columns)
+void InMemoryFileParser::write_file(const std::vector<std::shared_ptr<ColumnBase>> &columns)
 {
     if (!this->exists()) {
         throw std::runtime_error("In ToiletDB, InMemoryFileParser.write_file(), file does not exist");
