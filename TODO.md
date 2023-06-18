@@ -2,7 +2,6 @@
 - Dynamic ID uniqueness checking.
 - Make add_row() and get_row() type safe or replace it all with strings.
 - Class for table creation.
-- Remove private struct from parser class.
 - Non in-memory version. (this would become actually useful and it will be cool if I build something else using this library)
 - Table manager for CLI.
 - Documentation.

@@ -21,7 +21,12 @@ private:
     const std::string filename;
     size_t format_version;
     TableInfo columns;
-    struct Private;
+
+    std::fstream open(const std::ios_base::openmode mode);
+    void update_version(std::fstream &file);
+    void read_types(std::fstream &file);
+    std::vector<ColumnBase *> deserealize(std::fstream &file, std::vector<std::string> &names);
+    void serialize(std::fstream &file, const std::vector<ColumnBase *> &columns);
 
 public:
     InMemoryFileParser(const std::string &filename);
@@ -31,7 +36,7 @@ public:
     bool exists() const;
     bool exists_or_create() const;
     std::vector<ColumnBase *> read_file();
-    void write_file(const std::vector<ColumnBase *> &columns) const;
+    void write_file(const std::vector<ColumnBase *> &columns);
     const std::vector<int> &types() const;
     const std::vector<std::string> &names() const;
 };

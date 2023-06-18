@@ -19,82 +19,76 @@
 
 namespace toiletdb {
 
-struct InMemoryFileParser::Private
+std::fstream InMemoryFileParser::open(const std::ios_base::openmode mode)
 {
-    static std::fstream open(const InMemoryFileParser *self,
-                             const std::ios_base::openmode mode)
-    {
-        std::fstream file;
+    std::fstream file;
 
-        file.open(self->filename, mode);
+    file.open(this->filename, mode);
 
-        TDB_DEBUGS(self->filename, "InMemoryFileParser.open");
+    TDB_DEBUGS(this->filename, "InMemoryFileParser.open");
 
-        if (!file.is_open()) {
-            throw std::ios::failure("In ToiletDB, In InMemoryFileParser.open(), could not open file");
-        }
-
-        return file;
+    if (!file.is_open()) {
+        throw std::ios::failure("In ToiletDB, In InMemoryFileParser.open(), could not open file");
     }
 
-    // Reads first line of a file and updates InMemoryFileParser format version
-    static void update_version(InMemoryFileParser *self, std::fstream &file)
-    {
-        switch (self->format_version) {
-            case 1: {
-                self->format_version = FormatOne::read_version(file);
-            } break;
+    return file;
+}
 
-            default:
-                throw ParsingError("In ToiletDB, InMemoryFileParser.read_version(), invalid format version");
-        }
+// Reads first line of a file and updates InMemoryFileParser format version
+void InMemoryFileParser::update_version(std::fstream &file)
+{
+    switch (this->format_version) {
+        case 1: {
+            this->format_version = FormatOne::read_version(file);
+        } break;
+
+        default:
+            throw ParsingError("In ToiletDB, InMemoryFileParser.read_version(), invalid format version");
     }
+}
 
-    // Should parse second line of the database file.
-    // Line should look like this:
-    // `|[modifier] <type> <name>|...`
-    // Updates this->columns.
-    static void read_types(InMemoryFileParser *self, std::fstream &file)
-    {
-        switch (self->format_version) {
-            case 1: {
-                self->columns = FormatOne::read_types(file);
-            } break;
+// Should parse second line of the database file.
+// Line should look like this:
+// `|[modifier] <type> <name>|...`
+// Updates this->columns.
+void InMemoryFileParser::read_types(std::fstream &file)
+{
+    switch (this->format_version) {
+        case 1: {
+            this->columns = FormatOne::read_types(file);
+        } break;
 
-            default:
-                throw ParsingError("In ToiletDB, InMemoryFileParser.read_types(), invalid format version");
-        }
+        default:
+            throw ParsingError("In ToiletDB, InMemoryFileParser.read_types(), invalid format version");
     }
+}
 
-    // Read file from disk into memory.
-    static std::vector<ColumnBase *> deserealize(InMemoryFileParser *self,
-                                             std::fstream &file,
-                                             std::vector<std::string> &names)
-    {
-        switch (self->format_version) {
-            case 1: {
-                return FormatOne::deserealize(file, self->columns, names);
-            } break;
+// Read file from disk into memory.
+std::vector<ColumnBase *> InMemoryFileParser::deserealize(std::fstream &file,
+                                                          std::vector<std::string> &names)
+{
+    switch (this->format_version) {
+        case 1: {
+            return FormatOne::deserealize(file, this->columns, names);
+        } break;
 
-            default:
-                throw ParsingError("In ToiletDB, InMemoryFileParser.deserialize(), invalid format version");
-        }
+        default:
+            throw ParsingError("In ToiletDB, InMemoryFileParser.deserialize(), invalid format version");
     }
+}
 
-    static void serialize(const InMemoryFileParser *self,
-                          std::fstream &file,
-                          const std::vector<ColumnBase *> &columns)
-    {
-        switch (self->format_version) {
-            case 1: {
-                return FormatOne::serialize(file, columns);
-            } break;
+void InMemoryFileParser::serialize(std::fstream &file,
+                                   const std::vector<ColumnBase *> &columns)
+{
+    switch (this->format_version) {
+        case 1: {
+            return FormatOne::serialize(file, columns);
+        } break;
 
-            default:
-                throw ParsingError("In ToiletDB, InMemoryFileParser.serialize(), invalid format version");
-        }
+        default:
+            throw ParsingError("In ToiletDB, InMemoryFileParser.serialize(), invalid format version");
     }
-};
+}
 
 InMemoryFileParser::InMemoryFileParser(const std::string &filename) :
     filename(filename)
@@ -151,30 +145,30 @@ std::vector<ColumnBase *> InMemoryFileParser::read_file()
 {
     std::fstream file;
 
-    file = Private::open(this, std::ios::in | std::ios::out | std::ios::binary);
+    file = this->open(std::ios::in | std::ios::out | std::ios::binary);
 
-    Private::update_version(this, file);
-    Private::read_types(this, file);
+    this->update_version(file);
+    this->read_types(file);
 
     std::vector<std::string> names = this->columns.names;
 
-    std::vector<ColumnBase *> columns = Private::deserealize(this, file, names);
+    std::vector<ColumnBase *> columns = this->deserealize(file, names);
 
     file.close();
 
     return columns;
 }
 
-void InMemoryFileParser::write_file(const std::vector<ColumnBase *> &columns) const
+void InMemoryFileParser::write_file(const std::vector<ColumnBase *> &columns)
 {
     if (!this->exists()) {
         throw std::runtime_error("In ToiletDB, InMemoryFileParser.write_file(), file does not exist");
     }
 
     std::fstream file =
-        Private::open(this, std::ios::out | std::ios::trunc | std::ios::binary);
+        this->open(std::ios::out | std::ios::trunc | std::ios::binary);
 
-    Private::serialize(this, file, columns);
+    this->serialize(file, columns);
 
     file.close();
 }

@@ -36,7 +36,7 @@
 #include <string>
 #include <vector>
 
-#define TOILETDB_VERSION "1.1.0"
+#define TOILETDB_VERSION "1.2.0"
 #define TOILETDB_PARSER_FORMAT_VERSION 1
 
 #define TDB_INVALID_ULL (size_t)(-1)
@@ -64,11 +64,11 @@
 /**
  * Cast a void pointer and get it's value.
  */
-#define TDB_GET(type, prow_value) (*(static_cast<type *>(prow_value)))
+#define TDB_CAST(type, prow_value) (*(static_cast<type *>(prow_value)))
 
 #ifndef NDEBUG
-    #define TDB_DEBUGV(v, name) toilet_debug_putv(v, name)
-    #define TDB_DEBUGS(s, name) toilet_debug_puts(s, name)
+    #define TDB_DEBUGV(v, name) toiletdb::toilet_debug_putv(v, name)
+    #define TDB_DEBUGS(s, name) toiletdb::toilet_debug_puts(s, name)
 #else
     #define TDB_DEBUGV(v, name)
     #define TDB_DEBUGS(s, name)
@@ -118,16 +118,16 @@ std::string to_lower_string(const std::string &str);
 enum ToiletType
 {
     /// @brief Signed integer.
-    T_INT = 1 << 0,
+    TT_INT = 1 << 0,
     /// @brief Unsigned integer.
-    T_UINT = 1 << 1,
+    TT_UINT = 1 << 1,
     /// @brief std::string.
-    T_STR = 1 << 2,
+    TT_STR = 1 << 2,
     /// @brief Marks column to be used for indexing.
     /// Can only be used on type 'uint'.
-    T_ID = 1 << 3,
+    TT_ID = 1 << 3,
     /// @brief Marks column to be constant.
-    T_CONST = 1 << 4,
+    TT_CONST = 1 << 4,
 };
 
 /**

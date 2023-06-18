@@ -1,13 +1,16 @@
 #ifndef TOILET_DEBUG_H_
 #define TOILET_DEBUG_H_
 
+#include <cassert>
 #include <iostream>
 #include <vector>
 
 #ifndef NDEBUG
+    #define TDB_ASSERT(boolval) assert(boolval)
     #define TDB_DEBUGV(vector, name) toilet_debug_putv(vector, name)
     #define TDB_DEBUGS(value, name) toilet_debug_puts(value, name)
 #else
+    #define TDB_ASSERT(boolval)
     #define TDB_DEBUGV(vector, name)
     #define TDB_DEBUGS(value, name)
 #endif

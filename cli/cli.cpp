@@ -178,17 +178,17 @@ static void cli_put_table_header(InMemoryTable &model)
     size_t padding = 0;
 
     for (size_t i = 0; i < len; ++i) {
-        if (types[i] & T_INT) {
+        if (types[i] & TT_INT) {
             padding = CLI_INTW;
             name << std::left << std::setw(CLI_INTW) << names[i];
         }
 
-        else if (types[i] & T_UINT) {
+        else if (types[i] & TT_UINT) {
             padding = CLI_B_INTW;
             name << std::left << std::setw(CLI_B_INTW) << names[i];
         }
 
-        else if (types[i] & T_STR) {
+        else if (types[i] & TT_STR) {
             padding = CLI_STRW;
             name << std::left << std::setw(CLI_STRW) << names[i];
         }
@@ -197,11 +197,11 @@ static void cli_put_table_header(InMemoryTable &model)
 
         std::string temp;
 
-        if (types[i] & T_ID) {
+        if (types[i] & TT_ID) {
             temp += "[id]";
         }
 
-        if (types[i] & T_CONST) {
+    if (types[i] & TT_CONST) {
             temp += "[const]";
         }
 
@@ -212,15 +212,15 @@ static void cli_put_table_header(InMemoryTable &model)
 
         // Output types
 
-        if (types[i] & T_INT) {
+        if (types[i] & TT_INT) {
             temp = "[int]";
         }
 
-        else if (types[i] & T_UINT) {
+        else if (types[i] & TT_UINT) {
             temp = "[uint]";
         }
 
-        else if (types[i] & T_STR) {
+        else if (types[i] & TT_STR) {
             temp = "[str]";
         }
 
@@ -250,21 +250,20 @@ static void cli_put_row(InMemoryTable &model, const size_t &pos)
 
     for (size_t i = 0; i < len; ++i) {
         switch (TDB_TYPE(types[i])) {
-            case T_INT: {
+            case TT_INT: {
                 // Int should always fit.
                 continue;
             } break;
 
-            case T_UINT: {
-                if (*static_cast<size_t *>(row[i]) >= 100000000000) {
+            case TT_UINT: {
+                if (TDB_CAST(size_t, row[i]) >= 100000000000) {
                     should_wrap = true;
                     break;
                 }
             } break;
 
-            case T_STR: {
-                if (static_cast<std::string *>(row[i])->size() >
-                    CLI_STRW - CLI_MARGIN) {
+            case TT_STR: {
+                if (TDB_CAST(std::string, row[i]).size() > CLI_STRW - CLI_MARGIN) {
                     should_wrap = true;
                     break;
                 }
@@ -278,19 +277,19 @@ static void cli_put_row(InMemoryTable &model, const size_t &pos)
     if (!should_wrap) {
         for (size_t i = 0; i < len; ++i) {
             switch (types[i] & TDB_TMASK) {
-                case T_INT: {
+                case TT_INT: {
                     std::cout << std::left << std::setw(CLI_INTW)
-                              << *static_cast<int *>(row[i]);
+                              << TDB_CAST(int, row[i]);
                 } break;
 
-                case T_UINT: {
+                case TT_UINT: {
                     std::cout << std::left << std::setw(CLI_B_INTW)
-                              << *static_cast<size_t *>(row[i]);
+                              << TDB_CAST(size_t, row[i]);
                 } break;
 
-                case T_STR: {
+                case TT_STR: {
                     std::cout << std::left << std::setw(CLI_STRW)
-                              << *static_cast<std::string *>(row[i]);
+                              << TDB_CAST(std::string, row[i]);
                 } break;
 
                 default:
@@ -309,17 +308,17 @@ static void cli_put_row(InMemoryTable &model, const size_t &pos)
 
         for (size_t i = 0; i < len; ++i) {
             switch (types[i] & TDB_TMASK) {
-                case T_INT: {
+                case TT_INT: {
                     // Int always should fit
-                    int n         = *static_cast<int *>(row[i]);
+                    int n         = TDB_CAST(int, row[i]);
                     std::string s = std::to_string(n);
 
                     cols.push_back(std::to_string(n));
                     lengths.push_back(s.size());
                 } break;
 
-                case T_UINT: {
-                    size_t n = *static_cast<size_t *>(row[i]);
+                case TT_UINT: {
+                    size_t n = TDB_CAST(size_t, row[i]);
 
                     std::string s = std::to_string(n);
 
@@ -327,8 +326,8 @@ static void cli_put_row(InMemoryTable &model, const size_t &pos)
                     lengths.push_back(s.size());
                 } break;
 
-                case T_STR: {
-                    std::string s = *static_cast<std::string *>(row[i]);
+                case TT_STR: {
+                    std::string s = TDB_CAST(std::string, row[i]);
 
                     cols.push_back(s);
                     lengths.push_back(s.size());
@@ -349,11 +348,11 @@ static void cli_put_row(InMemoryTable &model, const size_t &pos)
 
             for (size_t i = 0; i < len; ++i) {
                 switch (types[i] & TDB_TMASK) {
-                    case T_INT: {
+                    case TT_INT: {
                         wrap_buf << std::left << std::setw(CLI_INTW) << ' ';
                     } break;
 
-                    case T_UINT: {
+                    case TT_UINT: {
                         wrap_buf << std::left << std::setw(CLI_B_INTW)
                                  << (lengths[i] > (CLI_B_INTW - CLI_MARGIN)
                                          ? cols[i].substr(
@@ -364,7 +363,7 @@ static void cli_put_row(InMemoryTable &model, const size_t &pos)
                         lengths[i] -= CLI_B_INTW;
                     } break;
 
-                    case T_STR: {
+                    case TT_STR: {
                         wrap_buf << std::left << std::setw(CLI_STRW)
                                  << (lengths[i] > (CLI_STRW - CLI_MARGIN)
                                          ? cols[i].substr(
@@ -383,16 +382,16 @@ static void cli_put_row(InMemoryTable &model, const size_t &pos)
 
             for (size_t i = 0; i < len; ++i) {
                 switch (types[i] & TDB_TMASK) {
-                    case T_INT: {
+                    case TT_INT: {
                         continue;
                     } break;
 
-                    case T_UINT: {
+                    case TT_UINT: {
                         should_wrap =
                             should_wrap || lengths[i] > CLI_B_INTW - CLI_MARGIN;
                     } break;
 
-                    case T_STR: {
+                    case TT_STR: {
                         should_wrap =
                             should_wrap || lengths[i] > CLI_STRW - CLI_MARGIN;
                     } break;
@@ -404,16 +403,16 @@ static void cli_put_row(InMemoryTable &model, const size_t &pos)
 
         for (size_t i = 0; i < len; ++i) {
             switch (TDB_TYPE(types[i])) {
-                case T_INT: {
+                case TT_INT: {
                     std::cout << std::left << std::setw(CLI_INTW) << cols[i];
                 } break;
 
-                case T_UINT: {
+                case TT_UINT: {
                     std::cout << std::left << std::setw(CLI_B_INTW)
                               << cols[i].substr(0, CLI_B_INTW - CLI_MARGIN);
                 } break;
 
-                case T_STR: {
+                case TT_STR: {
                     std::cout << std::left << std::setw(CLI_STRW)
                               << cols[i].substr(0, CLI_STRW - CLI_MARGIN);
                 } break;
@@ -423,7 +422,8 @@ static void cli_put_row(InMemoryTable &model, const size_t &pos)
             }
         }
 
-        std::cout << '\n' << wrap_buf.str() << '\n';
+        std::cout << '\n'
+                  << wrap_buf.str() << '\n';
     }
 }
 
@@ -500,12 +500,14 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
         case EXIT: {
             std::cout << "Saving..." << std::endl;
             model.write_file();
-            std::cout << "Exiting...\n" << std::endl;
+            std::cout << "Exiting...\n"
+                      << std::endl;
             std::exit(0);
         } break;
 
         case EXIT_NO_SAVE: {
-            std::cout << "Exiting...\n" << std::endl;
+            std::cout << "Exiting...\n"
+                      << std::endl;
             std::exit(0);
         } break;
 
@@ -570,7 +572,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
             }
 
             // If column specified has modifier 'id', use binary search.
-            if (model.get_column_type(column_pos) & T_ID) {
+            if (model.get_column_type(column_pos) & TT_ID) {
                 size_t value = parse_long_long(query);
 
                 if (value == TDB_INVALID_ULL) {
@@ -617,7 +619,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
 
                 for (size_t i = 0; i < len - 1; ++i) {
                     // ID field will be added automatically.
-                    if (types[i] & T_ID) {
+                    if (types[i] & TT_ID) {
                         continue;
                     }
                     fields += "<" + names[i] + "> ";
@@ -709,12 +711,12 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
 
                 for (size_t i = 0; i < len - 1; ++i) {
                     // ID field will be added automatically
-                    if (TDB_IS(types[i], T_CONST)) {
+                    if (TDB_IS(types[i], TT_CONST)) {
                         continue;
                     }
                     fields += "'" + names[i] + "' ";
                 }
-                if (!(TDB_IS(types[len - 1], T_CONST))) {
+                if (!(TDB_IS(types[len - 1], TT_CONST))) {
                     fields += "'" + names[len - 1] + "'";
                 }
 
@@ -760,14 +762,14 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
 
             void *data = (model.get_row(pos))[column_index];
 
-            if (TDB_IS(types[column_index], T_CONST)) {
+            if (TDB_IS(types[column_index], TT_CONST)) {
                 std::cout << "ERROR: Can not edit value with 'const' modifier."
                           << std::endl;
                 return;
             }
 
             switch (TDB_TYPE(types[column_index])) {
-                case T_INT: {
+                case TT_INT: {
                     int number = parse_int(value);
 
                     if (n == TDB_INVALID_I) {
@@ -776,10 +778,10 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
                         return;
                     }
 
-                    TDB_GET(int, data) = number;
+                    TDB_CAST(int, data) = number;
                 } break;
 
-                case T_UINT: {
+                case TT_UINT: {
                     size_t number = parse_long_long(value);
 
                     if (n == TDB_INVALID_ULL) {
@@ -788,11 +790,11 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
                         return;
                     }
 
-                    TDB_GET(size_t, data) = number;
+                    TDB_CAST(size_t, data) = number;
                 } break;
 
-                case T_STR: {
-                    TDB_GET(std::string, data) = value;
+                case TT_STR: {
+                    TDB_CAST(std::string, data) = value;
                 } break;
             }
 
@@ -847,7 +849,7 @@ void cli_loop(const char *filepath)
         std::exit(1);
     }
     catch (ParsingError &e) {
-        std::cout << filepath << ": Parsing error: " << e.what()
+        std::cout << filepath << ": " << e.what()
                   << "\n"
                      "Try '--help-format' to see help for database format."
                   << std::endl;
@@ -855,9 +857,8 @@ void cli_loop(const char *filepath)
     }
     catch (std::runtime_error &e) {
         TDB_DEBUGS(e.what(), "cli_loop");
-        std::cout << filepath << ": File does not exist."
+        std::cout << filepath << ": " << strerror(errno)
                   << "\n"
-                     "You need to create database file first.\n"
                      "Try '--help-format' to see help for database format."
                   << std::endl;
         exit(1);
@@ -873,7 +874,8 @@ void cli_loop(const char *filepath)
               << std::endl;
 
     while (true) {
-        std::cout << "\n" << filename << "# ";
+        std::cout << "\n"
+                  << filename << "# ";
 
         static std::string line;
         std::getline(std::cin, line);

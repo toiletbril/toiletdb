@@ -9,28 +9,37 @@
 #include "cli.hpp"
 #include "toiletdb.hpp"
 
-static bool help        = false;
-static bool help_format = false;
+static bool flag_help    = false;
+static bool flag_format  = false;
+static bool flag_version = false;
 
 #define TOILETDB_NAME "toiletdb"
 #define TOILETDB_GITHUB "<https://github.com/toiletbril>"
 
-void show_help()
+[[noreturn]] void show_help()
 {
     std::cout << "USAGE: " << TOILETDB_NAME << " [-options] <database file>\n"
               << "CLI for manipulating toiletdb files.\n"
                  "\n"
                  "OPTIONS:\n"
-                 "  -?, --help       \tSee this menu.\n"
-                 "      --help-format\tShow help for database file format.\n"
+                 "  -?, --help       \tDisplay this menu.\n"
+                 "      --help-format\tDisplay help for database file format.\n"
+                 "      --version    \tDisplay version."
                  "\n"
                  "v"
-              << TOILETDB_VERSION << " (c) toiletbril " << TOILETDB_GITHUB
               << std::endl;
     exit(0);
 }
 
-void show_help_format()
+[[noreturn]] void show_version()
+{
+    std::cout << "toiletdb " << TOILETDB_VERSION << "\n"
+              << "(c) toiletbril " << TOILETDB_GITHUB
+              << std::endl;
+    exit(0);
+}
+
+[[noreturn]] void show_help_format()
 {
     std::cout << "Database files look like this:\n"
                  "```\n"
@@ -58,30 +67,46 @@ void show_help_format()
     exit(0);
 }
 
-void set_flag(const char *s)
+void set_flag(const char *s, std::vector<const char *> &args)
 {
-    if (s[0] == '-') {
-        if (s[1] == '?') {
-            help = true;
+    if (strlen(s) < 2) {
+        return;
+    };
+
+    if (s[0] != '-') {
+        args.push_back(s);
+        return;
+    }
+
+    if (s[1] == '?') {
+        flag_help = true;
+        return;
+    }
+
+    // Long flags
+    if (s[1] == '-') {
+        if (strcmp(s, "--help") == 0) {
+            flag_help = true;
+            return;
         }
-        // Long flags
-        else if (s[1] == '-') {
-            if (strcmp(s, "--help") == 0) {
-                help = true;
-            }
-            else if (strcmp(s, "--help-format") == 0) {
-                help_format = true;
-            }
-            else {
-                std::cout << "Unknown flag " << s << ". Try '--help'."
-                          << std::endl;
-                exit(1);
-            }
+        if (strcmp(s, "--help-format") == 0) {
+            flag_format = true;
+            return;
+        }
+        if (strcmp(s, "--version") == 0) {
+            flag_version = true;
+            return;
         }
         else {
-            std::cout << "Unknown flag " << s << ". Try '--help'." << std::endl;
+            std::cout << "Unknown flag " << s << ". Try '--help'."
+                      << std::endl;
             exit(1);
         }
+    }
+
+    else {
+        std::cout << "Unknown flag " << s << ". Try '--help'." << std::endl;
+        exit(1);
     }
 }
 
@@ -97,25 +122,33 @@ int main(int argc, char **argv)
     std::cout << "*** Debug is enabled.\n";
 #endif
 
-    if (argc < 2) {
+    std::vector<const char *> args;
+
+    for (int i = 1; i < argc; ++i) {
+        set_flag(argv[i], args);
+    }
+
+    if (flag_help) {
+        show_help();
+    }
+
+    if (flag_format) {
+        show_help_format();
+    }
+
+    if (flag_version) {
+        show_version();
+    }
+
+    TDB_DEBUGV(args, "args");
+
+    if (args.size() < 1) {
         std::cout << "ERROR: Not enough arguments.\n"
                      "To get more help, try '--help'."
                   << std::endl;
         std::exit(0);
     }
 
-    for (int i = 1; i < argc; ++i) {
-        set_flag(argv[i]);
-    }
-
-    if (help) {
-        show_help();
-    }
-
-    if (help_format) {
-        show_help_format();
-    }
-
-    cli_loop(argv[1]);
+    cli_loop(args[0]);
     return 0;
 }

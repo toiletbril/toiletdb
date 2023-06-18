@@ -14,7 +14,7 @@ struct InMemoryTable::Private
     {
         std::vector<size_t> id_column =
             static_cast<ColumnUint *>(this->columns[this->parser->id_column_index()])
-            ->get_data();
+                ->get_data();
 
         std::vector<size_t> index;
         index.resize(id_column.size());
@@ -42,8 +42,10 @@ InMemoryTable::InMemoryTable(const std::string &filename)
     this->private_->parser = std::make_unique<InMemoryFileParser>(filename);
 
     if (!this->private_->parser->exists()) {
-        throw std::runtime_error(
-            "In InMemoryTable constructor, there is no such file.");
+        std::string failstring = "In InMemoryTable constructor, ";
+        failstring += strerror(errno);
+
+        throw std::runtime_error(failstring);
     }
 
     this->private_->columns = this->private_->parser->read_file();
@@ -88,7 +90,7 @@ size_t InMemoryTable::search(const size_t &id) const
 
     std::vector<size_t> id_column =
         static_cast<ColumnUint *>(this->private_->columns[this->private_->parser->id_column_index()])
-        ->get_data();
+            ->get_data();
 
     while (L <= R) {
         m = (L + R) / 2;
@@ -130,18 +132,18 @@ std::vector<size_t> InMemoryTable::search(const std::string &name,
     for (size_t i = 0; i < this->get_row_count(); ++i) {
         std::string value;
         switch (TDB_TYPE(type)) {
-            case T_INT: {
+            case TT_INT: {
                 value = static_cast<ColumnInt *>(this->private_->columns[column_index])
-                        ->get(i);
+                            ->get(i);
             } break;
-            case T_UINT: {
+            case TT_UINT: {
                 value = static_cast<ColumnUint *>(this->private_->columns[column_index])
-                        ->get(i);
+                            ->get(i);
                 break;
             }
-            case T_STR: {
+            case TT_STR: {
                 value = static_cast<ColumnStr *>(this->private_->columns[column_index])
-                        ->get(i);
+                            ->get(i);
                 break;
             }
         }
@@ -163,21 +165,22 @@ std::vector<void *> InMemoryTable::get_row(const size_t &pos)
     std::vector<void *> result;
 
     if (pos > this->get_row_count()) {
-        throw std::logic_error("In ToiletDB, In InMemoryTable.get_row(), pos "
-                               "is larger than data size");
+        throw std::logic_error(
+            "In ToiletDB, In InMemoryTable.get_row(), pos "
+            "is larger than data size");
     }
 
     for (ColumnBase *c : this->private_->columns) {
         switch (TDB_TYPE(c->get_type())) {
-            case T_INT: {
+            case TT_INT: {
                 result.push_back(static_cast<void *>(&(static_cast<ColumnInt *>(c))->get(pos)));
             } break;
 
-            case T_UINT: {
+            case TT_UINT: {
                 result.push_back(static_cast<void *>(&(static_cast<ColumnUint *>(c))->get(pos)));
             } break;
 
-            case T_STR: {
+            case TT_STR: {
                 result.push_back(static_cast<void *>(&(static_cast<ColumnStr *>(c))->get(pos)));
             } break;
         }
@@ -213,12 +216,12 @@ int InMemoryTable::add_row(std::vector<std::string> &args)
     for (size_t i = 1; i < this->get_column_count(); ++i) {
 
         // Skip the ID column.
-        if (TDB_IS(types[i], T_ID)) {
+        if (TDB_IS(types[i], TT_ID)) {
             continue;
         }
 
         switch (TDB_TYPE(types[i])) {
-            case T_INT: {
+            case TT_INT: {
                 int value = parse_int(*it++);
 
                 if (value == TDB_INVALID_I) {
@@ -226,7 +229,7 @@ int InMemoryTable::add_row(std::vector<std::string> &args)
                 }
             } break;
 
-            case T_UINT: {
+            case TT_UINT: {
                 size_t value = parse_long_long(*it++);
 
                 if (value == TDB_INVALID_ULL) {
@@ -247,22 +250,22 @@ int InMemoryTable::add_row(std::vector<std::string> &args)
     for (size_t i = 0; i < this->get_column_count(); ++i) {
 
         // NOTE: ID handling depends on get_next_id().
-        if (TDB_IS(types[i], T_ID)) {
+        if (TDB_IS(types[i], TT_ID)) {
             size_t new_id = this->get_next_id();
             static_cast<ColumnUint *>(this->private_->columns[i])->add(new_id);
         }
 
-        else if (TDB_IS(types[i], T_INT)) {
+        else if (TDB_IS(types[i], TT_INT)) {
             int value = parse_int(*it++);
             static_cast<ColumnInt *>(this->private_->columns[i])->add(value);
         }
 
-        else if (TDB_IS(types[i], T_UINT)) {
+        else if (TDB_IS(types[i], TT_UINT)) {
             size_t value = parse_long_long(*it++);
             static_cast<ColumnUint *>(this->private_->columns[i])->add(value);
         }
 
-        else if (TDB_IS(types[i], T_STR)) {
+        else if (TDB_IS(types[i], TT_STR)) {
             static_cast<ColumnStr *>(this->private_->columns[i])->add(*it++);
         }
     }
