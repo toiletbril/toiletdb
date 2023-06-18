@@ -16,8 +16,9 @@ size_t FormatOne::read_version(std::fstream &file)
     // Check for magic string
     for (int i = 0; i < 3; ++i) {
         if (temp[i] != TOILETDB_MAGIC[i]) {
-            std::string failstring = "Database file format is not "
-                                     "correct: File is not a tdb database";
+            std::string failstring =
+                "Database file format is not "
+                "correct: File is not a tdb database";
 
             throw ParsingError(failstring);
         }
@@ -37,13 +38,15 @@ size_t FormatOne::read_version(std::fstream &file)
     size_t version = parse_long_long(version_string);
 
     if (version == TDB_INVALID_ULL) {
-        throw ParsingError("Database format is not "
-                           "correct: Invalid version number");
+        throw ParsingError(
+            "Database format is not "
+            "correct: Invalid version number");
     }
 
     if (version > TOILETDB_PARSER_FORMAT_VERSION) {
-        throw ParsingError("Database format is not "
-                           "supported: Version is too new");
+        throw ParsingError(
+            "Database format is not "
+            "supported: Version is too new");
     };
 
     TDB_DEBUGS(version, "InMemoryFileParser.read_version");
@@ -136,9 +139,10 @@ TableInfo FormatOne::read_types(std::fstream &file)
 
         // Last word will be the name
         if (buf.empty()) {
-            std::string failstring = "Format error: No column name at "
-                                     "2:" +
-                                     std::to_string(pos);
+            std::string failstring =
+                "Format error: No column name at "
+                "2:" +
+                std::to_string(pos);
 
             throw ParsingError(failstring);
         }
@@ -171,8 +175,8 @@ TableInfo FormatOne::read_types(std::fstream &file)
 }
 
 std::vector<ColumnBase *> FormatOne::deserealize(std::fstream &file,
-                                             TableInfo &columns,
-                                             std::vector<std::string> &names)
+                                                 TableInfo &columns,
+                                                 std::vector<std::string> &names)
 {
     // Allocate memory for each field.
 
@@ -217,10 +221,11 @@ std::vector<ColumnBase *> FormatOne::deserealize(std::fstream &file,
 
     while (c != EOF) {
         if (c != '|') {
-            std::string failstring = "Database file format is not "
-                                     "correct: Invalid delimiter at line " +
-                                     std::to_string(line) + ":" +
-                                     std::to_string(pos);
+            std::string failstring =
+                "Database file format is not "
+                "correct: Invalid delimiter at line " +
+                std::to_string(line) + ":" +
+                std::to_string(pos);
 
             throw ParsingError(failstring);
         }
@@ -245,10 +250,11 @@ std::vector<ColumnBase *> FormatOne::deserealize(std::fstream &file,
             }
 
             if (field > columns.size) {
-                std::string failstring = "Database file format is not "
-                                         "correct: Extra field at line " +
-                                         std::to_string(line) + ":" +
-                                         std::to_string(pos + 1);
+                std::string failstring =
+                    "Database file format is not "
+                    "correct: Extra field at line " +
+                    std::to_string(line) + ":" +
+                    std::to_string(pos + 1);
 
                 throw ParsingError(failstring);
             }
@@ -282,24 +288,26 @@ std::vector<ColumnBase *> FormatOne::deserealize(std::fstream &file,
         for (size_t i = 0; i < columns.size; ++i) {
             if (columns.types[i] & TT_ID) {
                 if (!(columns.types[i] & TT_UINT)) {
-                    std::string failstring = "Database file format is not "
-                                             "correct: Field with modifier "
-                                             "'id' is not of type 'uint', "
-                                             "line " +
-                                             std::to_string(line) + ", field " +
-                                             std::to_string(i + 1);
+                    std::string failstring =
+                        "Database file format is not "
+                        "correct: Field with modifier "
+                        "'id' is not of type 'uint', "
+                        "line " +
+                        std::to_string(line) + ", field " +
+                        std::to_string(i + 1);
 
                     throw ParsingError(failstring);
                 }
 
                 // TODO: Reindex when editing ID
                 if (!(columns.types[i] & TT_CONST)) {
-                    std::string failstring = "Database file format is not "
-                                             "correct: Field with modifier "
-                                             "'id' is not constant, "
-                                             "line " +
-                                             std::to_string(line) + ", field " +
-                                             std::to_string(i + 1);
+                    std::string failstring =
+                        "Database file format is not "
+                        "correct: Field with modifier "
+                        "'id' is not constant, "
+                        "line " +
+                        std::to_string(line) + ", field " +
+                        std::to_string(i + 1);
 
                     throw ParsingError(failstring);
                 }
@@ -416,10 +424,10 @@ void FormatOne::serialize(std::fstream &file, const std::vector<ColumnBase *> &d
     for (size_t row = 0; row < row_count; ++row) {
         for (size_t col = 0; col < column_count; ++col) {
             file << '|';
-            ColumnBase *c  = data[col];
+            ColumnBase *c = data[col];
 
             switch (c->get_type() & TDB_TMASK) {
-                case TT_INT : {
+                case TT_INT: {
                     file << (static_cast<ColumnInt *>(c))->get(row);
                 } break;
 

@@ -157,7 +157,36 @@ std::vector<size_t> InMemoryTable::search(const std::string &name,
     return result;
 }
 
-std::vector<void *> InMemoryTable::get_row(const size_t &pos)
+const std::vector<std::string> InMemoryTable::get_row(const size_t &pos) const
+{
+    std::vector<std::string> result;
+
+    if (pos > this->get_row_count()) {
+        throw std::logic_error(
+            "In ToiletDB, In InMemoryTable.get_row(), pos "
+            "is larger than data size");
+    }
+
+    for (ColumnBase *c : this->private_->columns) {
+        switch (TDB_TYPE(c->get_type())) {
+            case TT_INT: {
+                result.push_back(std::to_string((static_cast<ColumnInt *>(c))->get(pos)));
+            } break;
+
+            case TT_UINT: {
+                result.push_back(std::to_string((static_cast<ColumnUint *>(c))->get(pos)));
+            } break;
+
+            case TT_STR: {
+                result.push_back((static_cast<ColumnStr *>(c))->get(pos));
+            } break;
+        }
+    }
+
+    return result;
+}
+
+std::vector<void *> InMemoryTable::unsafe_get_mut_row(const size_t &pos)
 {
     // To get types, use column_types().
     // This returns void pointers to values from every column on a single row.

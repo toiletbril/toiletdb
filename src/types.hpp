@@ -79,7 +79,7 @@ public:
     virtual void erase(size_t pos)              = 0;
 };
 
-template<typename T>
+template <typename T>
 class Column : public ColumnBase
 {
 public:

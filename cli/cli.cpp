@@ -201,7 +201,7 @@ static void cli_put_table_header(InMemoryTable &model)
             temp += "[id]";
         }
 
-    if (types[i] & TT_CONST) {
+        if (types[i] & TT_CONST) {
             temp += "[const]";
         }
 
@@ -244,7 +244,7 @@ static void cli_put_row(InMemoryTable &model, const size_t &pos)
     size_t line = 1;
 
     std::vector<int> types  = model.get_column_types();
-    std::vector<void *> row = model.get_row(pos);
+    std::vector<void *> row = model.unsafe_get_mut_row(pos);
 
     size_t len = types.size();
 
@@ -760,7 +760,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
                 return;
             }
 
-            void *data = (model.get_row(pos))[column_index];
+            void *data = (model.unsafe_get_mut_row(pos))[column_index];
 
             if (TDB_IS(types[column_index], TT_CONST)) {
                 std::cout << "ERROR: Can not edit value with 'const' modifier."

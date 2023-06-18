@@ -12,9 +12,9 @@
 #include "debug.hpp"
 
 #include "common.hpp"
-#include "types.hpp"
 #include "errors.hpp"
 #include "parser.hpp"
+#include "types.hpp"
 
 namespace toiletdb {
 
@@ -54,12 +54,15 @@ public:
     /// @return TDB_NOT_FOUND if element is not found.
     std::vector<size_t> search(const std::string &name,
                                std::string &query) const;
+    /// @brief Get copy of a row from vector as strings.
+    ///        One row means a value from each column.
+    const std::vector<std::string> get_row(const size_t &pos) const;
     /// @brief Get one row from vector.
     ///        One row means a value from each column.
     /// @warning You will need to get types and cast them yourself.
     /// @see get_column_types()
     /// @see get_column_type()
-    std::vector<void *> get_row(const size_t &pos);
+    std::vector<void *> unsafe_get_mut_row(const size_t &pos);
     /// @brief Adds one row. Converts strings to appropriate types.
     ///        One row means a value from each column *EXCEPT* ID.
     /// @warning ID row for new entry will be set automatically.
