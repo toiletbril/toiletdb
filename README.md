@@ -7,6 +7,11 @@ In-memory database with an ability to serialize into readable files.
 I got this idea from my friends' course project.
 The actual task was too easy, so I decided to implement a whole database :3c.
 
+**This contains [toiletline](https://github.com/toiletbril/toiletline) submodule! Clone recursively with:**
+```
+git clone --recursive https://github.com/toiletbril/toiletdb.git
+```
+
 ## Table of contents
 
 - [Introduction](#introduction)
