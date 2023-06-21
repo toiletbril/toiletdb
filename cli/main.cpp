@@ -110,12 +110,6 @@ void set_flag(const char *s, std::vector<const char *> &args)
 
 int main(int argc, char **argv)
 {
-#ifdef _WIN32
-    // I'm not sure if this does anything.
-    SetConsoleCP(1251);
-    SetConsoleOutputCP(1251);
-#endif
-
 #ifndef NDEBUG
     std::cout << "*** Debug is enabled.\n";
 #endif

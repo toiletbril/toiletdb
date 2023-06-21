@@ -11,6 +11,8 @@
 
 #include "toiletdb.hpp"
 
+#include "toiletline/toiletline.c"
+
 void cli_loop(const char *filepath);
 
 #endif // TOILETDB_CLI_H_

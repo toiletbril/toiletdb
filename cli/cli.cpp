@@ -112,13 +112,11 @@ static std::vector<std::string> cli_split_args(const std::string &s)
 static bool cli_y_or_n()
 {
     while (true) {
-        std::cout << "\tY or N >> ";
-        std::fflush(stdout);
+        char buf[2] = {0};
 
-        char answer = std::tolower(std::fgetc(stdin));
+        tl_readline(buf, 2, "    Y or N >> ");
 
-        // Discard the rest of the line.
-        while (fgetc(stdin) != '\n') {}
+        char answer = std::tolower(buf[0]);
 
         if (answer == 'y') {
             return true;
@@ -825,9 +823,11 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
     }
 }
 
+#define LINE_BUF_SIZE 64
+
 void cli_loop(const char *filepath)
 {
-    int err = std::setvbuf(stdout, NULL, _IOLBF, 1024);
+    int err = std::setvbuf(stdout, NULL, _IONBF, 1024);
 
     if (err) {
         std::cout << "Could not enable bufferin for output.\nPlease buy more "
@@ -873,12 +873,18 @@ void cli_loop(const char *filepath)
                  "Try 'help' to see available commands."
               << std::endl;
 
-    while (true) {
-        std::cout << "\n"
-                  << filename << "# ";
+    tl_init();
 
-        static std::string line;
-        std::getline(std::cin, line);
+    std::string line;
+    std::string prompt = filename + "# ";
+
+    while (true) {
+        char lb[LINE_BUF_SIZE];
+
+        if (tl_readline(lb, LINE_BUF_SIZE, prompt.c_str()) != 0)
+            exit(0);
+
+        line = lb;
 
         if (line.empty()) {
             continue;
@@ -895,10 +901,12 @@ void cli_loop(const char *filepath)
         }
         catch (std::ios::failure &e) {
             std::cout << "IO error: " << strerror(errno) << std::endl;
+            tl_exit();
             std::exit(1);
         }
         catch (std::runtime_error &e) {
             std::cout << "Runtime error: " << e.what() << std::endl;
+            tl_exit();
             std::exit(1);
         }
     }
