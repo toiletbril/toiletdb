@@ -460,14 +460,14 @@ static CLI_COMMAND_KIND cli_get_command(std::string &s)
     return UNKNOWN;
 }
 
-static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
+static int cli_exec(InMemoryTable &model, std::vector<std::string> &args)
 {
     CLI_COMMAND_KIND c;
 
     if (args.size() > 0)
         c = cli_get_command(args[0]);
     else
-        return;
+        return 0;
 
     switch (c) {
         case UNKNOWN: {
@@ -504,15 +504,15 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
         case EXIT: {
             std::cout << "Saving..." << std::endl;
             model.write_file();
-            std::cout << "Exiting...\n"
-                      << std::endl;
-            std::exit(0);
+            std::cout << "Exiting..." << std::endl;
+
+            return 1;
         } break;
 
         case EXIT_NO_SAVE: {
-            std::cout << "Exiting...\n"
-                      << std::endl;
-            std::exit(0);
+            std::cout << "Exiting..." << std::endl;
+
+            return 1;
         } break;
 
         case LIST: {
@@ -525,7 +525,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
                              "Do you really want to list them all?\n";
 
                 if (!cli_y_or_n()) {
-                    return;
+                    return 0;
                 }
             }
 
@@ -563,7 +563,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
                        "For more information on column types, use 'types'."
                     << std::endl;
 
-                return;
+                return 0;
             }
 
             std::string query = cli_concat_args(args, 2);
@@ -572,7 +572,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
             if (column_pos == TDB_NOT_FOUND) {
                 std::cout << "ERROR: Unknown column '" << args[1] << "'."
                           << std::endl;
-                return;
+                return 0;
             }
 
             // If column specified has modifier 'id', use binary search.
@@ -581,7 +581,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
 
                 if (value == TDB_INVALID_ULL) {
                     std::cout << "ERROR: ID is not a number." << std::endl;
-                    return;
+                    return 0;
                 }
 
                 size_t pos = model.search(value);
@@ -594,7 +594,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
 
                 std::fflush(stdout);
 
-                return;
+                return 0;
             };
 
             std::vector<size_t> positions = model.search(args[1], query);
@@ -641,7 +641,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
                        "Cool\" 69420\n"
                        "For more information on column types, use 'types'."
                     << std::endl;
-                return;
+                return 0;
             }
 
             // Remove the command from vector, so only values remain
@@ -652,7 +652,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
             if (errc) {
                 std::cout << "ERROR: Forbidden character '" << errc << "'."
                           << std::endl;
-                return;
+                return 0;
             }
 
             TDB_DEBUGV(args, "add_row() args");
@@ -681,14 +681,14 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
                              "Usage: remove <ID>\n"
                              "You can get ID by using 'list' or 'search'."
                           << std::endl;
-                return;
+                return 0;
             }
 
             size_t n = parse_long_long(args[1]);
 
             if (n == TDB_INVALID_ULL) {
                 std::cout << "ERROR: Invalid ID." << std::endl;
-                return;
+                return 0;
             }
 
             size_t pos = model.search(n);
@@ -696,7 +696,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
             if (pos == TDB_NOT_FOUND) {
                 std::cout << "ERROR: Could not find row with specified ID."
                           << std::endl;
-                return;
+                return 0;
             }
 
             cli_put_table_header(model);
@@ -729,14 +729,14 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
                              "Available fields: "
                           << fields << "\n";
 
-                return;
+                return 0;
             }
 
             size_t n = parse_long_long(args[1]);
 
             if (n == TDB_INVALID_ULL) {
                 std::cout << "ERROR: ID is not a number." << std::endl;
-                return;
+                return 0;
             }
 
             size_t pos = model.search(n);
@@ -744,14 +744,14 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
             if (pos == TDB_NOT_FOUND) {
                 std::cout << "ERROR: Could not find row with specified ID."
                           << std::endl;
-                return;
+                return 0;
             }
 
             size_t column_index = model.search_column_index(args[2]);
 
             if (column_index == TDB_NOT_FOUND) {
                 std::cout << "Invalid field '" << args[2] << "'" << std::endl;
-                return;
+                return 0;
             }
 
             std::string value = cli_concat_args(args, 3);
@@ -761,7 +761,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
             if (errc) {
                 std::cout << "ERROR: Forbidden character '" << errc << "'."
                           << std::endl;
-                return;
+                return 0;
             }
 
             void *data = (model.unsafe_get_mut_row(pos))[column_index];
@@ -769,7 +769,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
             if (TDB_IS(types[column_index], TT_CONST)) {
                 std::cout << "ERROR: Can not edit value with 'const' modifier."
                           << std::endl;
-                return;
+                return 0;
             }
 
             switch (TDB_TYPE(types[column_index])) {
@@ -779,7 +779,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
                     if (n == TDB_INVALID_I) {
                         std::cout << "ERROR: Value is not a number."
                                   << std::endl;
-                        return;
+                        return 0;
                     }
 
                     TDB_CAST(int, data) = number;
@@ -791,7 +791,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
                     if (n == TDB_INVALID_ULL) {
                         std::cout << "ERROR: Value is not a number."
                                   << std::endl;
-                        return;
+                        return 0;
                     }
 
                     TDB_CAST(size_t, data) = number;
@@ -811,7 +811,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
         case CLEAR: {
             std::cout << "Do you really want to do that?\n";
             if (!cli_y_or_n())
-                return;
+                return 0;
 
             model.clear();
             std::cout << "Database has been erased." << std::endl;
@@ -827,39 +827,41 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
             model.reread_file();
         } break;
     }
+
+    return 0;
 }
 
 #define LINE_BUF_SIZE 64
 
-void cli_loop(const char *filepath)
+int cli_loop(const std::string &filepath)
 {
-    int err = std::setvbuf(stdout, NULL, _IONBF, 1024);
+    int err = std::setvbuf(stdout, NULL, _IOLBF, 256);
 
     if (err) {
         std::cout << "Could not enable bufferin for output.\nPlease buy more "
                      "memory :c"
                   << std::endl;
-        exit(1);
+        return 1;
     }
 
-    InMemoryTable *model;
+    std::unique_ptr<InMemoryTable> model;
 
     try {
         std::cout << "Opening '" << filepath << "'..." << std::endl;
-        model = new InMemoryTable(filepath);
+        model = std::make_unique<InMemoryTable>(filepath);
     }
     catch (std::ios::failure &e) {
         // iostream error's .what() method returns weird string at the end
         std::cout << filepath << ": Could not open file: " << strerror(errno)
                   << std::endl;
-        std::exit(1);
+        return 1;
     }
     catch (ParsingError &e) {
         std::cout << filepath << ": " << e.what()
                   << "\n"
                      "Try '--help-format' to see help for database format."
                   << std::endl;
-        exit(1);
+        return 1;
     }
     catch (std::runtime_error &e) {
         TDB_DEBUGS(e.what(), "cli_loop");
@@ -867,7 +869,7 @@ void cli_loop(const char *filepath)
                   << "\n"
                      "Try '--help-format' to see help for database format."
                   << std::endl;
-        exit(1);
+        return 1;
     }
 
     std::string filename = cli_extract_filename(filepath);
@@ -884,11 +886,13 @@ void cli_loop(const char *filepath)
     std::string line;
     std::string prompt = filename + "# ";
 
+    int code = 0;
+    char lb[LINE_BUF_SIZE];
+
     while (true) {
-        char lb[LINE_BUF_SIZE];
 
         if (tl_readline(lb, LINE_BUF_SIZE, prompt.c_str()) != 0)
-            exit(0);
+            break;
 
         line = lb;
 
@@ -899,7 +903,8 @@ void cli_loop(const char *filepath)
         std::vector<std::string> args = cli_split_args(line);
 
         try {
-            cli_exec(*model, args);
+            if (cli_exec(*model, args))
+                break;
         }
         // Logic exceptions at execution should be recoverable errors.
         catch (std::logic_error &e) {
@@ -907,13 +912,21 @@ void cli_loop(const char *filepath)
         }
         catch (std::ios::failure &e) {
             std::cout << "IO error: " << strerror(errno) << std::endl;
-            tl_exit();
-            std::exit(1);
+            code = 1;
         }
         catch (std::runtime_error &e) {
             std::cout << "Runtime error: " << e.what() << std::endl;
             tl_exit();
-            std::exit(1);
+            code = 1;
         }
     }
+
+    tl_exit();
+
+    return code;
 }
+
+/*
+    TODO
+        - Enum to make int return values readable
+*/
