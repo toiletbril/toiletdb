@@ -16,7 +16,8 @@ static bool flag_version = false;
 #define TOILETDB_NAME "toiletdb"
 #define TOILETDB_GITHUB "<https://github.com/toiletbril>"
 
-[[noreturn]] void show_help()
+[[noreturn]]
+void show_help()
 {
     std::cout << "USAGE: " << TOILETDB_NAME << " [-options] <database file>\n"
               << "CLI for manipulating toiletdb files.\n"
@@ -29,7 +30,8 @@ static bool flag_version = false;
     exit(0);
 }
 
-[[noreturn]] void show_version()
+[[noreturn]]
+void show_version()
 {
     std::cout << "toiletdb " << TOILETDB_VERSION << "\n"
               << "(c) toiletbril " << TOILETDB_GITHUB
@@ -37,7 +39,8 @@ static bool flag_version = false;
     exit(0);
 }
 
-[[noreturn]] void show_help_format()
+[[noreturn]]
+void show_help_format()
 {
     std::cout << "Database files look like this:\n"
                  "```\n"
@@ -138,9 +141,14 @@ int main(int argc, char **argv)
         std::cout << "ERROR: Not enough arguments.\n"
                      "To get more help, try '--help'."
                   << std::endl;
-        std::exit(0);
+        exit(0);
     }
 
-    cli_loop(args[0]);
+    if (cli_loop(args[0])) {
+        std::cout << "Program exited with error."
+                  << std::endl;
+        exit(1);
+    }
+
     return 0;
 }
