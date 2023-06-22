@@ -99,6 +99,7 @@ static std::vector<std::string> cli_split_args(const std::string &s)
             temp += c;
         }
     }
+
     if (!temp.empty()) {
         result.push_back(temp);
     }
@@ -453,7 +454,7 @@ static CLI_COMMAND_KIND cli_get_command(std::string &s)
         return CLEAR;
     if (s == "commit" || s == "save")
         return COMMIT;
-    if (s == "revert" || s == "reverse")
+    if (s == "revert" || s == "reset")
         return REVERT;
 
     return UNKNOWN;
@@ -461,7 +462,12 @@ static CLI_COMMAND_KIND cli_get_command(std::string &s)
 
 static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
 {
-    CLI_COMMAND_KIND c = cli_get_command(args[0]);
+    CLI_COMMAND_KIND c;
+
+    if (args.size() > 0)
+        c = cli_get_command(args[0]);
+    else
+        return;
 
     switch (c) {
         case UNKNOWN: {
@@ -485,7 +491,7 @@ static void cli_exec(InMemoryTable &model, std::vector<std::string> &args)
                          "\tedit  \te\t\tEdit a row.\n"
                          "\tclear \t\t\tClear the database.\n"
                          "\tcommit\tsave\t\tSave changes to the file.\n"
-                         "\trevert\treverse\t\tRevert uncommited changes."
+                         "\trevert\treset\t\tRevert uncommited changes."
                       << std::endl;
         } break;
 
