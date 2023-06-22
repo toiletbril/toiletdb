@@ -27,7 +27,7 @@ class InMemoryTable
 {
 private:
     struct Private;
-    std::unique_ptr<Private> _private;
+    std::unique_ptr<Private> internal;
 
 public:
     /// @brief Opens up a file and loads it up into memory.

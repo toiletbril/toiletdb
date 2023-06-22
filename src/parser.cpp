@@ -90,7 +90,7 @@ void InMemoryFileParser::serialize(std::fstream &file,
     }
 }
 
-InMemoryFileParser::InMemoryFileParser(const std::string &filename) :
+InMemoryFileParser::InMemoryFileParser(const std::string filename) :
     filename(filename)
 {
     this->format_version = TOILETDB_PARSER_FORMAT_VERSION;

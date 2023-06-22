@@ -8,6 +8,11 @@ struct InMemoryTable::Private
     std::vector<std::shared_ptr<ColumnBase>> columns;
     std::unique_ptr<InMemoryFileParser> parser;
 
+    Private(std::string filename)
+    {
+        this->parser = std::make_unique<InMemoryFileParser>(filename);
+    }
+
     // Reads column marked as 'id',
     // updates index with a sorted list that maps position to ID.
     void update_index()
@@ -17,7 +22,7 @@ struct InMemoryTable::Private
                 ->get_data();
 
         std::vector<size_t> index;
-        index.resize(id_column.size());
+        index.reserve(this->columns.size());
 
         std::iota(index.begin(), index.end(), 0);
 
@@ -37,21 +42,19 @@ InMemoryTable::InMemoryTable(const std::string &filename)
 {
     TDB_DEBUGS(filename, "InMemoryTable filename");
 
-    this->_private = std::make_unique<Private>();
+    this->internal = std::make_unique<Private>(filename);
 
-    this->_private->parser = std::make_unique<InMemoryFileParser>(filename);
-
-    if (!this->_private->parser->exists()) {
+    if (!this->internal->parser->exists()) {
         std::string failstring = "In InMemoryTable constructor, ";
         failstring += strerror(errno);
 
         throw std::runtime_error(failstring);
     }
 
-    this->_private->columns = this->_private->parser->read_file();
+    this->internal->columns = this->internal->parser->read_file();
 
     // IDs from loaded file will be indexed here to be used for binary search.
-    this->_private->update_index();
+    this->internal->update_index();
 }
 
 InMemoryTable::~InMemoryTable()
@@ -59,42 +62,42 @@ InMemoryTable::~InMemoryTable()
 
 void InMemoryTable::reread_file()
 {
-    this->_private->columns = this->_private->parser->read_file();
+    this->internal->columns = this->internal->parser->read_file();
 }
 
 void InMemoryTable::write_file() const
 {
-    this->_private->parser->write_file(this->_private->columns);
+    this->internal->parser->write_file(this->internal->columns);
 }
 
 size_t InMemoryTable::search(const size_t &id) const
 {
     // Search methods return index of the element in the vector.
     // If element is not found, return TDB_NOT_FOUND.
-    // Binary search by id.
 
     // NOTE: Long instead of size_t.
+    // Binary search by id.
     long L = 0;
-    long R = this->_private->index.size();
+    long R = this->internal->index.size();
     long m;
 
     std::vector<size_t> id_column =
-        std::static_pointer_cast<ColumnUint>(this->_private->columns[this->_private->parser->id_column_index()])
+        std::static_pointer_cast<ColumnUint>(this->internal->columns[this->internal->parser->id_column_index()])
             ->get_data();
 
     while (L <= R) {
         m = (L + R) / 2;
 
-        if (id_column[this->_private->index[m]] < id) {
+        if (id_column[this->internal->index[m]] < id) {
             L = m + 1;
         }
-        else if (id_column[this->_private->index[m]] > id) {
+        else if (id_column[this->internal->index[m]] > id) {
             // If this would become unsigned,
             // here needs to be a test that breaks loop when R wraps.
             R = m - 1;
         }
         else {
-            return this->_private->index[m];
+            return this->internal->index[m];
         }
     }
 
@@ -117,22 +120,22 @@ std::vector<size_t> InMemoryTable::search(const std::string &name,
         throw std::logic_error(failstring);
     }
 
-    int type = this->_private->columns[column_index]->get_type();
+    int type = this->internal->columns[column_index]->get_type();
 
     for (size_t i = 0; i < this->get_row_count(); ++i) {
         std::string value;
         switch (TDB_TYPE(type)) {
             case TT_INT: {
-                value = std::static_pointer_cast<ColumnInt>(this->_private->columns[column_index])
+                value = std::static_pointer_cast<ColumnInt>(this->internal->columns[column_index])
                             ->get(i);
             } break;
             case TT_UINT: {
-                value = std::static_pointer_cast<ColumnUint>(this->_private->columns[column_index])
+                value = std::static_pointer_cast<ColumnUint>(this->internal->columns[column_index])
                             ->get(i);
                 break;
             }
             case TT_STR: {
-                value = std::static_pointer_cast<ColumnStr>(this->_private->columns[column_index])
+                value = std::static_pointer_cast<ColumnStr>(this->internal->columns[column_index])
                             ->get(i);
                 break;
             }
@@ -157,7 +160,7 @@ const std::vector<std::string> InMemoryTable::get_row(const size_t &pos) const
             "is larger than data size");
     }
 
-    for (std::shared_ptr<ColumnBase> &c : this->_private->columns) {
+    for (std::shared_ptr<ColumnBase> &c : this->internal->columns) {
         switch (TDB_TYPE(c->get_type())) {
             case TT_INT: {
                 result.push_back(std::to_string((static_cast<ColumnInt *>(c.get()))->get(pos)));
@@ -189,7 +192,7 @@ std::vector<void *> InMemoryTable::unsafe_get_mut_row(const size_t &pos)
             "is larger than data size");
     }
 
-    for (std::shared_ptr<ColumnBase> &c : this->_private->columns) {
+    for (std::shared_ptr<ColumnBase> &c : this->internal->columns) {
         switch (TDB_TYPE(c->get_type())) {
             case TT_INT: {
                 result.push_back(static_cast<void *>(&(static_cast<ColumnInt *>(c.get()))->get(pos)));
@@ -271,21 +274,21 @@ int InMemoryTable::add_row(std::vector<std::string> &args)
         // NOTE: ID handling depends on get_next_id().
         if (TDB_IS(types[i], TT_ID)) {
             size_t new_id = this->get_next_id();
-            std::static_pointer_cast<ColumnUint>(this->_private->columns[i])->add(new_id);
+            std::static_pointer_cast<ColumnUint>(this->internal->columns[i])->add(new_id);
         }
 
         else if (TDB_IS(types[i], TT_INT)) {
             int value = parse_int(*it++);
-            std::static_pointer_cast<ColumnInt>(this->_private->columns[i])->add(value);
+            std::static_pointer_cast<ColumnInt>(this->internal->columns[i])->add(value);
         }
 
         else if (TDB_IS(types[i], TT_UINT)) {
             size_t value = parse_long_long(*it++);
-            std::static_pointer_cast<ColumnUint>(this->_private->columns[i])->add(value);
+            std::static_pointer_cast<ColumnUint>(this->internal->columns[i])->add(value);
         }
 
         else if (TDB_IS(types[i], TT_STR)) {
-            std::static_pointer_cast<ColumnStr>(this->_private->columns[i])->add(*it++);
+            std::static_pointer_cast<ColumnStr>(this->internal->columns[i])->add(*it++);
         }
     }
 
@@ -294,7 +297,7 @@ int InMemoryTable::add_row(std::vector<std::string> &args)
 
 bool InMemoryTable::erase(const size_t &pos)
 {
-    size_t len = this->_private->columns.size();
+    size_t len = this->internal->columns.size();
 
     if (pos >= this->get_row_count()) {
         return false;
@@ -302,7 +305,7 @@ bool InMemoryTable::erase(const size_t &pos)
 
     // Erase data from all columns in one row.
     for (size_t i = 0; i < len; ++i) {
-        this->_private->columns[i]->erase(pos);
+        this->internal->columns[i]->erase(pos);
     }
 
     return true;
@@ -322,19 +325,19 @@ bool InMemoryTable::erase_id(const size_t &id)
 
 void InMemoryTable::clear()
 {
-    for (std::shared_ptr<ColumnBase> &c : this->_private->columns) {
+    for (std::shared_ptr<ColumnBase> &c : this->internal->columns) {
         c->clear();
     }
 }
 
 size_t InMemoryTable::get_column_count() const
 {
-    return this->_private->columns.size();
+    return this->internal->columns.size();
 }
 
 const std::vector<std::string> &InMemoryTable::get_column_names() const
 {
-    return this->_private->parser->names();
+    return this->internal->parser->names();
 }
 
 const std::string &InMemoryTable::get_column_name(const size_t &pos) const
@@ -345,7 +348,7 @@ const std::string &InMemoryTable::get_column_name(const size_t &pos) const
             "is larger than column count");
     }
 
-    return this->_private->parser->names()[pos];
+    return this->internal->parser->names()[pos];
 }
 
 size_t InMemoryTable::search_column_index(const std::string &name) const
@@ -355,7 +358,7 @@ size_t InMemoryTable::search_column_index(const std::string &name) const
     size_t column_index = TDB_INVALID_ULL;
     size_t i            = 0;
 
-    for (const std::shared_ptr<ColumnBase> &c : this->_private->columns) {
+    for (const std::shared_ptr<ColumnBase> &c : this->internal->columns) {
         if (c->get_name() == name) {
             column_index = i;
             break;
@@ -372,7 +375,7 @@ size_t InMemoryTable::search_column_index(const std::string &name) const
 
 const std::vector<int> &InMemoryTable::get_types() const
 {
-    return this->_private->parser->types();
+    return this->internal->parser->types();
 }
 
 const int &InMemoryTable::get_column_type(const size_t &pos) const
@@ -383,17 +386,17 @@ const int &InMemoryTable::get_column_type(const size_t &pos) const
             "is larger than column count");
     }
 
-    return this->_private->parser->types()[pos];
+    return this->internal->parser->types()[pos];
 }
 
 size_t InMemoryTable::get_row_count() const
 {
-    if (!this->_private->columns[0]) {
+    if (!this->internal->columns[0]) {
         throw std::logic_error(
             "In ToiletDB, In InMemoryTable.size(), there is no columns");
     }
 
-    return this->_private->columns[0]->size();
+    return this->internal->columns[0]->size();
 }
 
 size_t InMemoryTable::get_next_id() const

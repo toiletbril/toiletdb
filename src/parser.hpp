@@ -30,7 +30,7 @@ private:
     void serialize(std::fstream &file, const std::vector<std::shared_ptr<ColumnBase>> &columns);
 
 public:
-    InMemoryFileParser(const std::string &filename);
+    InMemoryFileParser(const std::string filename);
     ~InMemoryFileParser();
     const size_t &get_version() const;
     const size_t &id_column_index() const;
