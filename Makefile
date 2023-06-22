@@ -9,7 +9,7 @@ ifeq ($(OS),Windows_NT)
 endif
 
 CXXFLAGS=-Wall -Wextra -pedantic -std=c++17 -fno-rtti -Wno-deprecated -Wno-gnu
-CCFLAGS=-Wall -Wextra -pedantic -std=c11 -Wno-deprecated -Wno-gnu
+CCFLAGS=-Wall -Wextra -std=c11 -Wno-deprecated -Wno-gnu
 
 EXE:=toiletdb
 LIB:=toiletdb.lib
