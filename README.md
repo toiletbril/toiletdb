@@ -6,6 +6,7 @@ In-memory database with an ability to serialize into readable files.
 
 I got this idea from my friends' course project.
 The actual task was too easy, so I decided to implement a whole database :3c.
+This is just an experiment to extend my knowledge, and probably won't be finished, but who knows.
 
 **This contains [toiletline](https://github.com/toiletbril/toiletline) submodule! Clone recursively with:**
 ```
@@ -52,21 +53,16 @@ Modifiers:
 
 ## Building from source
 
-#### Windows
+### Windows
 
-Static library and CLI (launch this from MSVC-enabled console):
-```console
-> ./build_msvc.bat
-```
-
-Alternatively, you can use `make` targets from below with:
+You can use `make` targets from below with:
 
 - `g++`/`clang++` (CXX variable in [`Makefile`](./Makefile))
 - `make`, `ar` (You can get those with MinGW32)
     - `mingw32-make.exe`
-    - `x86_64-w64-mingw32-ar.exe`
+    - `x86_64-w64-mingw32-ar.exe`/`llvm-ar`
 
-#### POSIX
+### POSIX
 
 Static library:
 
@@ -74,7 +70,7 @@ Static library:
 $ make release
 ```
 
-Copy include header from [`include/toiletdb.hpp`](include/toiletdb.hpp), static library from `build/toiletdb.lib` and do whatever.
+Copy the header from [`include/toiletdb.hpp`](include/toiletdb.hpp), the library from `build/toiletdb.lib` and do whatever.
 
 CLI:
 
@@ -85,6 +81,8 @@ $ make cli
 Look for binaries in `build/`.
 
 ## CLI
+
+Made using [toiletline](https://github.com/toiletbril/toiletline) backend.
 
 ### Usage
 
