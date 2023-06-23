@@ -42,7 +42,7 @@ release: CXXFLAGS += -DNDEBUG
 release: $(OBJS_OUT) bundle
 
 toiletline:
-	$(CC) cli/toiletline/toiletline.c -DTOILETLINE_IMPL $(CCFLAGS) -O2 -c -o $(OBJDIR)/toiletline.o
+	$(CC) -o $(OBJDIR)/toiletline.o cli/toiletline/toiletline.c $(CCFLAGS) -O2 -c -DTOILETLINE_IMPLEMENTATION
 
 bundle: $(OBJS_OUT)
 	ar -rcs $(BINDIR)/$(LIB) $(OBJS_OUT)
