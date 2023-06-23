@@ -10,7 +10,6 @@
 #include <vector>
 
 #include "toiletdb.hpp"
-
 #include "toiletline/toiletline.c"
 
 int cli_loop(const std::string &filepath);
