@@ -1,10 +1,8 @@
 # TODO:
 - Dynamic ID uniqueness checking.
-- Advanced CLI interface using raw mode.
-- Get clues and fix Valgrind errors.
-- Fix segfault on ID search.
 - Class for table creation.
-- Non in-memory version. (this would become actually useful and it will be cool if I build something else using this library)
 - Table manager for CLI.
 - Documentation.
+- Valgrind.
 - Tests.
+- Non in-memory version. (This would actually become useful)
