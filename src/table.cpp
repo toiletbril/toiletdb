@@ -22,7 +22,7 @@ struct InMemoryTable::Private
                 ->get_data();
 
         std::vector<size_t> index;
-        index.reserve(this->columns.size());
+        index.resize(id_column.size());
 
         std::iota(index.begin(), index.end(), 0);
 
