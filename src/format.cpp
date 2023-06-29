@@ -60,7 +60,7 @@ TableInfo FormatOne::read_types(std::fstream &file)
     std::vector<std::string> names;
 
     int field_n = 0;
-    size_t pos  = 1;
+    size_t pos = 1;
 
     size_t id_pos = 0;
 
@@ -140,8 +140,8 @@ TableInfo FormatOne::read_types(std::fstream &file)
         // Last word will be the name
         if (buf.empty()) {
             std::string failstring =
-                "Format error: No column name at "
-                "2:" +
+                "Format error: No column name"
+                "at 2:" +
                 std::to_string(pos);
 
             throw ParsingError(failstring);
@@ -150,9 +150,17 @@ TableInfo FormatOne::read_types(std::fstream &file)
         // Allow T_ID only for T_B_INT
         if (TDB_IS(type, TT_ID) && !TDB_IS(type, TT_UINT)) {
             std::string failstring =
-                "Format error: ID column is not of type 'uint' at "
-                "2:" +
+                "Format error: ID column is not of type 'uint'"
+                "at 2:" +
                 std::to_string(pos);
+
+            throw ParsingError(failstring);
+        }
+
+        if (!set_id) {
+            std::string failstring =
+                "Format error: Database requires "
+                "a column with 'id' modifier.";
 
             throw ParsingError(failstring);
         }
@@ -168,7 +176,7 @@ TableInfo FormatOne::read_types(std::fstream &file)
 
     TDB_DEBUGV(fields.types, "InMemoryFileParser.update_types types");
 
-    fields.size  = field_n;
+    fields.size = field_n;
     fields.names = names;
 
     return fields;
@@ -184,10 +192,11 @@ std::vector<std::shared_ptr<ColumnBase>> FormatOne::deserealize(std::fstream &fi
     parsed_columns.reserve(columns.size);
 
     if (names.size() != columns.size) {
-        std::string failstring = "In FormatOne.deserialize(), names.size() (" +
-                                 std::to_string(names.size()) +
-                                 ") is not equal to columns.size (" +
-                                 std::to_string(columns.size) + ")";
+        std::string failstring =
+            "In FormatOne.deserialize(), names.size() (" +
+            std::to_string(names.size()) +
+            ") is not equal to columns.size (" +
+            std::to_string(columns.size) + ")";
 
         throw ParsingError(failstring);
     }
@@ -214,10 +223,10 @@ std::vector<std::shared_ptr<ColumnBase>> FormatOne::deserealize(std::fstream &fi
     // Data starts from third line.
     // First line is magic, second is types.
     size_t line = 3;
-    size_t pos  = 1;
+    size_t pos = 1;
 
     bool debug_crlf = false;
-    int c           = file.get();
+    int c = file.get();
 
     while (c != EOF) {
         if (c != '|') {
