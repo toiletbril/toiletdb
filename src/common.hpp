@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#define TOILETDB_VERSION "1.3.0"
+#define TOILETDB_VERSION "1.3.1"
 
 #define TDB_NOT_FOUND (size_t)(-1)
 
