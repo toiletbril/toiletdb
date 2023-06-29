@@ -6,4 +6,5 @@
 .vscode/
 build/
 obj/
+test/
 scripts/__pycache__/
