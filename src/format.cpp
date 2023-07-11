@@ -75,7 +75,7 @@ TableInfo FormatOne::read_types(std::fstream &file)
 
     bool set_id = false;
 
-    while (c != '\n') {
+    while (c != '\n' && c != EOF) {
         if (c == '\r') {
             c = file.get();
             continue;
@@ -246,7 +246,7 @@ std::vector<std::shared_ptr<ColumnBase>> FormatOne::deserealize(std::fstream &fi
         fields.reserve(columns.size);
         size_t field = 0;
 
-        while (c != '\n') {
+        while (c != '\n' && c != EOF) {
             if (c == '\r') {
                 if (!debug_crlf) {
                     TDB_DEBUGS("CRLF detected",
