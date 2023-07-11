@@ -329,13 +329,15 @@ static void cli_put_row(InMemoryTable &model, const size_t &pos)
                     std::string s = TDB_CAST(std::string, row[i]);
 
                     cols.push_back(s);
-                    lengths.push_back(s.size());
+                    lengths.push_back(tl_utf8_strlen(s.c_str()));
                 } break;
 
                 default:
                     std::logic_error("Unreachable");
             }
         }
+
+        TDB_DEBUGV(lengths, "lengths");
 
         while (should_wrap) {
             if (line > 1) {
@@ -926,7 +928,5 @@ int cli_loop(const std::string &filepath)
     return code;
 }
 
-/*
-    TODO
-        - Enum to make int return values readable
-*/
+//  TODO
+//      - Enum to make int return values readable
