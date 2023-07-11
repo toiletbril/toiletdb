@@ -72,6 +72,10 @@ void InMemoryTable::write_file() const
 
 size_t InMemoryTable::search(const size_t &id) const
 {
+    if (this->get_row_count() == 0) {
+        return TDB_NOT_FOUND;
+    }
+
     // Search methods return index of the element in the vector.
     // If element is not found, return TDB_NOT_FOUND.
 
