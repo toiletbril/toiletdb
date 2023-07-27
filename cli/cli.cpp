@@ -115,7 +115,7 @@ static bool cli_y_or_n()
     while (true) {
         char buf[2] = {0};
 
-        tl_readline(buf, 2, "    Y or N >> ");
+        tl_getc(buf, 2, "    Y or N? ");
 
         char answer = std::tolower(buf[0]);
 
