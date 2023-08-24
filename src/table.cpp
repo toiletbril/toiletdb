@@ -63,6 +63,7 @@ InMemoryTable::~InMemoryTable()
 void InMemoryTable::reread_file()
 {
     this->internal->columns = this->internal->parser->read_file();
+    this->internal->update_index();
 }
 
 void InMemoryTable::write_file() const
@@ -296,6 +297,9 @@ int InMemoryTable::add_row(std::vector<std::string> &args)
         }
     }
 
+    // TODO
+    this->internal->update_index();
+
     return 0;
 }
 
@@ -311,6 +315,9 @@ bool InMemoryTable::erase(const size_t &pos)
     for (size_t i = 0; i < len; ++i) {
         this->internal->columns[i]->erase(pos);
     }
+
+    // TODO
+    this->internal->update_index();
 
     return true;
 }
@@ -332,6 +339,8 @@ void InMemoryTable::clear()
     for (std::shared_ptr<ColumnBase> &c : this->internal->columns) {
         c->clear();
     }
+
+    this->internal->update_index();
 }
 
 size_t InMemoryTable::get_column_count() const
