@@ -31,7 +31,7 @@ OBJS_OUT=$(addprefix $(OBJDIR)/, $(OBJS))
 cli: dirs release toiletline bundle
 	$(CXX) -o $(BINDIR)/$(EXE) $(CXXFLAGS) -O2 -DNDEBUG -Iinclude cli/main.cpp cli/cli.cpp $(OBJDIR)/toiletline.o $(BINDIR)/$(LIB)
 
-cli-debug: dirs debug toiletline bundle
+cli-debug: dirs debug toiletline-debug bundle
 	$(CXX) -o $(BINDIR)/$(EXE) $(CXXFLAGS) -DDEBUG -g -Iinclude cli/main.cpp cli/cli.cpp $(OBJDIR)/toiletline.o $(BINDIR)/$(LIB)
 
 debug: CXXFLAGS += -DDEBUG
@@ -40,6 +40,9 @@ debug: dirs $(OBJS_OUT) bundle
 
 release: CXXFLAGS += -DNDEBUG
 release: dirs $(OBJS_OUT) bundle
+
+toiletline-debug:
+	$(CC) $(CCFLAGS) -DITL_DEBUG -O2 -c -o $(OBJDIR)/toiletline.o cli/toiletline.c
 
 toiletline:
 	$(CC) $(CCFLAGS) -O2 -c -o $(OBJDIR)/toiletline.o cli/toiletline.c
