@@ -36,7 +36,7 @@
 #include <string>
 #include <vector>
 
-#define TOILETDB_VERSION "1.3.1"
+#define TOILETDB_VERSION "1.3.2"
 #define TOILETDB_PARSER_FORMAT_VERSION 1
 
 #define TDB_INVALID_ULL (size_t)(-1)
