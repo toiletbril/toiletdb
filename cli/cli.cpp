@@ -892,9 +892,16 @@ int cli_loop(const std::string &filepath)
     char lb[LINE_BUF_SIZE];
 
     while (true) {
+        int tl_code = tl_readline(lb, LINE_BUF_SIZE, prompt.c_str());
 
-        if (tl_readline(lb, LINE_BUF_SIZE, prompt.c_str()) != 0)
+        if (tl_code == TL_PRESSED_CTRLC)
             break;
+
+        if (tl_code > 0) {
+            std::cout << "Toiletline encountered an error. (" << tl_code << ")" << std::endl;
+            code = 1;
+            break;
+        }
 
         line = lb;
 
@@ -927,6 +934,3 @@ int cli_loop(const std::string &filepath)
 
     return code;
 }
-
-//  TODO
-//      - Enum to make int return values readable

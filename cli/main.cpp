@@ -61,8 +61,7 @@ void show_help_format()
                  "- `id`    Marks column to be used for indexing "
                  "(available only for `const uint`)\n"
                  "\n"
-                 "supported format versions: <="
-              << TOILETDB_PARSER_FORMAT_VERSION << "\n"
+                 "supported format versions: <= " << TOILETDB_PARSER_FORMAT_VERSION << "\n"
               << TOILETDB_VERSION << " (c) toiletbril " << TOILETDB_GITHUB
               << std::endl;
     exit(0);
@@ -138,13 +137,14 @@ int main(int argc, char **argv)
     TDB_DEBUGV(args, "args");
 
     if (args.size() < 1) {
-        std::cout << "ERROR: Not enough arguments.\n"
-                     "To get more help, try '--help'."
+        std::cout << "ERROR: Not enough arguments. To get more help, try '--help'."
                   << std::endl;
         exit(0);
     }
 
-    if (cli_loop(args[0])) {
+    int err = cli_loop(args[0]);
+
+    if (err) {
         std::cout << "Program exited with error."
                   << std::endl;
         exit(1);
