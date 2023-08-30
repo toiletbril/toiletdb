@@ -524,7 +524,8 @@ static int cli_exec(InMemoryTable &model, std::vector<std::string> &args)
                 std::cout << "Database has over 1 000 entries (" << len
                           << ").\n"
                              "This can take a long time.\n"
-                             "Do you really want to list them all?\n";
+                             "Do you really want to list them all?"
+                          << std::endl;
 
                 if (!cli_y_or_n()) {
                     return 0;
@@ -811,7 +812,7 @@ static int cli_exec(InMemoryTable &model, std::vector<std::string> &args)
         break;
 
         case CLEAR: {
-            std::cout << "Do you really want to do that?\n";
+            std::cout << "Do you really want to do that?" << std::endl;
             if (!cli_y_or_n())
                 return 0;
 
@@ -833,7 +834,7 @@ static int cli_exec(InMemoryTable &model, std::vector<std::string> &args)
     return 0;
 }
 
-#define LINE_BUF_SIZE 64
+#define LINE_BUF_SIZE 256
 
 int cli_loop(const std::string &filepath)
 {
@@ -892,14 +893,18 @@ int cli_loop(const std::string &filepath)
     char lb[LINE_BUF_SIZE];
 
     while (true) {
-        int tl_code = tl_readline(lb, LINE_BUF_SIZE, prompt.c_str());
+        std::fflush(stdout);
 
-        if (tl_code == TL_PRESSED_CTRLC)
+        int tl_code = tl_readline(lb, LINE_BUF_SIZE, prompt.c_str());
+        std::cout << std::endl;
+
+        if (tl_code == TL_PRESSED_INTERRUPT) {
+            std::cout << "Interrupted." << std::endl;
             break;
+        }
 
         if (tl_code > 0) {
-            std::cout << "Toiletline encountered an error. (" << tl_code << ")" << std::endl;
-            code = 1;
+            code = tl_code;
             break;
         }
 

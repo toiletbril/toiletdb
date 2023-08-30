@@ -1,4 +1,6 @@
+#include <cstdio>
 #include <fstream>
+#include <string>
 #include <vector>
 
 #include "debug.hpp"

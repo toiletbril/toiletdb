@@ -145,8 +145,7 @@ int main(int argc, char **argv)
     int err = cli_loop(args[0]);
 
     if (err) {
-        std::cout << "Program exited with error."
-                  << std::endl;
+        std::cout << "Program exited with error. (" << err << ")" << std::endl;
         exit(1);
     }
 
