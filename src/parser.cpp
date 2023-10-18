@@ -191,6 +191,10 @@ std::vector<std::shared_ptr<ColumnBase>> InMemoryFileParser::read_file()
 
 void InMemoryFileParser::write_file(const std::string filepath, const std::vector<std::shared_ptr<ColumnBase>> &columns)
 {
+    if (this->exists()) {
+        throw std::logic_error("In ToiletDB, InMemoryFileParser.write_file(), refusing to overwrite existing file");
+    }
+
     std::fstream file =
         this->open(filepath, std::ios::out | std::ios::trunc | std::ios::binary);
 

@@ -93,20 +93,20 @@ $ toiletdb <database file>
 ```console
 test# help
 Available commands:
-  help, ?             See this message.
-  version, ver        Display version.
-  exit, quit, q       Save and quit. Append '!' to the end to skip saving.
-  search, s           Search the database.
-  list, ls            Show all rows.
-  types, lst          Show only a table header.
-  size                See total amount of rows in database.
-  add                 Add a row to database.
-  remove, rm          Remove a row from database.
-  edit, e             Edit a row.
-  clear               Clear the database.
-  commitas, saveas    Save changes to the file specified.
-  commit, save        Save changes.
-  revert, reset       Revert uncommited changes.
+    help, ?             See this message.
+    version, ver        Display version.
+    exit, quit, q       Save and quit. Append '!' to the end to skip saving.
+    search, s           Search the database.
+    list, ls            Show all rows.
+    types, lst          Show only a table header.
+    size                See total amount of rows in database.
+    add                 Add a row to database.
+    remove, rm          Remove a row from database.
+    edit, e             Edit a row.
+    clear               Clear the database.
+    commitas, saveas    Save changes to the file specified.
+    commit, save        Save changes.
+    revert, reset       Revert uncommited changes.
 ```
 
 For testing purposes, you can generate mock student database file with:

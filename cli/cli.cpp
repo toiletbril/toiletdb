@@ -484,20 +484,20 @@ static int cli_exec(InMemoryTable &model, std::vector<std::string> &args)
 
         case HELP: {
             std::cout << "Available commands:\n"
-                         "  help, ?             See this message.\n"
-                         "  version, ver        Display version.\n"
-                         "  exit, quit, q       Save and quit. Append '!' to the end to skip saving.\n"
-                         "  search, s           Search the database.\n"
-                         "  list, ls            Show all rows.\n"
-                         "  types, lst          Show only a table header.\n"
-                         "  size                See total amount of rows in database.\n"
-                         "  add                 Add a row to database.\n"
-                         "  remove, rm          Remove a row from database.\n"
-                         "  edit, e             Edit a row.\n"
-                         "  clear               Clear the database.\n"
-                         "  commitas, saveas    Save changes to the file specified.\n"
-                         "  commit, save        Save changes.\n"
-                         "  revert, reset       Revert uncommited changes."
+                         "    help, ?             See this message.\n"
+                         "    version, ver        Display version.\n"
+                         "    exit, quit, q       Save and quit. Append '!' to the end to skip saving.\n"
+                         "    search, s           Search the database.\n"
+                         "    list, ls            Show all rows.\n"
+                         "    types, lst          Show only a table header.\n"
+                         "    size                See total amount of rows in database.\n"
+                         "    add                 Add a row to database.\n"
+                         "    remove, rm          Remove a row from database.\n"
+                         "    edit, e             Edit a row.\n"
+                         "    clear               Clear the database.\n"
+                         "    commitas, saveas    Save changes to the file specified.\n"
+                         "    commit, save        Save changes.\n"
+                         "    revert, reset       Revert uncommited changes."
                       << std::endl;
         } break;
 
@@ -828,15 +828,20 @@ static int cli_exec(InMemoryTable &model, std::vector<std::string> &args)
         } break;
 
         case COMMITAS: {
-             if (args.size() != 2) {
+            if (args.size() != 2) {
                 std::cout << "ERROR: Invalid number of arguments.\n"
-                             "Usage: commitas <file path>\n"
+                             "Usage: commitas <file path>"
                           << std::endl;
                 return 0;
             }
 
             std::cout << "Saving..." << std::endl;
-            model.write_file(args[1]);
+            try {
+                model.write_file(args[1]);
+            }
+            catch (std::logic_error &err) {
+                std::cout << "ERROR: File already exists." << std::endl;
+            }
         } break;
 
         case REVERT: {
