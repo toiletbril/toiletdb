@@ -71,6 +71,11 @@ void InMemoryTable::write_file() const
     this->internal->parser->write_file(this->internal->columns);
 }
 
+void InMemoryTable::write_file(const std::string &filepath) const
+{
+    this->internal->parser->write_file(filepath, this->internal->columns);
+}
+
 size_t InMemoryTable::search(const size_t &id) const
 {
     if (this->get_row_count() == 0) {

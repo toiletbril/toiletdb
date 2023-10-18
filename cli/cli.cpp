@@ -23,6 +23,7 @@ enum CLI_COMMAND_KIND
     REMOVE,
     EDIT,
     CLEAR,
+    COMMITAS,
     COMMIT,
     REVERT,
 };
@@ -454,6 +455,8 @@ static CLI_COMMAND_KIND cli_get_command(std::string &s)
         return EDIT;
     if (s == "clear")
         return CLEAR;
+    if (s == "commitas" || s == "saveas")
+        return COMMITAS;
     if (s == "commit" || s == "save")
         return COMMIT;
     if (s == "revert" || s == "reset")
@@ -473,34 +476,35 @@ static int cli_exec(InMemoryTable &model, std::vector<std::string> &args)
 
     switch (c) {
         case UNKNOWN: {
-            std::cout << "ERROR: Unknown command '" << args[0]
-                      << "'.\nTry 'help' to see available commands."
+            std::cout << "ERROR: Unknown command "
+                      << "'" << args[0] << "'.\n"
+                      << "Try 'help' to see available commands."
                       << std::endl;
         } break;
 
         case HELP: {
             std::cout << "Available commands:\n"
-                         "\thelp  \t?\t\tSee this message.\n"
-                         "\tversion\tv, ver\t\tDisplay version.\n"
-                         "\texit  \tq, quit\t\tSave and quit. "
-                         "Append '!' to the end to skip saving.\n"
-                         "\tsearch\ts\t\tSearch the database.\n"
-                         "\tlist  \tls\t\tShow all rows.\n"
-                         "\ttypes \tlst\t\tShow only a table header.\n"
-                         "\tsize  \t\t\tSee total amount of rows in database.\n"
-                         "\tadd   \t\t\tAdd a row to database.\n"
-                         "\tremove\trm\t\tRemove a row from database.\n"
-                         "\tedit  \te\t\tEdit a row.\n"
-                         "\tclear \t\t\tClear the database.\n"
-                         "\tcommit\tsave\t\tSave changes to the file.\n"
-                         "\trevert\treset\t\tRevert uncommited changes."
+                         "  help, ?             See this message.\n"
+                         "  version, ver        Display version.\n"
+                         "  exit, quit, q       Save and quit. Append '!' to the end to skip saving.\n"
+                         "  search, s           Search the database.\n"
+                         "  list, ls            Show all rows.\n"
+                         "  types, lst          Show only a table header.\n"
+                         "  size                See total amount of rows in database.\n"
+                         "  add                 Add a row to database.\n"
+                         "  remove, rm          Remove a row from database.\n"
+                         "  edit, e             Edit a row.\n"
+                         "  clear               Clear the database.\n"
+                         "  commitas, saveas    Save changes to the file specified.\n"
+                         "  commit, save        Save changes.\n"
+                         "  revert, reset       Revert uncommited changes."
                       << std::endl;
         } break;
 
         case VERSION: {
-            std::cout << "toiletdb " << TOILETDB_VERSION
-                      << "\nsupported format versions: <= "
-                      << TOILETDB_PARSER_FORMAT_VERSION << std::endl;
+            std::cout << "toiletdb " << TOILETDB_VERSION << "\n"
+                      << "supported format versions: <= " << TOILETDB_PARSER_FORMAT_VERSION
+                      << std::endl;
         } break;
 
         case EXIT: {
@@ -521,8 +525,8 @@ static int cli_exec(InMemoryTable &model, std::vector<std::string> &args)
             size_t len = model.get_row_count();
 
             if (len > 1000) {
-                std::cout << "Database has over 1 000 entries (" << len
-                          << ").\n"
+                std::cout << "Database has over 1 000 entries "
+                             "(" << len << ").\n"
                              "This can take a long time.\n"
                              "Do you really want to list them all?"
                           << std::endl;
@@ -635,10 +639,8 @@ static int cli_exec(InMemoryTable &model, std::vector<std::string> &args)
 
                 std::cout
                     << "ERROR: Invalid number of arguments. "
-                    << "(" << len - 1 << " needed, actual " << args.size() - 1
-                    << ")\n"
-                    << "Usage: add_row " << fields
-                    << "\n"
+                    << "(" << len - 1 << " needed, actual " << args.size() - 1 << ")\n"
+                    << "Usage: add_row " << fields << "\n"
                        "You can put quotes around fields.\n"
                        "EXAMPLE: Vasiliy \"Ivanov Petrov\" \"Very "
                        "Cool\" 69420\n"
@@ -825,6 +827,18 @@ static int cli_exec(InMemoryTable &model, std::vector<std::string> &args)
             model.write_file();
         } break;
 
+        case COMMITAS: {
+             if (args.size() != 2) {
+                std::cout << "ERROR: Invalid number of arguments.\n"
+                             "Usage: commitas <file path>\n"
+                          << std::endl;
+                return 0;
+            }
+
+            std::cout << "Saving..." << std::endl;
+            model.write_file(args[1]);
+        } break;
+
         case REVERT: {
             std::cout << "Reverting changes..." << std::endl;
             model.reread_file();
@@ -841,8 +855,8 @@ int cli_loop(const std::string &filepath)
     int err = std::setvbuf(stdout, NULL, _IOLBF, 256);
 
     if (err) {
-        std::cout << "Could not enable bufferin for output.\nPlease buy more "
-                     "memory :c"
+        std::cout << "Could not enable bufferin for output.\n"
+                     "Please buy more memory :c"
                   << std::endl;
         return 1;
     }
@@ -860,16 +874,14 @@ int cli_loop(const std::string &filepath)
         return 1;
     }
     catch (ParsingError &e) {
-        std::cout << filepath << ": " << e.what()
-                  << "\n"
+        std::cout << filepath << ": " << e.what() << "\n"
                      "Try '--help-format' to see help for database format."
                   << std::endl;
         return 1;
     }
     catch (std::runtime_error &e) {
         TDB_DEBUGS(e.what(), "cli_loop");
-        std::cout << filepath << ": " << strerror(errno)
-                  << "\n"
+        std::cout << filepath << ": " << strerror(errno) << "\n"
                      "Try '--help-format' to see help for database format."
                   << std::endl;
         return 1;
@@ -879,8 +891,7 @@ int cli_loop(const std::string &filepath)
 
     std::cout << "\nWelcome to toiletdb " << TOILETDB_VERSION << '.'
               << std::endl;
-    std::cout << "Loaded " << model->get_row_count()
-              << " rows.\n"
+    std::cout << "Loaded " << model->get_row_count() << " rows.\n"
                  "Try 'help' to see available commands."
               << std::endl;
 

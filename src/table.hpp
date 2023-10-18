@@ -44,6 +44,8 @@ public:
     /// @brief Writes data stored in memory back to the file.
     /// @throws std::runtime_error when table file was deleted or moved.
     void write_file() const;
+    /// @brief Writes data stored in memory back to the file specified.
+    void write_file(const std::string &filepath) const;
     /// @brief Search in-memory vector by ID.
     /// O(log n)
     /// @return TDB_NOT_FOUND if element is not found.

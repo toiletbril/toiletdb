@@ -23,6 +23,7 @@ private:
     size_t format_version;
     TableInfo columns;
 
+    std::fstream open(const std::string &filepath, const std::ios_base::openmode mode);
     std::fstream open(const std::ios_base::openmode mode);
     void update_version(std::fstream &file);
     void read_types(std::fstream &file);
@@ -34,9 +35,11 @@ public:
     ~InMemoryFileParser();
     const size_t &get_version() const;
     const size_t &id_column_index() const;
+    bool exists(const std::string &filepath) const;
     bool exists() const;
     bool exists_or_create() const;
     std::vector<std::shared_ptr<ColumnBase>> read_file();
+    void write_file(const std::string filepath, const std::vector<std::shared_ptr<ColumnBase>> &columns);
     void write_file(const std::vector<std::shared_ptr<ColumnBase>> &columns);
     const std::vector<int> &types() const;
     const std::vector<std::string> &names() const;

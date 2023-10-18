@@ -36,7 +36,7 @@
 #include <string>
 #include <vector>
 
-#define TOILETDB_VERSION "1.3.3"
+#define TOILETDB_VERSION "1.3.4"
 #define TOILETDB_PARSER_FORMAT_VERSION 1
 
 #define TDB_INVALID_ULL (size_t)(-1)
@@ -175,20 +175,21 @@ public:
     /// @throws ParsingError when parsing error is encountered.
     InMemoryTable(const std::string &filename);
     ~InMemoryTable();
-    const std::vector<ColumnBase *> &get_all() const;
     /// @brief Discards all changes made to in-memory vector, and reads file
-    ///        again.
+    /// again.
     /// @throws std::runtime_error when table file was deleted or moved.
     void reread_file();
     /// @brief Writes data stored in memory back to the file.
     /// @throws std::runtime_error when table file was deleted or moved.
     void write_file() const;
+    /// @brief Writes data stored in memory back to the file specified.
+    void write_file(const std::string &filepath) const;
     /// @brief Search in-memory vector by ID.
-    ///        O(log n)
+    /// O(log n)
     /// @return TDB_NOT_FOUND if element is not found.
     size_t search(const size_t &id) const;
     /// @brief Search in-memory vector by comparing values as std::string.
-    ///        O(n)
+    /// O(n)
     /// @return TDB_NOT_FOUND if element is not found.
     std::vector<size_t> search(const std::string &name,
                                std::string &query) const;
@@ -225,7 +226,7 @@ public:
     const std::string &get_column_name(const size_t &pos) const;
     /// @brief Searches for column with specified name in a table.
     /// @returns Position of column in the table. TDB_NOT_FOUND if element
-    /// is not found.
+    ///          is not found.
     size_t search_column_index(const std::string &name) const;
     /// @see ToiletType
     const std::vector<int> &get_types() const;

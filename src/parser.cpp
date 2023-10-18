@@ -19,6 +19,21 @@
 
 namespace toiletdb {
 
+std::fstream InMemoryFileParser::open(const std::string &filepath, const std::ios_base::openmode mode)
+{
+    std::fstream file;
+
+    file.open(filepath, mode);
+
+    TDB_DEBUGS(filepath, "InMemoryFileParser.open");
+
+    if (!file.is_open()) {
+        throw std::ios::failure("In ToiletDB, In InMemoryFileParser.open(), could not open file");
+    }
+
+    return file;
+}
+
 std::fstream InMemoryFileParser::open(const std::ios_base::openmode mode)
 {
     std::fstream file;
@@ -117,10 +132,25 @@ bool InMemoryFileParser::exists() const
     std::fstream file;
 
     file.open(this->filename);
+    bool is_open = file.is_open()
 
     TDB_DEBUGS(file.is_open(), "InMemoryFileParser.exists");
+    file.close();
 
-    return file.is_open();
+    return is_open;
+}
+
+bool InMemoryFileParser::exists(const std::string &filepath) const
+{
+    std::fstream file;
+
+    file.open(filepath);
+    bool is_open = file.is_open()
+
+    TDB_DEBUGS(file.is_open(), "InMemoryFileParser.exists");
+    file.close();
+
+    return is_open;
 }
 
 // Return true if file exists, false if it doesn't.
@@ -157,6 +187,16 @@ std::vector<std::shared_ptr<ColumnBase>> InMemoryFileParser::read_file()
     file.close();
 
     return columns;
+}
+
+void InMemoryFileParser::write_file(const std::string filepath, const std::vector<std::shared_ptr<ColumnBase>> &columns)
+{
+    std::fstream file =
+        this->open(filepath, std::ios::out | std::ios::trunc | std::ios::binary);
+
+    this->serialize(file, columns);
+
+    file.close();
 }
 
 void InMemoryFileParser::write_file(const std::vector<std::shared_ptr<ColumnBase>> &columns)
