@@ -36,13 +36,14 @@ cli-debug: dirs debug toiletline-debug bundle
 
 debug: CXXFLAGS += -DDEBUG
 debug: CXXFLAGS += -g
+debug: CCFLAGS += -g
 debug: dirs $(OBJS_OUT) bundle
 
 release: CXXFLAGS += -DNDEBUG
 release: dirs $(OBJS_OUT) bundle
 
 toiletline-debug:
-	$(CC) $(CCFLAGS) -DITL_DEBUG -O2 -c -o $(OBJDIR)/toiletline.o cli/toiletline.c
+	$(CC) $(CCFLAGS) -O2 -c -o $(OBJDIR)/toiletline.o cli/toiletline.c
 
 toiletline:
 	$(CC) $(CCFLAGS) -O2 -c -o $(OBJDIR)/toiletline.o cli/toiletline.c

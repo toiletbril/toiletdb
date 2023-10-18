@@ -263,7 +263,7 @@ static void cli_put_row(InMemoryTable &model, const size_t &pos)
             } break;
 
             case TT_STR: {
-                if (TDB_CAST(std::string, row[i]).size() > CLI_STRW - CLI_MARGIN) {
+                if (tl_utf8_strlen(TDB_CAST(std::string, row[i]).c_str()) > CLI_STRW - CLI_MARGIN) {
                     should_wrap = true;
                     break;
                 }

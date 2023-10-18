@@ -132,9 +132,9 @@ bool InMemoryFileParser::exists() const
     std::fstream file;
 
     file.open(this->filename);
-    bool is_open = file.is_open()
+    bool is_open = file.is_open();
 
-    TDB_DEBUGS(file.is_open(), "InMemoryFileParser.exists");
+    TDB_DEBUGS(is_open, "InMemoryFileParser.exists");
     file.close();
 
     return is_open;
@@ -145,9 +145,9 @@ bool InMemoryFileParser::exists(const std::string &filepath) const
     std::fstream file;
 
     file.open(filepath);
-    bool is_open = file.is_open()
+    bool is_open = file.is_open();
 
-    TDB_DEBUGS(file.is_open(), "InMemoryFileParser.exists");
+    TDB_DEBUGS(is_open, "InMemoryFileParser.exists");
     file.close();
 
     return is_open;
@@ -191,7 +191,7 @@ std::vector<std::shared_ptr<ColumnBase>> InMemoryFileParser::read_file()
 
 void InMemoryFileParser::write_file(const std::string filepath, const std::vector<std::shared_ptr<ColumnBase>> &columns)
 {
-    if (this->exists()) {
+    if (this->exists(filepath)) {
         throw std::logic_error("In ToiletDB, InMemoryFileParser.write_file(), refusing to overwrite existing file");
     }
 
