@@ -1,6 +1,5 @@
 # TODO
-- Clean up more. This was written when I was learning rapidly, so some code may
-  be not as clear as I want.
+- Refactor the shit of out this
 - Fix setw not handling multibyte chars.
 - Update index on insertion/deletion more efficiently.
 - Make sure that all IDs are unique.

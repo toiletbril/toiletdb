@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cstdio>
 #include <fstream>
 #include <string>
@@ -18,10 +19,7 @@ size_t FormatOne::read_version(std::fstream &file)
     // Check for magic string
     for (int i = 0; i < 3; ++i) {
         if (temp[i] != TOILETDB_MAGIC[i]) {
-            std::string failstring =
-                "Database file format is not "
-                "correct: File is not a tdb database";
-
+            std::string failstring = "Database file format is not correct: File is not a tdb database";
             throw ParsingError(failstring);
         }
     }
@@ -41,14 +39,12 @@ size_t FormatOne::read_version(std::fstream &file)
 
     if (version == TDB_INVALID_ULL) {
         throw ParsingError(
-            "Database format is not "
-            "correct: Invalid version number");
+            "Database format is not correct: Invalid version number");
     }
 
     if (version > TOILETDB_PARSER_FORMAT_VERSION) {
         throw ParsingError(
-            "Database format is not "
-            "supported: Version is too new");
+            "Database format is not supported: Version is too new");
     };
 
     TDB_DEBUGS(version, "InMemoryFileParser.read_version");
@@ -84,33 +80,32 @@ TableInfo FormatOne::read_types(std::fstream &file)
         }
         int type = 0;
 
-        std::string buf;
+        std::string read_buf;
 
         bool set_type = false;
 
         while (c != '|') {
             if (c == ' ') {
-                if (buf == "int" && !set_type) {
+                if (read_buf == "int" && !set_type) {
                     type |= (int)TT_INT;
                     set_type = true;
                 }
-                else if (buf == "uint" && !set_type) {
+                else if (read_buf == "uint" && !set_type) {
                     type |= (int)TT_UINT;
                     set_type = true;
                 }
-                else if (buf == "str" && !set_type) {
+                else if (read_buf == "str" && !set_type) {
                     type |= (int)TT_STR;
                     set_type = true;
                 }
-                else if (buf == "const") {
+                else if (read_buf == "const") {
                     type |= (int)TT_CONST;
                 }
-                else if (buf == "id") {
+                else if (read_buf == "id") {
                     if (set_id) {
                         std::string failstring =
-                            "Format error: ID is already set at 2:" +
-                            std::to_string(pos) +
-                            ", previous ID at 2:" + std::to_string(id_pos);
+                            "Format error: ID is already set at 2:" + std::to_string(pos) + ", "
+                            "previous ID at 2:" + std::to_string(id_pos);
 
                         throw ParsingError(failstring);
                     }
@@ -124,15 +119,14 @@ TableInfo FormatOne::read_types(std::fstream &file)
                 }
                 else if (!set_type) {
                     std::string failstring =
-                        "Format error: Unknown type modifier '" + buf + "' at 2:" +
-                        std::to_string(pos);
+                        "Format error: Unknown type modifier '" + read_buf + "' at 2:" + std::to_string(pos);
                     throw ParsingError(failstring);
                 }
 
-                buf.clear();
+                read_buf.clear();
             }
             else {
-                buf += c;
+                read_buf += c;
             }
 
             c = file.get();
@@ -140,11 +134,9 @@ TableInfo FormatOne::read_types(std::fstream &file)
         }
 
         // Last word will be the name
-        if (buf.empty()) {
+        if (read_buf.empty()) {
             std::string failstring =
-                "Format error: No column name"
-                "at 2:" +
-                std::to_string(pos);
+                "Format error: No column name at 2:" + std::to_string(pos);
 
             throw ParsingError(failstring);
         }
@@ -152,22 +144,27 @@ TableInfo FormatOne::read_types(std::fstream &file)
         // Allow T_ID only for T_B_INT
         if (TDB_IS(type, TT_ID) && !TDB_IS(type, TT_UINT)) {
             std::string failstring =
-                "Format error: ID column is not of type 'uint'"
-                "at 2:" +
-                std::to_string(pos);
+                "Format error: ID column is not of type 'uint' at 2:" + std::to_string(pos);
 
             throw ParsingError(failstring);
         }
 
         if (!set_id) {
+            std::string failstring = "Format error: Database requires a column with 'id' modifier.";
+            throw ParsingError(failstring);
+        }
+
+        // There literally was no contains until C++23
+        size_t duplicate_index = std::find(names.begin(), names.end(), read_buf) != names.end();
+        if(duplicate_index) {
             std::string failstring =
-                "Format error: Database requires "
-                "a column with 'id' modifier.";
+                "Format error: duplicate column '" + read_buf + "' at 2:" + std::to_string(pos) + ", "
+                "previous column is on position " + std::to_string(duplicate_index) + ".";
 
             throw ParsingError(failstring);
         }
 
-        names.push_back(buf);
+        names.push_back(read_buf);
 
         fields.types.push_back(type);
         ++field_n;
@@ -184,9 +181,7 @@ TableInfo FormatOne::read_types(std::fstream &file)
     return fields;
 }
 
-std::vector<std::shared_ptr<ColumnBase>> FormatOne::deserealize(std::fstream &file,
-                                                                TableInfo &columns,
-                                                                std::vector<std::string> &names)
+std::vector<std::shared_ptr<ColumnBase>> FormatOne::deserealize(std::fstream &file, TableInfo &columns, std::vector<std::string> &names)
 {
     // Allocate memory for each field.
 
