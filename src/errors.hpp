@@ -1,20 +1,20 @@
-#ifndef TOILET_ERRORS_H_
-#define TOILET_ERRORS_H_
+#ifndef TDB_ERRORS_H
+#define TDB_ERRORS_H
 
+#include <exception>
 #include <stdexcept>
 
 namespace toiletdb {
 
-/**
- * @class ParsingError
- * @brief Is thrown when internal parser encounters errors.
- */
-class ParsingError : public std::logic_error
+class Parser_Error : public std::exception
 {
+    std::string message;
+
 public:
-    ParsingError(std::string const &msg);
+    Parser_Error(const std::string &message);
+    const char *what() const noexcept override;
 };
 
 } // namespace toiletdb
 
-#endif // TOILET_ERRORS_H_
+#endif // TDB_ERRORS_H

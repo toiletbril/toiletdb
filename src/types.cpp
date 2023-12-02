@@ -1,194 +1,48 @@
-#define TOILETDB_MAGIC "tdb"
-
-#define TDB_TMASK 0b00000111
-#define TDB_MMASK 0b00111000
-
 #include "types.hpp"
 
 namespace toiletdb {
 
-struct TableInfo;
-
-class ColumnBase;
-
-template <typename T>
-class Column;
-
-ColumnInt::ColumnInt(std::string name, int type)
+void Column_Info::set_type_checked(Column_Type type)
 {
-    TDB_DEBUGS(name, "ColumnInt name");
-    TDB_DEBUGS(type, "ColumnInt type");
-
-    this->name = name;
-    this->type = type;
-    this->data = new std::vector<int>;
-}
-
-ColumnInt::~ColumnInt()
-{
-    delete this->data;
-}
-
-const int &ColumnInt::get_type() const
-{
-    return this->type;
-}
-
-const std::string &ColumnInt::get_name() const
-{
-    return this->name;
-}
-
-size_t ColumnInt::size() const
-{
-    return this->data->size();
-}
-
-void ColumnInt::erase(size_t pos)
-{
-    this->data->erase(this->data->begin() + pos);
-}
-
-void ColumnInt::clear()
-{
-    this->data->clear();
-}
-
-void ColumnInt::add(int data)
-{
-    this->data->push_back(data);
-}
-
-int &ColumnInt::get(size_t pos)
-{
-    if (pos >= this->size()) {
-        throw std::logic_error("In ToiletDB, In Column, pos > size of vector");
+    if (this->type != Column_Type::UNKN) {
+        throw "Column_Info::set_type_checked: type was already set";
     }
 
-    return (*(this->data))[pos];
-}
-
-std::vector<int> &ColumnInt::get_data()
-{
-    return *(this->data);
-}
-
-ColumnUint::ColumnUint(const std::string name, int type)
-{
-    TDB_DEBUGS(name, "ColumnB_Int name");
-    TDB_DEBUGS(type, "ColumnB_Int type");
-
-    this->name = name;
     this->type = type;
-    this->data = new std::vector<size_t>;
 }
 
-ColumnUint::~ColumnUint()
+void Column_Info::add_modifier_checked(Column_Modifier modifier)
 {
-    delete this->data;
-}
-
-const int &ColumnUint::get_type() const
-{
-    return this->type;
-}
-
-const std::string &ColumnUint::get_name() const
-{
-    return this->name;
-}
-
-size_t ColumnUint::size() const
-{
-    return this->data->size();
-}
-
-void ColumnUint::erase(size_t pos)
-{
-    this->data->erase(this->data->begin() + pos);
-}
-
-void ColumnUint::clear()
-{
-    this->data->clear();
-}
-
-void ColumnUint::add(size_t data)
-{
-    this->data->push_back(data);
-}
-
-size_t &ColumnUint::get(size_t pos)
-{
-    if (pos >= this->size()) {
-        throw std::logic_error("In ToiletDB, In Column, pos > size of vector");
+    if (this->modifiers & static_cast<uint32_t>(modifier)) {
+        throw "Column_Info::set_modifier_checked: modifier was already set";
     }
 
-    return (*(this->data))[pos];
+    this->modifiers |= static_cast<uint32_t>(modifier);
 }
 
-std::vector<size_t> &ColumnUint::get_data()
+Column_Type Column_Base::get_type() const noexcept
 {
-    return *(this->data);
+    return this->info.type;
 }
 
-ColumnStr::ColumnStr(std::string name, int type)
+uint32_t Column_Base::get_modifiers() const noexcept
 {
-    TDB_DEBUGS(name, "ColumnStr name");
-    TDB_DEBUGS(type, "ColumnStr type");
-
-    this->name = name;
-    this->type = type;
-    this->data = new std::vector<std::string>;
+    return this->info.modifiers;
 }
 
-ColumnStr::~ColumnStr()
+std::string_view Column_Base::get_name() const noexcept
 {
-    delete this->data;
+    return this->info.name;
 }
 
-const int &ColumnStr::get_type() const
+bool Column_Info::is(Column_Modifier modifier) const noexcept
 {
-    return this->type;
+    return (this->modifiers & static_cast<uint32_t>(modifier));
 }
 
-const std::string &ColumnStr::get_name() const
+bool Column_Info::is(Column_Type type) const noexcept
 {
-    return this->name;
-}
-
-size_t ColumnStr::size() const
-{
-    return this->data->size();
-}
-
-void ColumnStr::erase(size_t pos)
-{
-    this->data->erase(this->data->begin() + pos);
-}
-
-void ColumnStr::clear()
-{
-    this->data->clear();
-}
-
-void ColumnStr::add(std::string data)
-{
-    this->data->push_back(data);
-}
-
-std::string &ColumnStr::get(size_t pos)
-{
-    if (pos >= this->size()) {
-        throw std::logic_error("In ToiletDB, In Column, pos > size of vector");
-    }
-
-    return (*(this->data))[pos];
-}
-
-std::vector<std::string> &ColumnStr::get_data()
-{
-    return *(this->data);
+    return (this->type == type);
 }
 
 } // namespace toiletdb
