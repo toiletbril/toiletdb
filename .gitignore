@@ -1,10 +1,5 @@
-*
-!/**/
-!*.*
-!LICENSE
-!Makefile
-.vscode/
 build/
 obj/
 test/
-scripts/__pycache__/
+__pycache__/
+.vscode/
